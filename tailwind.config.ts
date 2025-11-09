@@ -58,6 +58,13 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      backgroundImage: {
+        'ice-gradient': 'var(--ice-gradient)',
+      },
+      boxShadow: {
+        'ice-glow': 'var(--ice-glow)',
+        'card-glow': 'var(--card-glow)',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
