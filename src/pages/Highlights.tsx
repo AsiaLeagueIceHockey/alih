@@ -21,18 +21,32 @@ interface Video {
 const Highlights = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
-  const { data: videos, isLoading } = useQuery({
+  const { data: videos, isLoading, error } = useQuery({
     queryKey: ['alih-videos'],
     queryFn: async () => {
+      console.log('🔵 Supabase 연결 시도: alih_video 테이블 조회');
+      
       const { data, error } = await externalSupabase
         .from('alih_video')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase 에러:', error);
+        throw error;
+      }
+      
+      console.log('✅ Supabase 연결 성공! 조회된 영상 수:', data?.length || 0);
+      console.log('📊 조회된 데이터:', data);
+      
       return data as Video[];
     }
   });
+
+  // 에러 발생 시 로그
+  if (error) {
+    console.error('❌ 영상 데이터 로드 실패:', error);
+  }
 
   const getYoutubeVideoId = (url: string) => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
@@ -69,6 +83,12 @@ const Highlights = () => {
         {isLoading ? (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">영상 로딩 중...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center text-destructive py-12">
+            <p className="font-semibold">영상을 불러오는데 실패했습니다</p>
+            <p className="text-sm text-muted-foreground mt-2">콘솔을 확인해주세요</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
