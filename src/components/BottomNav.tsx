@@ -7,7 +7,6 @@ const BottomNav = () => {
     { to: "/schedule", icon: Calendar, label: "일정" },
     { to: "/highlights", icon: Video, label: "영상" },
     { to: "/standings", icon: Trophy, label: "순위" },
-    { to: "/stats", icon: Users, label: "선수" },
     { to: "/news", icon: Newspaper, label: "뉴스" },
   ];
 
