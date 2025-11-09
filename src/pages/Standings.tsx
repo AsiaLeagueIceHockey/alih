@@ -3,6 +3,12 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+
+const externalSupabase = createClient(
+  "https://nvlpbdyqfzmlrjauvhxx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68"
+);
 
 interface TeamStanding {
   team: { name: string };
@@ -20,7 +26,25 @@ interface PlayerStats {
   regularStats: { GP: number; G: number; A: number; PTS: number };
 }
 
+interface AlihTeam {
+  english_name: string;
+  name: string;
+  logo: string;
+}
+
 const Standings = () => {
+  const { data: alihTeams } = useQuery({
+    queryKey: ['alih-teams'],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_teams')
+        .select('english_name, name, logo');
+      
+      if (error) throw error;
+      return data as AlihTeam[];
+    }
+  });
+
   const { data: teamStandings, isLoading: isLoadingTeams } = useQuery({
     queryKey: ['team-standings'],
     queryFn: async () => {
@@ -42,6 +66,20 @@ const Standings = () => {
       return data.data as PlayerStats[];
     }
   });
+
+  const getTeamName = (englishName: string) => {
+    const team = alihTeams?.find(
+      t => t.english_name.toLowerCase() === englishName.toLowerCase()
+    );
+    return team?.name || englishName;
+  };
+
+  const getTeamLogo = (englishName: string) => {
+    const team = alihTeams?.find(
+      t => t.english_name.toLowerCase() === englishName.toLowerCase()
+    );
+    return team?.logo || '';
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -86,11 +124,11 @@ const Standings = () => {
                         <td className="p-3">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={standing.teamLogo.medium} 
-                              alt={standing.team.name}
+                              src={getTeamLogo(standing.team.name) || standing.teamLogo.medium} 
+                              alt={getTeamName(standing.team.name)}
                               className="w-6 h-6 object-contain"
                             />
-                            <span className="font-medium">{standing.team.name}</span>
+                            <span className="font-medium">{getTeamName(standing.team.name)}</span>
                           </div>
                         </td>
                         <td className="p-3 text-center">{standing.stats.GP}</td>
@@ -150,11 +188,11 @@ const Standings = () => {
                         <td className="p-3">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={player.team.logo.medium} 
-                              alt={player.team.name}
+                              src={getTeamLogo(player.team.name) || player.team.logo.medium} 
+                              alt={getTeamName(player.team.name)}
                               className="w-5 h-5 object-contain"
                             />
-                            <span className="text-xs text-muted-foreground">{player.team.name}</span>
+                            <span className="text-xs text-muted-foreground">{getTeamName(player.team.name)}</span>
                           </div>
                         </td>
                         <td className="p-3 text-center">{player.regularStats.GP}</td>
