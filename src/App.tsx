@@ -10,6 +10,7 @@ import Standings from "./pages/Standings";
 import News from "./pages/News";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <div className="min-h-screen">
           <Routes>
             <Route path="/" element={<Home />} />
