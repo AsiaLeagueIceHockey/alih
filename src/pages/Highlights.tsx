@@ -31,9 +31,9 @@ const Highlights = () => {
 
   const handleVideoSelect = (videoUrl: string) => {
     setSelectedVideo(videoUrl);
-    // 비디오 플레이어로 스크롤 (부드럽게)
+    // 비디오 플레이어가 완전히 보이도록 맨 위로 스크롤
     setTimeout(() => {
-      playerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
   };
 
