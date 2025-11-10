@@ -205,12 +205,12 @@ const Schedule = () => {
 
                   <div className="flex items-center justify-between">
                     <div className="flex-1 flex flex-col items-center">
-                      {awayTeam?.logo && (
-                        <img src={awayTeam.logo} alt={awayTeam.name} className="w-12 h-12 object-contain mb-2" />
+                      {homeTeam?.logo && (
+                        <img src={homeTeam.logo} alt={homeTeam.name} className="w-12 h-12 object-contain mb-2" />
                       )}
-                      <p className="text-sm font-medium mb-1">{awayTeam?.name || '미정'}</p>
+                      <p className="text-sm font-medium mb-1">{homeTeam?.name || '미정'}</p>
                       {hasScore && (
-                        <p className="text-2xl font-bold">{game.away_alih_team_score}</p>
+                        <p className="text-2xl font-bold">{game.home_alih_team_score}</p>
                       )}
                     </div>
 
@@ -223,12 +223,12 @@ const Schedule = () => {
                     </div>
 
                     <div className="flex-1 flex flex-col items-center">
-                      {homeTeam?.logo && (
-                        <img src={homeTeam.logo} alt={homeTeam.name} className="w-12 h-12 object-contain mb-2" />
+                      {awayTeam?.logo && (
+                        <img src={awayTeam.logo} alt={awayTeam.name} className="w-12 h-12 object-contain mb-2" />
                       )}
-                      <p className="text-sm font-medium mb-1">{homeTeam?.name || '미정'}</p>
+                      <p className="text-sm font-medium mb-1">{awayTeam?.name || '미정'}</p>
                       {hasScore && (
-                        <p className="text-2xl font-bold">{game.home_alih_team_score}</p>
+                        <p className="text-2xl font-bold">{game.away_alih_team_score}</p>
                       )}
                     </div>
                   </div>
