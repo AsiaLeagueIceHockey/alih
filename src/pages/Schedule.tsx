@@ -72,7 +72,9 @@ const Schedule = () => {
       console.log('📊 일정 데이터:', data);
       
       return data as ScheduleGame[];
-    }
+    },
+    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
   const getTeamById = (teamId: number) => {

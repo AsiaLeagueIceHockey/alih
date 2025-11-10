@@ -42,7 +42,9 @@ const Standings = () => {
       
       if (error) throw error;
       return data as AlihTeam[];
-    }
+    },
+    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
   const { data: teamStandings, isLoading: isLoadingTeams } = useQuery({
@@ -53,7 +55,9 @@ const Standings = () => {
       );
       const data = await response.json();
       return data.data as TeamStanding[];
-    }
+    },
+    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
   const { data: playerStats, isLoading: isLoadingPlayers } = useQuery({
@@ -64,7 +68,9 @@ const Standings = () => {
       );
       const data = await response.json();
       return data.data as PlayerStats[];
-    }
+    },
+    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
   const getTeamName = (englishName: string) => {
