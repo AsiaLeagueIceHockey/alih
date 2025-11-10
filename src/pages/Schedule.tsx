@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
-import { Loader2 } from "lucide-react";
+import { Loader2, Video } from "lucide-react";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -49,6 +49,7 @@ const Schedule = () => {
   
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [expandedGameId, setExpandedGameId] = useState<number | null>(null);
 
   const { data: teams, isLoading: teamsLoading } = useTeams();
 
@@ -77,6 +78,11 @@ const Schedule = () => {
   const getTeamById = (teamId: number) => {
     if (!teams) return null;
     return teams.find(t => t.id === teamId);
+  };
+
+  const getYoutubeVideoId = (url: string) => {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+    return match?.[1] || null;
   };
 
   const filteredGames = useMemo(() => {
@@ -183,6 +189,8 @@ const Schedule = () => {
               const matchDate = new Date(game.match_at);
               const isUpcoming = matchDate > new Date();
               const hasScore = game.home_alih_team_score !== null && game.away_alih_team_score !== null;
+              const hasHighlight = game.highlight_url && game.highlight_url.trim() !== '';
+              const isExpanded = expandedGameId === game.id;
               
               return (
                 <Card key={game.id} className="p-4 border-border">
@@ -195,12 +203,24 @@ const Schedule = () => {
                         {matchDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <Badge 
-                      variant={isUpcoming ? "default" : "outline"}
-                      className={isUpcoming ? "bg-accent" : ""}
-                    >
-                      {isUpcoming ? "예정" : "종료"}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {hasHighlight && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => setExpandedGameId(isExpanded ? null : game.id)}
+                        >
+                          <Video className={`h-4 w-4 ${isExpanded ? 'text-primary' : ''}`} />
+                        </Button>
+                      )}
+                      <Badge 
+                        variant={isUpcoming ? "default" : "outline"}
+                        className={isUpcoming ? "bg-accent" : ""}
+                      >
+                        {isUpcoming ? "예정" : "종료"}
+                      </Badge>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -234,6 +254,26 @@ const Schedule = () => {
                   </div>
 
                   <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>
+
+                  {isExpanded && hasHighlight && game.highlight_url && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="aspect-video w-full rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${getYoutubeVideoId(game.highlight_url)}`}
+                          title={game.highlight_title || "경기 하이라이트"}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
+                      </div>
+                      {game.highlight_title && (
+                        <p className="text-sm font-medium mt-2">{game.highlight_title}</p>
+                      )}
+                    </div>
+                  )}
                 </Card>
               );
             })}
