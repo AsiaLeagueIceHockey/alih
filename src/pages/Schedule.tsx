@@ -15,14 +15,14 @@ const externalSupabase = createClient(
 
 interface ScheduleGame {
   id: number;
-  date: string;
-  time: string;
-  home_team: string;
-  away_team: string;
-  home_score?: number;
-  away_score?: number;
-  status: string;
-  venue: string;
+  home_alih_team_id: number;
+  away_alih_team_id: number;
+  home_alih_team_score: number | null;
+  away_alih_team_score: number | null;
+  match_at: string;
+  match_place: string;
+  highlight_url: string | null;
+  highlight_title: string | null;
 }
 
 const MONTHS = [
@@ -60,7 +60,7 @@ const Schedule = () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
-        .order('date', { ascending: true });
+        .order('match_at', { ascending: true });
       
       if (error) {
         console.error('❌ Supabase 에러 (alih_schedule):', error);
@@ -74,23 +74,16 @@ const Schedule = () => {
     }
   });
 
-  const getTeamName = (englishName: string) => {
-    if (!teams) return englishName;
-    const team = teams.find(t => t.english_name.toLowerCase() === englishName.toLowerCase());
-    return team ? team.name : englishName;
-  };
-
-  const getTeamLogo = (englishName: string) => {
+  const getTeamById = (teamId: number) => {
     if (!teams) return null;
-    const team = teams.find(t => t.english_name.toLowerCase() === englishName.toLowerCase());
-    return team?.logo || null;
+    return teams.find(t => t.id === teamId);
   };
 
   const filteredGames = useMemo(() => {
-    if (!schedules) return [];
+    if (!schedules || !teams) return [];
     
     return schedules.filter(game => {
-      const gameDate = new Date(game.date);
+      const gameDate = new Date(game.match_at);
       const gameMonth = gameDate.getMonth() + 1;
       const gameYear = gameDate.getFullYear();
       
@@ -100,12 +93,14 @@ const Schedule = () => {
       if (!monthMatch) return false;
       
       if (selectedTeam) {
-        return game.home_team === selectedTeam || game.away_team === selectedTeam;
+        const homeTeam = getTeamById(game.home_alih_team_id);
+        const awayTeam = getTeamById(game.away_alih_team_id);
+        return homeTeam?.english_name === selectedTeam || awayTeam?.english_name === selectedTeam;
       }
       
       return true;
     });
-  }, [schedules, selectedMonth, selectedTeam]);
+  }, [schedules, selectedMonth, selectedTeam, teams]);
 
   const isLoading = teamsLoading || schedulesLoading;
 
@@ -183,37 +178,44 @@ const Schedule = () => {
         ) : (
           <div className="space-y-3">
             {filteredGames.map((game) => {
-              const homeTeamLogo = getTeamLogo(game.home_team);
-              const awayTeamLogo = getTeamLogo(game.away_team);
+              const homeTeam = getTeamById(game.home_alih_team_id);
+              const awayTeam = getTeamById(game.away_alih_team_id);
+              const matchDate = new Date(game.match_at);
+              const isUpcoming = matchDate > new Date();
+              const hasScore = game.home_alih_team_score !== null && game.away_alih_team_score !== null;
               
               return (
                 <Card key={game.id} className="p-4 border-border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm">
-                      <span className="font-medium">{new Date(game.date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}</span>
-                      <span className="text-muted-foreground ml-2">{game.time}</span>
+                      <span className="font-medium">
+                        {matchDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                      </span>
+                      <span className="text-muted-foreground ml-2">
+                        {matchDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
                     <Badge 
-                      variant={game.status === "예정" ? "default" : "outline"}
-                      className={game.status === "예정" ? "bg-accent" : ""}
+                      variant={isUpcoming ? "default" : "outline"}
+                      className={isUpcoming ? "bg-accent" : ""}
                     >
-                      {game.status}
+                      {isUpcoming ? "예정" : "종료"}
                     </Badge>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex-1 flex flex-col items-center">
-                      {awayTeamLogo && (
-                        <img src={awayTeamLogo} alt={game.away_team} className="w-12 h-12 object-contain mb-2" />
+                      {awayTeam?.logo && (
+                        <img src={awayTeam.logo} alt={awayTeam.name} className="w-12 h-12 object-contain mb-2" />
                       )}
-                      <p className="text-sm font-medium mb-1">{getTeamName(game.away_team)}</p>
-                      {game.away_score !== undefined && (
-                        <p className="text-2xl font-bold">{game.away_score}</p>
+                      <p className="text-sm font-medium mb-1">{awayTeam?.name || '미정'}</p>
+                      {hasScore && (
+                        <p className="text-2xl font-bold">{game.away_alih_team_score}</p>
                       )}
                     </div>
 
                     <div className="px-4">
-                      {game.status === "예정" ? (
+                      {isUpcoming ? (
                         <span className="text-lg font-bold text-muted-foreground">VS</span>
                       ) : (
                         <span className="text-lg font-bold text-muted-foreground">:</span>
@@ -221,17 +223,17 @@ const Schedule = () => {
                     </div>
 
                     <div className="flex-1 flex flex-col items-center">
-                      {homeTeamLogo && (
-                        <img src={homeTeamLogo} alt={game.home_team} className="w-12 h-12 object-contain mb-2" />
+                      {homeTeam?.logo && (
+                        <img src={homeTeam.logo} alt={homeTeam.name} className="w-12 h-12 object-contain mb-2" />
                       )}
-                      <p className="text-sm font-medium mb-1">{getTeamName(game.home_team)}</p>
-                      {game.home_score !== undefined && (
-                        <p className="text-2xl font-bold">{game.home_score}</p>
+                      <p className="text-sm font-medium mb-1">{homeTeam?.name || '미정'}</p>
+                      {hasScore && (
+                        <p className="text-2xl font-bold">{game.home_alih_team_score}</p>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-xs text-muted-foreground text-center mt-3">{game.venue}</p>
+                  <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>
                 </Card>
               );
             })}
