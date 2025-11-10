@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,15 @@ interface ScheduleGame {
 const Highlights = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  const handleVideoSelect = (videoUrl: string) => {
+    setSelectedVideo(videoUrl);
+    // 비디오 플레이어로 스크롤 (부드럽게)
+    setTimeout(() => {
+      playerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   const { data: teams, isLoading: teamsLoading } = useTeams();
 
@@ -123,7 +132,7 @@ const Highlights = () => {
         )}
 
         {selectedVideo && (
-          <Card className="overflow-hidden border-border mb-6">
+          <Card ref={playerRef} className="overflow-hidden border-border mb-6">
             <div className="aspect-video w-full">
               <iframe
                 width="100%"
@@ -156,11 +165,17 @@ const Highlights = () => {
               const awayTeam = getTeamById(game.away_alih_team_id);
               const matchDate = new Date(game.match_at);
 
+              const isSelected = selectedVideo === game.highlight_url;
+              
               return (
                 <Card
                   key={game.id}
-                  className="overflow-hidden border-border cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => setSelectedVideo(game.highlight_url)}
+                  className={`overflow-hidden cursor-pointer transition-all ${
+                    isSelected 
+                      ? 'border-primary border-2 shadow-lg ring-2 ring-primary/20' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => handleVideoSelect(game.highlight_url)}
                 >
                   <div className="relative aspect-video bg-secondary">
                     <img
