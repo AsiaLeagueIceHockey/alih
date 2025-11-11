@@ -217,10 +217,9 @@ const GameDetail = () => {
 
         {/* 탭 인터페이스 */}
         <Tabs defaultValue="summary" className="mb-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="summary">경기 요약</TabsTrigger>
-            <TabsTrigger value="goals">득점 기록</TabsTrigger>
-            <TabsTrigger value="penalties">패널티</TabsTrigger>
+            <TabsTrigger value="goals">득점 & 패널티</TabsTrigger>
             <TabsTrigger value="roster">선수 명단</TabsTrigger>
           </TabsList>
 
@@ -279,73 +278,79 @@ const GameDetail = () => {
             </Card>
           </TabsContent>
 
-          {/* 탭 2: 득점 기록 */}
+          {/* 탭 2: 득점 기록 & 패널티 */}
           <TabsContent value="goals">
             <Card className="p-4">
-              <h3 className="font-semibold mb-4">득점 기록</h3>
-              {gameDetail.goals.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">득점 기록이 없습니다</p>
+              <h3 className="font-semibold mb-4">득점 기록 & 패널티</h3>
+              {gameDetail.goals.length === 0 && gameDetail.penalties.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">기록이 없습니다</p>
               ) : (
                 <div className="space-y-3">
-                  {gameDetail.goals.map((goal, index) => {
-                    const scoringTeam = goal.team_id === homeTeam.id ? homeTeam : awayTeam;
-                    return (
-                      <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-                        <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">{goal.period}P {adjustGameTime(goal.period, goal.time)}</Badge>
-                            <Badge className="text-xs">{getSituationLabel(goal.situation)}</Badge>
+                  {[
+                    ...gameDetail.goals.map(goal => ({ ...goal, type: 'goal' as const })),
+                    ...gameDetail.penalties.map(penalty => ({ ...penalty, type: 'penalty' as const }))
+                  ]
+                    .sort((a, b) => {
+                      // 피리어드 우선 정렬
+                      if (a.period !== b.period) return a.period - b.period;
+                      // 같은 피리어드 내에서는 시간으로 정렬
+                      const [aMin, aSec] = a.time.split(':').map(Number);
+                      const [bMin, bSec] = b.time.split(':').map(Number);
+                      const aTotal = aMin * 60 + aSec;
+                      const bTotal = bMin * 60 + bSec;
+                      return aTotal - bTotal;
+                    })
+                    .map((record, index) => {
+                      if (record.type === 'goal') {
+                        const goal = record as typeof record & { goal_no: number; situation: string; assist1_no: number | null; assist2_no: number | null; };
+                        const scoringTeam = goal.team_id === homeTeam.id ? homeTeam : awayTeam;
+                        return (
+                          <div key={`goal-${index}`} className="flex items-start gap-3 p-3 border rounded-lg bg-primary/5">
+                            <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="text-xs">{goal.period}P {adjustGameTime(goal.period, goal.time)}</Badge>
+                                <Badge className="text-xs">{getSituationLabel(goal.situation)}</Badge>
+                              </div>
+                              <p className="font-medium">
+                                득점: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
+                              </p>
+                              {(goal.assist1_no || goal.assist2_no) && (
+                                <p className="text-sm text-muted-foreground">
+                                  어시스트: 
+                                  {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
+                                  {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <p className="font-medium">
-                            득점: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
-                          </p>
-                          {(goal.assist1_no || goal.assist2_no) && (
-                            <p className="text-sm text-muted-foreground">
-                              어시스트: 
-                              {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
-                              {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      } else {
+                        const penalty = record as typeof record & { player_no: number; offence: string; minutes: number; };
+                        const penaltyTeam = penalty.team_id === homeTeam.id ? homeTeam : awayTeam;
+                        return (
+                          <div key={`penalty-${index}`} className="flex items-start gap-3 p-3 border rounded-lg">
+                            <img src={penaltyTeam.logo} alt={penaltyTeam.name} className="w-10 h-10 object-contain" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="text-xs">{penalty.period}P {adjustGameTime(penalty.period, penalty.time)}</Badge>
+                                <Badge variant="destructive" className="text-xs">{penalty.minutes}분</Badge>
+                              </div>
+                              <p className="font-medium">
+                                패널티: {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
+                              </p>
+                              <p className="text-sm text-muted-foreground">반칙: {penalty.offence}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                    })}
                 </div>
               )}
             </Card>
           </TabsContent>
 
-          {/* 탭 3: 패널티 */}
-          <TabsContent value="penalties">
-            <Card className="p-4">
-              <h3 className="font-semibold mb-4">패널티 기록</h3>
-              {gameDetail.penalties.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">패널티 기록이 없습니다</p>
-              ) : (
-                <div className="space-y-3">
-                  {gameDetail.penalties.map((penalty, index) => {
-                    const penaltyTeam = penalty.team_id === homeTeam.id ? homeTeam : awayTeam;
-                    return (
-                      <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-                        <img src={penaltyTeam.logo} alt={penaltyTeam.name} className="w-10 h-10 object-contain" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">{penalty.period}P {adjustGameTime(penalty.period, penalty.time)}</Badge>
-                            <Badge variant="destructive" className="text-xs">{penalty.minutes}분</Badge>
-                          </div>
-                          <p className="font-medium">
-                            {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
-                          </p>
-                          <p className="text-sm text-muted-foreground">반칙: {penalty.offence}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </Card>
-          </TabsContent>
+          {/* 탭 3: 패널티 (삭제됨 - 득점 기록 탭에 통합) */}
 
           {/* 탭 4: 선수 명단 */}
           <TabsContent value="roster" className="space-y-6">
