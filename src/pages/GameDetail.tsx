@@ -123,6 +123,20 @@ const GameDetail = () => {
     return "EV (이븐)";
   };
 
+  // 피리어드별 시간 조정 함수 (2P는 -20분, 3P는 -40분)
+  const adjustGameTime = (period: number, time: string) => {
+    const [minutes, seconds] = time.split(':').map(Number);
+    let adjustedMinutes = minutes;
+    
+    if (period === 2) {
+      adjustedMinutes = minutes - 20;
+    } else if (period === 3) {
+      adjustedMinutes = minutes - 40;
+    }
+    
+    return `${adjustedMinutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -258,9 +272,9 @@ const GameDetail = () => {
               <h3 className="font-semibold mb-3">아이스하키 용어 설명</h3>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">SOG:</span> Shot on Goal (유효 슈팅. 골키퍼가 막아내거나 골로 연결된 슈팅)</p>
-                <p><span className="font-medium">PIM:</span> Penalty Infraction Minutes (선수가 패널티로 인해 퇴장당한 총 시간(분))</p>
-                <p><span className="font-medium">PPG/PPGF:</span> Power Play Goal (For) (팀이 수적 우위(파워플레이) 상황에서 넣은 골)</p>
-                <p><span className="font-medium">SHG/SHGF:</span> Short Handed Goal (For) (팀이 수적 열세(숏핸디드) 상황에서 넣은 골)</p>
+                <p><span className="font-medium">PIM:</span> Penalties in Minutes (선수가 패널티로 인해 퇴장당한 총 시간(분))</p>
+                <p><span className="font-medium">PPG:</span> Power Play Goal (팀이 수적 우위(파워플레이) 상황에서 넣은 골)</p>
+                <p><span className="font-medium">SHG:</span> Short Handed Goal (팀이 수적 열세(숏핸디드) 상황에서 넣은 골)</p>
               </div>
             </Card>
           </TabsContent>
@@ -280,7 +294,7 @@ const GameDetail = () => {
                         <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">{goal.period}P {goal.time}</Badge>
+                            <Badge variant="outline" className="text-xs">{goal.period}P {adjustGameTime(goal.period, goal.time)}</Badge>
                             <Badge className="text-xs">{getSituationLabel(goal.situation)}</Badge>
                           </div>
                           <p className="font-medium">
@@ -317,7 +331,7 @@ const GameDetail = () => {
                         <img src={penaltyTeam.logo} alt={penaltyTeam.name} className="w-10 h-10 object-contain" />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">{penalty.period}P {penalty.time}</Badge>
+                            <Badge variant="outline" className="text-xs">{penalty.period}P {adjustGameTime(penalty.period, penalty.time)}</Badge>
                             <Badge variant="destructive" className="text-xs">{penalty.minutes}분</Badge>
                           </div>
                           <p className="font-medium">
@@ -418,25 +432,13 @@ const GameDetail = () => {
         {/* 기타 정보 */}
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-3">경기 정보</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h4 className="font-medium mb-2">코치진</h4>
-              <div className="space-y-1 text-muted-foreground">
-                <p>홈 감독: {gameDetail.game_info.coaches.home_manager}</p>
-                <p>홈 코치: {gameDetail.game_info.coaches.home_coach}</p>
-                <p>원정 감독: {gameDetail.game_info.coaches.away_manager}</p>
-                <p>원정 코치: {gameDetail.game_info.coaches.away_coach}</p>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">심판진</h4>
-              <div className="space-y-1 text-muted-foreground">
-                <p>주심: {gameDetail.game_info.officials.referees.filter(r => r).join(', ') || '정보 없음'}</p>
-                <p>부심: {gameDetail.game_info.officials.linesmen.filter(l => l).join(', ') || '정보 없음'}</p>
-                {gameDetail.game_info.officials.supervisor && (
-                  <p>감독관: {gameDetail.game_info.officials.supervisor}</p>
-                )}
-              </div>
+          <div className="text-sm">
+            <h4 className="font-medium mb-2">코치진</h4>
+            <div className="space-y-1 text-muted-foreground">
+              <p>홈 감독: {gameDetail.game_info.coaches.home_manager}</p>
+              <p>홈 코치: {gameDetail.game_info.coaches.home_coach}</p>
+              <p>원정 감독: {gameDetail.game_info.coaches.away_manager}</p>
+              <p>원정 코치: {gameDetail.game_info.coaches.away_coach}</p>
             </div>
           </div>
         </Card>

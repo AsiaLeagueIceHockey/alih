@@ -208,41 +208,12 @@ const Schedule = () => {
                         {matchDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {hasScore && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => navigate(`/schedule/${game.game_no}`, { 
-                            state: { 
-                              homeTeam, 
-                              awayTeam,
-                              matchDate: game.match_at
-                            } 
-                          })}
-                        >
-                          <FileText className="h-3 w-3 mr-1" />
-                          기록
-                        </Button>
-                      )}
-                      {hasHighlight && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          onClick={() => setExpandedGameId(isExpanded ? null : game.id)}
-                        >
-                          <Video className={`h-4 w-4 ${isExpanded ? 'text-primary' : ''}`} />
-                        </Button>
-                      )}
-                      <Badge 
-                        variant={isUpcoming ? "default" : "outline"}
-                        className={isUpcoming ? "bg-accent" : ""}
-                      >
-                        {isUpcoming ? "예정" : "종료"}
-                      </Badge>
-                    </div>
+                    <Badge 
+                      variant={isUpcoming ? "default" : "outline"}
+                      className={isUpcoming ? "bg-accent" : ""}
+                    >
+                      {isUpcoming ? "예정" : "종료"}
+                    </Badge>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -276,6 +247,39 @@ const Schedule = () => {
                   </div>
 
                   <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>
+
+                  {(hasHighlight || hasScore) && (
+                    <div className="mt-3 pt-3 border-t border-border flex items-center justify-center gap-3">
+                      {hasHighlight && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => setExpandedGameId(isExpanded ? null : game.id)}
+                        >
+                          <Video className={`h-3.5 w-3.5 mr-1.5 ${isExpanded ? 'text-primary' : ''}`} />
+                          영상
+                        </Button>
+                      )}
+                      {hasScore && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => navigate(`/schedule/${game.game_no}`, { 
+                            state: { 
+                              homeTeam, 
+                              awayTeam,
+                              matchDate: game.match_at
+                            } 
+                          })}
+                        >
+                          <FileText className="h-3.5 w-3.5 mr-1.5" />
+                          기록
+                        </Button>
+                      )}
+                    </div>
+                  )}
 
                   {isExpanded && hasHighlight && game.highlight_url && (
                     <div className="mt-4 pt-4 border-t border-border">
