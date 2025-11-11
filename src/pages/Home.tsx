@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -14,6 +15,7 @@ const externalSupabase = createClient(
 
 interface ScheduleGame {
   id: number;
+  game_no: number;
   home_alih_team_id: number;
   away_alih_team_id: number;
   home_alih_team_score: number | null;
@@ -37,6 +39,7 @@ interface AlihTeam {
 }
 
 const Home = () => {
+  const navigate = useNavigate();
   const { data: teams } = useTeams();
 
   const { data: schedules } = useQuery({
@@ -186,7 +189,16 @@ const Home = () => {
               <p className="text-sm text-muted-foreground text-center">최근 결과가 없습니다</p>
             </Card>
           ) : (
-            <Card className="p-4 border-border">
+            <Card 
+              className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => navigate(`/schedule/${recentGame.game_no}`, {
+                state: {
+                  homeTeam: getTeamById(recentGame.home_alih_team_id),
+                  awayTeam: getTeamById(recentGame.away_alih_team_id),
+                  matchDate: recentGame.match_at
+                }
+              })}
+            >
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
                   {new Date(recentGame.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}

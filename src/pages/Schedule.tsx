@@ -198,7 +198,37 @@ const Schedule = () => {
               const isExpanded = expandedGameId === game.id;
               
               return (
-                <Card key={game.id} className="p-4 border-border">
+                <Card 
+                  key={game.id} 
+                  className={`p-4 border-border relative ${hasScore ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
+                  onClick={() => {
+                    if (hasScore) {
+                      navigate(`/schedule/${game.game_no}`, { 
+                        state: { 
+                          homeTeam, 
+                          awayTeam,
+                          matchDate: game.match_at
+                        } 
+                      });
+                    }
+                  }}
+                >
+                  {/* 영상 버튼 - 우측 상단 */}
+                  {hasHighlight && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2 h-8 px-3 text-xs z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedGameId(isExpanded ? null : game.id);
+                      }}
+                    >
+                      <Video className={`h-3.5 w-3.5 mr-1.5 ${isExpanded ? 'text-primary' : ''}`} />
+                      영상
+                    </Button>
+                  )}
+
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm">
                       <span className="font-medium">
@@ -247,39 +277,6 @@ const Schedule = () => {
                   </div>
 
                   <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>
-
-                  {(hasHighlight || hasScore) && (
-                    <div className="mt-3 pt-3 border-t border-border flex items-center justify-center gap-3">
-                      {hasHighlight && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-3 text-xs"
-                          onClick={() => setExpandedGameId(isExpanded ? null : game.id)}
-                        >
-                          <Video className={`h-3.5 w-3.5 mr-1.5 ${isExpanded ? 'text-primary' : ''}`} />
-                          영상
-                        </Button>
-                      )}
-                      {hasScore && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-3 text-xs"
-                          onClick={() => navigate(`/schedule/${game.game_no}`, { 
-                            state: { 
-                              homeTeam, 
-                              awayTeam,
-                              matchDate: game.match_at
-                            } 
-                          })}
-                        >
-                          <FileText className="h-3.5 w-3.5 mr-1.5" />
-                          기록
-                        </Button>
-                      )}
-                    </div>
-                  )}
 
                   {isExpanded && hasHighlight && game.highlight_url && (
                     <div className="mt-4 pt-4 border-t border-border">
