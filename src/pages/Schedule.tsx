@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
-import { Loader2, Video } from "lucide-react";
+import { Loader2, Video, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -15,6 +16,7 @@ const externalSupabase = createClient(
 
 interface ScheduleGame {
   id: number;
+  game_no: number;
   home_alih_team_id: number;
   away_alih_team_id: number;
   home_alih_team_score: number | null;
@@ -37,6 +39,7 @@ const MONTHS = [
 ];
 
 const Schedule = () => {
+  const navigate = useNavigate();
   const now = new Date();
   const currentMonth = now.getMonth() + 1; // 1-12
   const currentYear = now.getFullYear();
@@ -206,6 +209,23 @@ const Schedule = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
+                      {hasScore && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => navigate(`/schedule/${game.game_no}`, { 
+                            state: { 
+                              homeTeam, 
+                              awayTeam,
+                              matchDate: game.match_at
+                            } 
+                          })}
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          기록
+                        </Button>
+                      )}
                       {hasHighlight && (
                         <Button
                           variant="ghost"
