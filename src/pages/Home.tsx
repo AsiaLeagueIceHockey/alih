@@ -316,7 +316,10 @@ const Home = () => {
               <p className="text-sm text-muted-foreground text-center">하이라이트가 없습니다</p>
             </Card>
           ) : (
-            <Card className="overflow-hidden border-border">
+            <Card 
+              className="overflow-hidden border-border cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => latestHighlight.highlight_url && window.open(latestHighlight.highlight_url, '_blank')}
+            >
               <div className="aspect-video bg-secondary/50 relative">
                 {latestHighlight.highlight_url && (
                   <img 

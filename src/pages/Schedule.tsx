@@ -213,21 +213,29 @@ const Schedule = () => {
                     }
                   }}
                 >
-                  {/* 영상 버튼 - 우측 상단 */}
-                  {hasHighlight && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2 h-8 px-3 text-xs z-10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedGameId(isExpanded ? null : game.id);
-                      }}
+                  {/* 우측 상단 배지와 버튼 */}
+                  <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+                    {hasHighlight && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-3 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedGameId(isExpanded ? null : game.id);
+                        }}
+                      >
+                        <Video className={`h-3.5 w-3.5 mr-1.5 ${isExpanded ? 'text-primary' : ''}`} />
+                        영상
+                      </Button>
+                    )}
+                    <Badge 
+                      variant={isUpcoming ? "default" : "outline"}
+                      className={isUpcoming ? "bg-accent" : ""}
                     >
-                      <Video className={`h-3.5 w-3.5 mr-1.5 ${isExpanded ? 'text-primary' : ''}`} />
-                      영상
-                    </Button>
-                  )}
+                      {isUpcoming ? "예정" : "종료"}
+                    </Badge>
+                  </div>
 
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm">
@@ -238,12 +246,6 @@ const Schedule = () => {
                         {matchDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <Badge 
-                      variant={isUpcoming ? "default" : "outline"}
-                      className={isUpcoming ? "bg-accent" : ""}
-                    >
-                      {isUpcoming ? "예정" : "종료"}
-                    </Badge>
                   </div>
 
                   <div className="flex items-center justify-between">
