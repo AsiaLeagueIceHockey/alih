@@ -219,7 +219,7 @@ const GameDetail = () => {
         <Tabs defaultValue="summary" className="mb-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="summary">경기 요약</TabsTrigger>
-            <TabsTrigger value="goals">득점 & 패널티</TabsTrigger>
+            <TabsTrigger value="goals">득점 & 페널티</TabsTrigger>
             <TabsTrigger value="roster">선수 명단</TabsTrigger>
           </TabsList>
 
@@ -234,7 +234,7 @@ const GameDetail = () => {
                       <TableHead className="w-20">구분</TableHead>
                       <TableHead className="text-center">득점</TableHead>
                       <TableHead className="text-center">유효 슈팅</TableHead>
-                      <TableHead className="text-center">패널티(분)</TableHead>
+                      <TableHead className="text-center">페널티(분)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -271,17 +271,17 @@ const GameDetail = () => {
               <h3 className="font-semibold mb-3">아이스하키 용어 설명</h3>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">SOG:</span> Shot on Goal (유효 슈팅. 골키퍼가 막아내거나 골로 연결된 슈팅)</p>
-                <p><span className="font-medium">PIM:</span> Penalties in Minutes (선수가 패널티로 인해 퇴장당한 총 시간(분))</p>
+                <p><span className="font-medium">PIM:</span> Penalties in Minutes (선수가 페널티로 인해 퇴장당한 총 시간(분))</p>
                 <p><span className="font-medium">PPG:</span> Power Play Goal (팀이 수적 우위(파워플레이) 상황에서 넣은 골)</p>
                 <p><span className="font-medium">SHG:</span> Short Handed Goal (팀이 수적 열세(숏핸디드) 상황에서 넣은 골)</p>
               </div>
             </Card>
           </TabsContent>
 
-          {/* 탭 2: 득점 기록 & 패널티 */}
+          {/* 탭 2: 득점 기록 & 페널티 */}
           <TabsContent value="goals">
             <Card className="p-4">
-              <h3 className="font-semibold mb-4">득점 기록 & 패널티</h3>
+              <h3 className="font-semibold mb-4">득점 기록 & 페널티</h3>
               {gameDetail.goals.length === 0 && gameDetail.penalties.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">기록이 없습니다</p>
               ) : (
@@ -337,7 +337,7 @@ const GameDetail = () => {
                                 <Badge variant="destructive" className="text-xs">{penalty.minutes}분</Badge>
                               </div>
                               <p className="font-medium">
-                                패널티: {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
+                                페널티: {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
                               </p>
                               <p className="text-sm text-muted-foreground">반칙: {penalty.offence}</p>
                             </div>
@@ -350,7 +350,7 @@ const GameDetail = () => {
             </Card>
           </TabsContent>
 
-          {/* 탭 3: 패널티 (삭제됨 - 득점 기록 탭에 통합) */}
+          {/* 탭 3: 페널티 (삭제됨 - 득점 기록 탭에 통합) */}
 
           {/* 탭 4: 선수 명단 */}
           <TabsContent value="roster" className="space-y-6">
