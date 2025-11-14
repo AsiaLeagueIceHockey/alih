@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
+import SEO from "@/components/SEO";
 
 const externalSupabase = createClient(
   "https://nvlpbdyqfzmlrjauvhxx.supabase.co",
@@ -89,6 +90,12 @@ const Standings = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      <SEO 
+        title="아시아리그 순위 - 팀 순위 및 선수 스탯"
+        description="아시아리그 아이스하키 2025-26 시즌 팀 순위표와 개인 기록을 확인하세요. 승점, 골, 어시스트, 포인트 등 상세 스탯을 제공합니다."
+        keywords="아시아리그 순위, 아이스하키 순위표, 팀 순위, 선수 스탯, 득점 순위"
+        path="/standings"
+      />
       <PageHeader title="순위" subtitle="2025-26 시즌 기록" />
       
       <div className="container mx-auto px-4">

@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SEO from "@/components/SEO";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -153,8 +154,28 @@ const Home = () => {
 
   const topThreeStandings = teamStandings?.slice(0, 3);
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SportsOrganization",
+    "name": "아시아리그 아이스하키",
+    "sport": "Ice Hockey",
+    "url": "https://alih.lovable.app",
+    "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 결과, 영상, 순위, 스탯, 뉴스를 한 곳에서",
+    "memberOf": {
+      "@type": "SportsLeague",
+      "name": "Asia League Ice Hockey"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
+      <SEO 
+        title="아시아리그 아이스하키 - 2025-26 시즌"
+        description="아시아리그 아이스하키 2025-26 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요."
+        keywords="아시아리그, 아이스하키, ALIH, HL 안양, 레드 이글스 홋카이도, 도호쿠 프리 블레이즈, 2025-26 시즌, 경기 일정, 하이라이트"
+        path="/"
+        structuredData={structuredData}
+      />
       <PageHeader title="아시아리그 아이스하키" subtitle="2025-26 시즌" />
 
       <div className="container mx-auto px-4 py-6 space-y-6">

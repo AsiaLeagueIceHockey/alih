@@ -5,7 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from '@supabase/supabase-js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import SEO from "@/components/SEO";
 import { useState } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -67,6 +67,12 @@ const News = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      <SEO 
+        title="아시아리그 뉴스 - 최신 소식 및 업데이트"
+        description="아시아리그 아이스하키 2025-26 시즌 최신 뉴스, 경기 분석, 선수 인터뷰, 팀 소식을 실시간으로 확인하세요."
+        keywords="아시아리그 뉴스, 아이스하키 뉴스, ALIH 소식, 경기 분석, 선수 인터뷰"
+        path="/news"
+      />
       <PageHeader title="아시아리그 뉴스" subtitle="2025-26 소식" />
       
       <div className="container mx-auto px-4">
