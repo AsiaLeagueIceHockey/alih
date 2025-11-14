@@ -7,6 +7,10 @@ import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -38,9 +42,20 @@ interface AlihTeam {
   logo: string;
 }
 
+interface AlihNews {
+  id: number;
+  title: string;
+  origin_url: string;
+  created_at: string;
+  summary: string;
+  published_at: string;
+  language: string;
+}
+
 const Home = () => {
   const navigate = useNavigate();
   const { data: teams } = useTeams();
+  const [selectedHighlight, setSelectedHighlight] = useState<{ url: string; title: string } | null>(null);
 
   const { data: schedules } = useQuery({
     queryKey: ['alih-schedules'],
@@ -84,6 +99,22 @@ const Home = () => {
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
+  const { data: latestNews } = useQuery({
+    queryKey: ['latest-news'],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_news')
+        .select('*')
+        .order('published_at', { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      return data as AlihNews[];
+    },
+    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+  });
+
   const getTeamById = (teamId: number) => {
     if (!teams) return null;
     return teams.find(t => t.id === teamId);
@@ -103,10 +134,9 @@ const Home = () => {
     return team?.logo || '';
   };
 
-  const getYoutubeThumbnail = (url: string) => {
+  const getYoutubeVideoId = (url: string) => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-    const videoId = match?.[1] || null;
-    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+    return match?.[1] || null;
   };
 
   const now = new Date();
@@ -283,26 +313,37 @@ const Home = () => {
 
         {/* Latest News */}
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Newspaper className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">최신 뉴스</h2>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Newspaper className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-bold">최신 뉴스</h2>
+            </div>
+            <a href="/news" className="text-xs text-primary hover:underline">
+              전체 보기
+            </a>
           </div>
-          <div className="space-y-3">
-            {[
-              { title: "HL 안양, 홈 3연승으로 2위 굳히기", source: "HL안양 공홈", time: "2시간 전" },
-              { title: "아시아리그 올스타전 일정 발표", source: "ALIH", time: "5시간 전" },
-              { title: "레드 이글스 홋카이도 선두 질주", source: "ALIH", time: "1일 전" },
-            ].map((news, i) => (
-              <Card key={i} className="p-3 border-border hover:border-primary/50 transition-colors cursor-pointer">
-                <p className="text-sm font-medium mb-1">{news.title}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{news.source}</span>
-                  <span>·</span>
-                  <span>{news.time}</span>
-                </div>
-              </Card>
-            ))}
-          </div>
+          {!latestNews ? (
+            <Card className="p-4 border-border">
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {latestNews.map((news) => (
+                <Card 
+                  key={news.id} 
+                  className="p-3 border-border hover:border-primary/50 transition-colors cursor-pointer"
+                  onClick={() => window.open(news.origin_url, '_blank')}
+                >
+                  <p className="text-sm font-medium mb-1 line-clamp-2">{news.title}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{format(new Date(news.published_at), 'PPP', { locale: ko })}</span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Latest Highlight */}
@@ -318,12 +359,19 @@ const Home = () => {
           ) : (
             <Card 
               className="overflow-hidden border-border cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => latestHighlight.highlight_url && window.open(latestHighlight.highlight_url, '_blank')}
+              onClick={() => {
+                if (latestHighlight.highlight_url) {
+                  setSelectedHighlight({
+                    url: latestHighlight.highlight_url,
+                    title: latestHighlight.highlight_title || `${getTeamById(latestHighlight.home_alih_team_id)?.name} vs ${getTeamById(latestHighlight.away_alih_team_id)?.name} 하이라이트`
+                  });
+                }
+              }}
             >
               <div className="aspect-video bg-secondary/50 relative">
                 {latestHighlight.highlight_url && (
                   <img 
-                    src={getYoutubeThumbnail(latestHighlight.highlight_url)} 
+                    src={`https://img.youtube.com/vi/${getYoutubeVideoId(latestHighlight.highlight_url)}/maxresdefault.jpg`}
                     alt={latestHighlight.highlight_title || "하이라이트"}
                     className="w-full h-full object-cover"
                   />
@@ -344,6 +392,29 @@ const Home = () => {
           )}
         </section>
       </div>
+
+      {/* YouTube Embed Dialog */}
+      <Dialog open={!!selectedHighlight} onOpenChange={() => setSelectedHighlight(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{selectedHighlight?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedHighlight && (
+            <div className="aspect-video">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${getYoutubeVideoId(selectedHighlight.url)}`}
+                title={selectedHighlight.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="rounded-md"
+              ></iframe>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
