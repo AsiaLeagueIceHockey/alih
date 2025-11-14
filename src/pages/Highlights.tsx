@@ -97,7 +97,7 @@ const Highlights = () => {
     <div className="min-h-screen bg-background pb-20">
       <SEO 
         title="아시아리그 하이라이트 - 경기 영상 모음"
-        description="아시아리그 아이스하키 2025-26 시즌 하이라이트 영상을 팀별로 확인하세요. 최신 경기 하이라이트와 골 장면을 HD 화질로 제공합니다."
+        description="아시아리그 아이스하키 2025-26 시즌 하이라이트 영상을 팀별로 확인하세요. 최신 경기 하이라이트를 제공합니다."
         keywords="아시아리그 하이라이트, 아이스하키 영상, 경기 하이라이트, 골 영상, ALIH 동영상"
         path="/highlights"
       />
