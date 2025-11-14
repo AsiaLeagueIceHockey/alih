@@ -5,7 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from '@supabase/supabase-js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+
 import { useState } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -47,9 +47,9 @@ const News = () => {
     selectedLanguage === "all" ? true : news.language === selectedLanguage
   ) || [];
 
-  const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNews = filteredNews.slice(startIndex, startIndex + itemsPerPage);
+  const displayedItemsCount = currentPage * itemsPerPage;
+  const paginatedNews = filteredNews.slice(0, displayedItemsCount);
+  const hasMore = filteredNews.length > displayedItemsCount;
 
   const handleLanguageChange = (lang: string) => {
     setSelectedLanguage(lang);
@@ -114,36 +114,15 @@ const News = () => {
               ))}
             </div>
 
-            {totalPages > 1 && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(page)}
-                        isActive={currentPage === page}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+            {hasMore && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  className="w-full py-3 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-sm font-medium"
+                >
+                  더 보기 ▼
+                </button>
+              </div>
             )}
           </>
         )}
