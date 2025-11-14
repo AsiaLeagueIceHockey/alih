@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
 import { Loader2, Video, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -117,6 +118,12 @@ const Schedule = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      <SEO 
+        title="아시아리그 경기 일정 - 2025-26 시즌"
+        description="아시아리그 아이스하키 2025-26 시즌 전체 경기 일정을 확인하세요. 월별 경기 일정, 팀별 일정, 하이라이트 영상을 제공합니다."
+        keywords="아시아리그 일정, 아이스하키 경기 일정, ALIH 스케줄, 경기 결과, 하이라이트"
+        path="/schedule"
+      />
       <PageHeader title="경기 일정 / 결과" subtitle="2025-26 시즌 전체 경기" />
       
       <div className="container mx-auto px-4">

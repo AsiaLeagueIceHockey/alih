@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlihTeam } from "@/hooks/useTeams";
+import SEO from "@/components/SEO";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -160,8 +161,35 @@ const GameDetail = () => {
   const matchDateObj = new Date(matchDate);
   const [homeScore, awayScore] = gameDetail.game_summary.total.score.split(' : ');
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": `${homeTeam?.name} vs ${awayTeam?.name}`,
+    "sport": "Ice Hockey",
+    "startDate": matchDate,
+    "location": {
+      "@type": "Place",
+      "name": gameDetail.game_info.venue
+    },
+    "homeTeam": {
+      "@type": "SportsTeam",
+      "name": homeTeam?.name
+    },
+    "awayTeam": {
+      "@type": "SportsTeam",
+      "name": awayTeam?.name
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
+      <SEO 
+        title={`${homeTeam?.name} vs ${awayTeam?.name} - 경기 상세 기록`}
+        description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} 경기의 상세 기록, 스코어, 슈팅, 득점 정보를 확인하세요.`}
+        keywords={`${homeTeam?.name}, ${awayTeam?.name}, 경기 기록, 상세 스탯, 득점, 어시스트`}
+        path={`/schedule/${gameNo}`}
+        structuredData={structuredData}
+      />
       {/* 헤더 */}
       <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
         <div className="container mx-auto px-4">
