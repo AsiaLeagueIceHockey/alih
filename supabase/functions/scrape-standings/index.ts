@@ -22,51 +22,51 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Fetching standings data from alhockey.com...');
+    console.log('Fetching standings data from asiaicehockey.com...');
     
-    const response = await fetch('https://www.alhockey.com/popup/47/standings.html');
+    const response = await fetch('https://asiaicehockey.com/standings');
     const html = await response.text();
     
     const standings: Standing[] = [];
     
     // Team name translation map
     const teamMap: Record<string, string> = {
-      'RED EAGLES HOKKAIDO': '레드 이글스',
-      'HL ANYANG ICE HOCKEY CLUB': 'HL 안양',
-      'TOHOKU FREEBLADES': '프리블레이즈',
-      'NIKKO ICEBUCKS': '아이스벅스',
-      'YOKOHAMA GRITS': '요코하마 그리츠',
-      'STARS KOBE': '스타즈 고베',
+      'レッドイーグルス北海道': '레드 이글스 홋카이도',
+      'HLアニャンアイスホッケークラブ': 'HL 안양',
+      '東北フリーブレイズ': '도호쿠 프리블레이즈',
+      'H.C.栃木日光アイスバックス': '닛코 아이스벅스',
+      '横浜GRITS': '요코하마 그리츠',
+      'スターズ神戸': '스타즈 고베',
     };
     
-    // Extract the standings table
-    const tableMatch = html.match(/<table[^>]*>[\s\S]*?<tr bgcolor="#CCCCCC">[\s\S]*?<\/table>/);
-    if (!tableMatch) {
-      throw new Error('Could not find standings table');
-    }
+    // Parse HTML to extract standings data
+    // This is a simplified parser - adjust based on actual HTML structure
+    const tableRows = html.match(/<tr>.*?<\/tr>/gs) || [];
     
-    const tableHtml = tableMatch[0];
-    const rows = tableHtml.match(/<tr>[\s\S]*?<\/tr>/g) || [];
-    
-    for (const row of rows) {
-      const cells = row.match(/<td[^>]*>(.*?)<\/td>/g) || [];
-      if (cells.length >= 11) {
-        const cellValues = cells.map(cell => cell.replace(/<[^>]*>/g, '').trim());
+    let rank = 1;
+    for (const row of tableRows) {
+      const cells = row.match(/<td.*?>(.*?)<\/td>/g) || [];
+      if (cells.length >= 7 && cells[0]) {
+        const teamCellMatch = cells[0].match(/>(.*?)</);
+        const teamCell = teamCellMatch ? teamCellMatch[1] : '';
         
-        const teamName = cellValues[1];
-        const translatedTeam = teamMap[teamName] || teamName;
-        
-        const gfGaMatch = cellValues[9].match(/(\d+)\s*-\s*(\d+)/);
+        let translatedTeam = teamCell;
+        for (const [jp, kr] of Object.entries(teamMap)) {
+          if (teamCell.includes(jp)) {
+            translatedTeam = kr;
+            break;
+          }
+        }
         
         standings.push({
-          rank: parseInt(cellValues[0]),
+          rank: rank++,
           team: translatedTeam,
-          gp: parseInt(cellValues[2]),
-          pts: parseInt(cellValues[10]),
-          w: parseInt(cellValues[3]),
-          l: parseInt(cellValues[8]),
-          otw: parseInt(cellValues[4]) + parseInt(cellValues[5]), // Win OT + Win PSS
-          otl: parseInt(cellValues[6]) + parseInt(cellValues[7]), // Lose PSS + Lose OT
+          gp: parseInt(cells[1].match(/\d+/)?.[0] || '0'),
+          pts: parseInt(cells[2].match(/\d+/)?.[0] || '0'),
+          w: parseInt(cells[3].match(/\d+/)?.[0] || '0'),
+          l: parseInt(cells[4].match(/\d+/)?.[0] || '0'),
+          otw: parseInt(cells[5].match(/\d+/)?.[0] || '0'),
+          otl: parseInt(cells[6].match(/\d+/)?.[0] || '0'),
         });
       }
     }

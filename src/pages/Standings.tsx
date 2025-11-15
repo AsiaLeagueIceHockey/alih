@@ -12,14 +12,9 @@ const externalSupabase = createClient(
 );
 
 interface TeamStanding {
-  rank: number;
-  team: string;
-  gp: number;
-  pts: number;
-  w: number;
-  l: number;
-  otw: number;
-  otl: number;
+  team: { name: string };
+  teamLogo: { medium: string };
+  stats: { GP: number; W: number; L: number; OTW: number; OTL: number; PTS: number };
 }
 
 interface PlayerStats {
@@ -57,10 +52,10 @@ const Standings = () => {
     queryKey: ['team-standings'],
     queryFn: async () => {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scrape-standings`
+        'https://widget.eliteprospects.com/api/league/asia-league?season=2025-2026'
       );
       const data = await response.json();
-      return data.standings as TeamStanding[];
+      return data.data as TeamStanding[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
@@ -86,19 +81,10 @@ const Standings = () => {
     return team?.name || englishName;
   };
 
-  const getTeamLogo = (nameOrEnglishName: string) => {
-    if (!nameOrEnglishName || typeof nameOrEnglishName !== 'string') {
-      return '';
-    }
-    
-    // 먼저 한국어 이름으로 찾기
-    let team = alihTeams?.find(t => t.name === nameOrEnglishName);
-    // 없으면 영어 이름으로 찾기
-    if (!team) {
-      team = alihTeams?.find(
-        t => t.english_name.toLowerCase() === nameOrEnglishName.toLowerCase()
-      );
-    }
+  const getTeamLogo = (englishName: string) => {
+    const team = alihTeams?.find(
+      t => t.english_name.toLowerCase() === englishName.toLowerCase()
+    );
     return team?.logo || '';
   };
 
@@ -140,30 +126,30 @@ const Standings = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {teamStandings?.map((standing) => (
+                    {teamStandings?.map((standing, index) => (
                       <tr 
-                        key={standing.rank} 
+                        key={index} 
                         className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${
-                          standing.team === "HL 안양" ? "bg-primary/5" : ""
+                          standing.team.name === "HL Anyang" ? "bg-primary/5" : ""
                         }`}
                       >
-                        <td className="p-3 font-bold text-primary">{standing.rank}</td>
+                        <td className="p-3 font-bold text-primary">{index + 1}</td>
                         <td className="p-3">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={getTeamLogo(standing.team)} 
-                              alt={standing.team}
+                              src={getTeamLogo(standing.team.name) || standing.teamLogo.medium} 
+                              alt={getTeamName(standing.team.name)}
                               className="w-6 h-6 object-contain"
                             />
-                            <span className="font-medium">{standing.team}</span>
+                            <span className="font-medium">{getTeamName(standing.team.name)}</span>
                           </div>
                         </td>
-                        <td className="p-3 text-center">{standing.gp}</td>
-                        <td className="p-3 text-center font-bold text-primary">{standing.pts}</td>
-                        <td className="p-3 text-center">{standing.w}</td>
-                        <td className="p-3 text-center">{standing.l}</td>
-                        <td className="p-3 text-center text-accent">{standing.otw}</td>
-                        <td className="p-3 text-center text-muted-foreground">{standing.otl}</td>
+                        <td className="p-3 text-center">{standing.stats.GP}</td>
+                        <td className="p-3 text-center font-bold text-primary">{standing.stats.PTS}</td>
+                        <td className="p-3 text-center">{standing.stats.W}</td>
+                        <td className="p-3 text-center">{standing.stats.L}</td>
+                        <td className="p-3 text-center text-accent">{standing.stats.OTW}</td>
+                        <td className="p-3 text-center text-muted-foreground">{standing.stats.OTL}</td>
                       </tr>
                     ))}
                   </tbody>
