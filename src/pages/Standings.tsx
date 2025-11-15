@@ -87,6 +87,10 @@ const Standings = () => {
   };
 
   const getTeamLogo = (nameOrEnglishName: string) => {
+    if (!nameOrEnglishName || typeof nameOrEnglishName !== 'string') {
+      return '';
+    }
+    
     // 먼저 한국어 이름으로 찾기
     let team = alihTeams?.find(t => t.name === nameOrEnglishName);
     // 없으면 영어 이름으로 찾기
