@@ -10,9 +10,10 @@ import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
+import type { CarouselApi } from "@/components/ui/carousel";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -68,6 +69,30 @@ const Home = () => {
   const navigate = useNavigate();
   const { data: teams } = useTeams();
   const [selectedHighlight, setSelectedHighlight] = useState<{ url: string; title: string } | null>(null);
+  const [nextGamesApi, setNextGamesApi] = useState<CarouselApi>();
+  const [recentGamesApi, setRecentGamesApi] = useState<CarouselApi>();
+  const [nextGamesIndex, setNextGamesIndex] = useState(0);
+  const [recentGamesIndex, setRecentGamesIndex] = useState(0);
+
+  useEffect(() => {
+    if (!nextGamesApi) return;
+    
+    setNextGamesIndex(nextGamesApi.selectedScrollSnap());
+    
+    nextGamesApi.on("select", () => {
+      setNextGamesIndex(nextGamesApi.selectedScrollSnap());
+    });
+  }, [nextGamesApi]);
+
+  useEffect(() => {
+    if (!recentGamesApi) return;
+    
+    setRecentGamesIndex(recentGamesApi.selectedScrollSnap());
+    
+    recentGamesApi.on("select", () => {
+      setRecentGamesIndex(recentGamesApi.selectedScrollSnap());
+    });
+  }, [recentGamesApi]);
 
   const { data: schedules } = useQuery({
     queryKey: ['alih-schedules'],
@@ -253,7 +278,7 @@ const Home = () => {
               <p className="text-xs text-muted-foreground text-center mt-3">{nextGames[0].match_place}</p>
             </Card>
           ) : (
-            <Carousel className="w-full">
+            <Carousel className="w-full" setApi={setNextGamesApi}>
               <CarouselContent>
                 {nextGames.map((game) => (
                   <CarouselItem key={game.id}>
@@ -298,7 +323,12 @@ const Home = () => {
               </CarouselContent>
               <div className="flex justify-center gap-1 mt-3">
                 {nextGames.map((_, index) => (
-                  <div key={index} className="w-1.5 h-1.5 rounded-full bg-muted" />
+                  <div 
+                    key={index} 
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                      index === nextGamesIndex ? 'bg-primary' : 'bg-muted'
+                    }`} 
+                  />
                 ))}
               </div>
             </Carousel>
@@ -368,7 +398,7 @@ const Home = () => {
               </div>
             </Card>
           ) : (
-            <Carousel className="w-full">
+            <Carousel className="w-full" setApi={setRecentGamesApi}>
               <CarouselContent>
                 {recentGames.map((game) => (
                   <CarouselItem key={game.id}>
@@ -423,7 +453,12 @@ const Home = () => {
               </CarouselContent>
               <div className="flex justify-center gap-1 mt-3">
                 {recentGames.map((_, index) => (
-                  <div key={index} className="w-1.5 h-1.5 rounded-full bg-muted" />
+                  <div 
+                    key={index} 
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                      index === recentGamesIndex ? 'bg-primary' : 'bg-muted'
+                    }`} 
+                  />
                 ))}
               </div>
             </Carousel>
