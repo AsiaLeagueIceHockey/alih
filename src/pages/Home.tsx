@@ -2,6 +2,7 @@ import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
@@ -143,12 +144,30 @@ const Home = () => {
   };
 
   const now = new Date();
+  
+  // 다음 경기: 미래의 가장 가까운 날짜의 모든 경기
   const nextGame = schedules?.find(game => new Date(game.match_at) > now);
-  const recentGame = schedules?.filter(game => 
+  const nextGames = schedules?.filter(game => {
+    if (!nextGame) return false;
+    const gameDate = new Date(game.match_at).toDateString();
+    const nextGameDate = new Date(nextGame.match_at).toDateString();
+    return gameDate === nextGameDate;
+  }) || [];
+
+  // 최근 결과: 과거의 가장 최근 날짜의 모든 완료된 경기
+  const completedGames = schedules?.filter(game => 
     new Date(game.match_at) < now && 
     game.home_alih_team_score !== null && 
     game.away_alih_team_score !== null
-  ).reverse()[0];
+  ).reverse() || [];
+  
+  const recentGame = completedGames[0];
+  const recentGames = completedGames.filter(game => {
+    if (!recentGame) return false;
+    const gameDate = new Date(game.match_at).toDateString();
+    const recentGameDate = new Date(recentGame.match_at).toDateString();
+    return gameDate === recentGameDate;
+  });
   
   const latestHighlight = schedules?.filter(game => 
     game.highlight_url && game.highlight_url.trim() !== ''
@@ -186,48 +205,103 @@ const Home = () => {
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-bold">다음 경기</h2>
+            {nextGames.length > 1 && (
+              <Badge variant="outline" className="text-xs ml-auto">
+                {nextGames.length}경기
+              </Badge>
+            )}
           </div>
-          {!nextGame ? (
+          {nextGames.length === 0 ? (
             <Card className="p-4 border-border">
               <p className="text-sm text-muted-foreground text-center">예정된 경기가 없습니다</p>
             </Card>
-          ) : (
+          ) : nextGames.length === 1 ? (
             <Card className="p-4 shadow-card-glow border-primary/20">
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
-                  {new Date(nextGame.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(nextGame.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(nextGames[0].match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(nextGames[0].match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </Badge>
                 <Badge className="text-xs bg-accent">예정</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
-                  {getTeamById(nextGame.home_alih_team_id)?.logo ? (
+                  {getTeamById(nextGames[0].home_alih_team_id)?.logo ? (
                     <img 
-                      src={getTeamById(nextGame.home_alih_team_id)!.logo} 
-                      alt={getTeamById(nextGame.home_alih_team_id)!.name}
+                      src={getTeamById(nextGames[0].home_alih_team_id)!.logo} 
+                      alt={getTeamById(nextGames[0].home_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(nextGame.home_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-sm font-bold">{getTeamById(nextGames[0].home_alih_team_id)?.name || '미정'}</p>
                 </div>
                 <div className="text-2xl font-bold text-muted-foreground px-4">VS</div>
                 <div className="text-center flex-1">
-                  {getTeamById(nextGame.away_alih_team_id)?.logo ? (
+                  {getTeamById(nextGames[0].away_alih_team_id)?.logo ? (
                     <img 
-                      src={getTeamById(nextGame.away_alih_team_id)!.logo} 
-                      alt={getTeamById(nextGame.away_alih_team_id)!.name}
+                      src={getTeamById(nextGames[0].away_alih_team_id)!.logo} 
+                      alt={getTeamById(nextGames[0].away_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(nextGame.away_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-sm font-bold">{getTeamById(nextGames[0].away_alih_team_id)?.name || '미정'}</p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-3">{nextGame.match_place}</p>
+              <p className="text-xs text-muted-foreground text-center mt-3">{nextGames[0].match_place}</p>
             </Card>
+          ) : (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {nextGames.map((game) => (
+                  <CarouselItem key={game.id}>
+                    <Card className="p-4 shadow-card-glow border-primary/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        </Badge>
+                        <Badge className="text-xs bg-accent">예정</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-center flex-1">
+                          {getTeamById(game.home_alih_team_id)?.logo ? (
+                            <img 
+                              src={getTeamById(game.home_alih_team_id)!.logo} 
+                              alt={getTeamById(game.home_alih_team_id)!.name}
+                              className="w-12 h-12 object-contain mx-auto mb-2"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
+                          )}
+                          <p className="text-sm font-bold">{getTeamById(game.home_alih_team_id)?.name || '미정'}</p>
+                        </div>
+                        <div className="text-2xl font-bold text-muted-foreground px-4">VS</div>
+                        <div className="text-center flex-1">
+                          {getTeamById(game.away_alih_team_id)?.logo ? (
+                            <img 
+                              src={getTeamById(game.away_alih_team_id)!.logo} 
+                              alt={getTeamById(game.away_alih_team_id)!.name}
+                              className="w-12 h-12 object-contain mx-auto mb-2"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
+                          )}
+                          <p className="text-sm font-bold">{getTeamById(game.away_alih_team_id)?.name || '미정'}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex justify-center gap-1 mt-3">
+                {nextGames.map((_, index) => (
+                  <div key={index} className="w-1.5 h-1.5 rounded-full bg-muted" />
+                ))}
+              </div>
+            </Carousel>
           )}
         </section>
 
@@ -236,58 +310,123 @@ const Home = () => {
           <div className="flex items-center gap-2 mb-3">
             <Trophy className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-bold">최근 결과</h2>
+            {recentGames.length > 1 && (
+              <Badge variant="outline" className="text-xs ml-auto">
+                {recentGames.length}경기
+              </Badge>
+            )}
           </div>
-          {!recentGame ? (
+          {recentGames.length === 0 ? (
             <Card className="p-4 border-border">
               <p className="text-sm text-muted-foreground text-center">최근 결과가 없습니다</p>
             </Card>
-          ) : (
+          ) : recentGames.length === 1 ? (
             <Card 
               className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate(`/schedule/${recentGame.game_no}`, {
+              onClick={() => navigate(`/schedule/${recentGames[0].game_no}`, {
                 state: {
-                  homeTeam: getTeamById(recentGame.home_alih_team_id),
-                  awayTeam: getTeamById(recentGame.away_alih_team_id),
-                  matchDate: recentGame.match_at
+                  homeTeam: getTeamById(recentGames[0].home_alih_team_id),
+                  awayTeam: getTeamById(recentGames[0].away_alih_team_id),
+                  matchDate: recentGames[0].match_at
                 }
               })}
             >
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
-                  {new Date(recentGame.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                  {new Date(recentGames[0].match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
                 </Badge>
                 <Badge variant="outline" className="text-xs">종료</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
-                  {getTeamById(recentGame.home_alih_team_id)?.logo ? (
+                  {getTeamById(recentGames[0].home_alih_team_id)?.logo ? (
                     <img 
-                      src={getTeamById(recentGame.home_alih_team_id)!.logo} 
-                      alt={getTeamById(recentGame.home_alih_team_id)!.name}
+                      src={getTeamById(recentGames[0].home_alih_team_id)!.logo} 
+                      alt={getTeamById(recentGames[0].home_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(recentGame.home_alih_team_id)?.name || '미정'}</p>
-                  <p className="text-2xl font-bold text-primary mt-1">{recentGame.home_alih_team_score}</p>
+                  <p className="text-sm font-bold">{getTeamById(recentGames[0].home_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-2xl font-bold text-primary mt-1">{recentGames[0].home_alih_team_score}</p>
                 </div>
                 <div className="text-xl font-bold text-muted-foreground px-4">:</div>
                 <div className="text-center flex-1">
-                  {getTeamById(recentGame.away_alih_team_id)?.logo ? (
+                  {getTeamById(recentGames[0].away_alih_team_id)?.logo ? (
                     <img 
-                      src={getTeamById(recentGame.away_alih_team_id)!.logo} 
-                      alt={getTeamById(recentGame.away_alih_team_id)!.name}
+                      src={getTeamById(recentGames[0].away_alih_team_id)!.logo} 
+                      alt={getTeamById(recentGames[0].away_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(recentGame.away_alih_team_id)?.name || '미정'}</p>
-                  <p className="text-2xl font-bold mt-1">{recentGame.away_alih_team_score}</p>
+                  <p className="text-sm font-bold">{getTeamById(recentGames[0].away_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-2xl font-bold mt-1">{recentGames[0].away_alih_team_score}</p>
                 </div>
               </div>
             </Card>
+          ) : (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {recentGames.map((game) => (
+                  <CarouselItem key={game.id}>
+                    <Card 
+                      className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => navigate(`/schedule/${game.game_no}`, {
+                        state: {
+                          homeTeam: getTeamById(game.home_alih_team_id),
+                          awayTeam: getTeamById(game.away_alih_team_id),
+                          matchDate: game.match_at
+                        }
+                      })}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">종료</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-center flex-1">
+                          {getTeamById(game.home_alih_team_id)?.logo ? (
+                            <img 
+                              src={getTeamById(game.home_alih_team_id)!.logo} 
+                              alt={getTeamById(game.home_alih_team_id)!.name}
+                              className="w-12 h-12 object-contain mx-auto mb-2"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
+                          )}
+                          <p className="text-sm font-bold">{getTeamById(game.home_alih_team_id)?.name || '미정'}</p>
+                          <p className="text-2xl font-bold text-primary mt-1">{game.home_alih_team_score}</p>
+                        </div>
+                        <div className="text-xl font-bold text-muted-foreground px-4">:</div>
+                        <div className="text-center flex-1">
+                          {getTeamById(game.away_alih_team_id)?.logo ? (
+                            <img 
+                              src={getTeamById(game.away_alih_team_id)!.logo} 
+                              alt={getTeamById(game.away_alih_team_id)!.name}
+                              className="w-12 h-12 object-contain mx-auto mb-2"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
+                          )}
+                          <p className="text-sm font-bold">{getTeamById(game.away_alih_team_id)?.name || '미정'}</p>
+                          <p className="text-2xl font-bold mt-1">{game.away_alih_team_score}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex justify-center gap-1 mt-3">
+                {recentGames.map((_, index) => (
+                  <div key={index} className="w-1.5 h-1.5 rounded-full bg-muted" />
+                ))}
+              </div>
+            </Carousel>
           )}
         </section>
 
