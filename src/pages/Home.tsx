@@ -32,9 +32,19 @@ interface ScheduleGame {
 }
 
 interface TeamStanding {
-  team: { name: string };
-  teamLogo: { medium: string };
-  stats: { PTS: number };
+  rank: number;
+  team_id: number;
+  games_played: number;
+  points: number;
+  win_60min: number;
+  win_ot: number;
+  win_pss: number;
+  lose_pss: number;
+  lose_ot: number;
+  lose_60min: number;
+  goals_for: number;
+  goals_against: number;
+  team?: AlihTeam;
 }
 
 interface AlihTeam {
@@ -90,11 +100,18 @@ const Home = () => {
   const { data: teamStandings } = useQuery({
     queryKey: ['team-standings-home'],
     queryFn: async () => {
-      const response = await fetch(
-        'https://widget.eliteprospects.com/api/league/asia-league?season=2025-2026'
-      );
-      const data = await response.json();
-      return data.data as TeamStanding[];
+      const { data, error } = await externalSupabase
+        .from('alih_standings')
+        .select('*, team:alih_teams(name, logo, english_name)')
+        .order('rank', { ascending: true })
+        .limit(3);
+      
+      if (error) throw error;
+      
+      return (data || []).map(standing => ({
+        ...standing,
+        team: standing.team as unknown as AlihTeam
+      })) as TeamStanding[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
@@ -121,20 +138,6 @@ const Home = () => {
     return teams.find(t => t.id === teamId);
   };
 
-  const getTeamName = (englishName: string) => {
-    const team = alihTeams?.find(
-      t => t.english_name.toLowerCase() === englishName.toLowerCase()
-    );
-    return team?.name || englishName;
-  };
-
-  const getTeamLogo = (englishName: string) => {
-    const team = alihTeams?.find(
-      t => t.english_name.toLowerCase() === englishName.toLowerCase()
-    );
-    return team?.logo || '';
-  };
-
   const getYoutubeVideoId = (url: string) => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     return match?.[1] || null;
@@ -152,7 +155,7 @@ const Home = () => {
     game.highlight_url && game.highlight_url.trim() !== ''
   ).reverse()[0];
 
-  const topThreeStandings = teamStandings?.slice(0, 3);
+  const topThreeStandings = teamStandings;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -309,22 +312,22 @@ const Home = () => {
           ) : (
             <Card className="p-4 border-border">
               <div className="space-y-3">
-                {topThreeStandings.map((standing, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                {topThreeStandings.map((standing) => (
+                  <div key={standing.rank} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-primary w-6">{index + 1}</span>
+                      <span className="text-lg font-bold text-primary w-6">{standing.rank}</span>
                       <div className="flex items-center gap-2">
-                        {getTeamLogo(standing.team.name) && (
+                        {standing.team?.logo && (
                           <img 
-                            src={getTeamLogo(standing.team.name)} 
-                            alt={getTeamName(standing.team.name)}
+                            src={standing.team.logo} 
+                            alt={standing.team.name}
                             className="w-5 h-5 object-contain"
                           />
                         )}
-                        <span className="text-sm">{getTeamName(standing.team.name)}</span>
+                        <span className="text-sm">{standing.team?.name}</span>
                       </div>
                     </div>
-                    <span className="text-sm font-bold">{standing.stats.PTS}P</span>
+                    <span className="text-sm font-bold">{standing.points}P</span>
                   </div>
                 ))}
               </div>
