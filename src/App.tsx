@@ -18,7 +18,16 @@ const Standings = lazy(() => import("./pages/Standings"));
 const News = lazy(() => import("./pages/News"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5분 기본 캐시
+      gcTime: 1000 * 60 * 30, // 30분 동안 메모리 유지
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">

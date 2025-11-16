@@ -107,6 +107,8 @@ const Home = () => {
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const { data: alihTeams } = useQuery({
@@ -119,8 +121,10 @@ const Home = () => {
       if (error) throw error;
       return data as AlihTeam[];
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
-    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 동안 캐시
+    gcTime: 1000 * 60 * 60 * 24 * 7, // 7일 동안 메모리에 유지
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const { data: teamStandings } = useQuery({
@@ -138,8 +142,10 @@ const Home = () => {
         team: standing.team as unknown as AlihTeam
       })) as TeamStanding[];
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    staleTime: 1000 * 60 * 30, // 30분 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const { data: latestNews } = useQuery({
@@ -154,8 +160,10 @@ const Home = () => {
       if (error) throw error;
       return data as AlihNews[];
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    staleTime: 1000 * 60 * 30, // 30분 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const getTeamById = (teamId: number) => {
@@ -480,8 +488,8 @@ const Home = () => {
               <TrendingUp className="w-5 h-5 text-primary" />
               <h2 className="text-lg font-bold">리그 순위</h2>
             </div>
-            <a href="/standings" className="text-xs text-primary hover:underline">
-              전체 보기
+            <a href="/standings" className="text-xs text-primary hover:underline" aria-label="리그 순위 전체 보기">
+              전체 순위 보기
             </a>
           </div>
           {!topThreeStandings ? (
@@ -524,8 +532,8 @@ const Home = () => {
               <Newspaper className="w-5 h-5 text-primary" />
               <h2 className="text-lg font-bold">최신 뉴스</h2>
             </div>
-            <a href="/news" className="text-xs text-primary hover:underline">
-              전체 보기
+            <a href="/news" className="text-xs text-primary hover:underline" aria-label="뉴스 전체 보기">
+              전체 뉴스 보기
             </a>
           </div>
           {!latestNews ? (
