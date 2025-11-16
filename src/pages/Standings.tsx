@@ -123,12 +123,12 @@ const Standings = () => {
                       <th className="p-3 font-semibold text-primary">팀</th>
                       <th className="p-3 font-semibold text-primary text-center">경기</th>
                       <th className="p-3 font-semibold text-primary text-center">승점</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">60분승</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">정규승</th>
                       <th className="p-3 font-semibold text-muted-foreground text-center">연장승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">PSS승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">PSS패</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">승부승</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">정규패</th>
                       <th className="p-3 font-semibold text-muted-foreground text-center">연장패</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">60분패</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">승부패</th>
                       <th className="p-3 font-semibold text-muted-foreground text-center">골득실</th>
                     </tr>
                   </thead>
@@ -156,9 +156,9 @@ const Standings = () => {
                         <td className="p-3 text-center">{standing.win_60min}</td>
                         <td className="p-3 text-center">{standing.win_ot}</td>
                         <td className="p-3 text-center">{standing.win_pss}</td>
-                        <td className="p-3 text-center">{standing.lose_pss}</td>
-                        <td className="p-3 text-center">{standing.lose_ot}</td>
                         <td className="p-3 text-center">{standing.lose_60min}</td>
+                        <td className="p-3 text-center">{standing.lose_ot}</td>
+                        <td className="p-3 text-center">{standing.lose_pss}</td>
                         <td className="p-3 text-center text-xs">
                           {standing.goals_for} - {standing.goals_against}
                         </td>
