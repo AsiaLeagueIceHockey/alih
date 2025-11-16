@@ -255,6 +255,7 @@ const Home = () => {
                       src={getTeamById(nextGames[0].home_alih_team_id)!.logo} 
                       alt={getTeamById(nextGames[0].home_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -268,6 +269,7 @@ const Home = () => {
                       src={getTeamById(nextGames[0].away_alih_team_id)!.logo} 
                       alt={getTeamById(nextGames[0].away_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -296,6 +298,7 @@ const Home = () => {
                               src={getTeamById(game.home_alih_team_id)!.logo} 
                               alt={getTeamById(game.home_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
+                              loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -309,6 +312,7 @@ const Home = () => {
                               src={getTeamById(game.away_alih_team_id)!.logo} 
                               alt={getTeamById(game.away_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
+                              loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -374,6 +378,7 @@ const Home = () => {
                       src={getTeamById(recentGames[0].home_alih_team_id)!.logo} 
                       alt={getTeamById(recentGames[0].home_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -388,6 +393,7 @@ const Home = () => {
                       src={getTeamById(recentGames[0].away_alih_team_id)!.logo} 
                       alt={getTeamById(recentGames[0].away_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -425,6 +431,7 @@ const Home = () => {
                               src={getTeamById(game.home_alih_team_id)!.logo} 
                               alt={getTeamById(game.home_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
+                              loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -439,6 +446,7 @@ const Home = () => {
                               src={getTeamById(game.away_alih_team_id)!.logo} 
                               alt={getTeamById(game.away_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
+                              loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
@@ -495,6 +503,7 @@ const Home = () => {
                             src={standing.team.logo} 
                             alt={standing.team.name}
                             className="w-5 h-5 object-contain"
+                            loading="lazy"
                           />
                         )}
                         <span className="text-sm">{standing.team?.name}</span>
@@ -571,6 +580,7 @@ const Home = () => {
                     src={`https://img.youtube.com/vi/${getYoutubeVideoId(latestHighlight.highlight_url)}/maxresdefault.jpg`}
                     alt={latestHighlight.highlight_title || "하이라이트"}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 )}
                 <div className="absolute inset-0 flex items-center justify-center">
