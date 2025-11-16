@@ -12,9 +12,19 @@ const externalSupabase = createClient(
 );
 
 interface TeamStanding {
-  team: { name: string };
-  teamLogo: { medium: string };
-  stats: { GP: number; W: number; L: number; OTW: number; OTL: number; PTS: number };
+  rank: number;
+  team_id: number;
+  games_played: number;
+  points: number;
+  win_60min: number;
+  win_ot: number;
+  win_pss: number;
+  lose_pss: number;
+  lose_ot: number;
+  lose_60min: number;
+  goals_for: number;
+  goals_against: number;
+  team?: AlihTeam;
 }
 
 interface PlayerStats {
@@ -51,11 +61,18 @@ const Standings = () => {
   const { data: teamStandings, isLoading: isLoadingTeams } = useQuery({
     queryKey: ['team-standings'],
     queryFn: async () => {
-      const response = await fetch(
-        'https://widget.eliteprospects.com/api/league/asia-league?season=2025-2026'
-      );
-      const data = await response.json();
-      return data.data as TeamStanding[];
+      const { data, error } = await externalSupabase
+        .from('alih_standings')
+        .select('*, team:alih_teams(name, logo)')
+        .order('rank', { ascending: true });
+      
+      if (error) throw error;
+      
+      // Flatten the team data for easier access
+      return (data || []).map(standing => ({
+        ...standing,
+        team: standing.team as unknown as AlihTeam
+      })) as TeamStanding[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
@@ -74,19 +91,6 @@ const Standings = () => {
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
-  const getTeamName = (englishName: string) => {
-    const team = alihTeams?.find(
-      t => t.english_name.toLowerCase() === englishName.toLowerCase()
-    );
-    return team?.name || englishName;
-  };
-
-  const getTeamLogo = (englishName: string) => {
-    const team = alihTeams?.find(
-      t => t.english_name.toLowerCase() === englishName.toLowerCase()
-    );
-    return team?.logo || '';
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -116,49 +120,61 @@ const Standings = () => {
                   <thead className="border-b border-border">
                     <tr className="text-left">
                       <th className="p-3 font-semibold text-primary">#</th>
-                      <th className="p-3 font-semibold text-primary">팀명</th>
+                      <th className="p-3 font-semibold text-primary">팀</th>
                       <th className="p-3 font-semibold text-primary text-center">경기</th>
                       <th className="p-3 font-semibold text-primary text-center">승점</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">패</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">연승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">연패</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">60분승</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">연장승</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">PSS승</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">PSS패</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">연장패</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">60분패</th>
+                      <th className="p-3 font-semibold text-muted-foreground text-center">골득실</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {teamStandings?.map((standing, index) => (
+                    {teamStandings?.map((standing) => (
                       <tr 
-                        key={index} 
+                        key={standing.rank} 
                         className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${
-                          standing.team.name === "HL Anyang" ? "bg-primary/5" : ""
+                          standing.team?.name === "안양 한라" ? "bg-primary/5" : ""
                         }`}
                       >
-                        <td className="p-3 font-bold text-primary">{index + 1}</td>
+                        <td className="p-3 font-bold text-primary">{standing.rank}</td>
                         <td className="p-3">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={getTeamLogo(standing.team.name) || standing.teamLogo.medium} 
-                              alt={getTeamName(standing.team.name)}
+                              src={standing.team?.logo || ''} 
+                              alt={standing.team?.name || ''}
                               className="w-6 h-6 object-contain"
                             />
-                            <span className="font-medium">{getTeamName(standing.team.name)}</span>
+                            <span className="font-medium">{standing.team?.name}</span>
                           </div>
                         </td>
-                        <td className="p-3 text-center">{standing.stats.GP}</td>
-                        <td className="p-3 text-center font-bold text-primary">{standing.stats.PTS}</td>
-                        <td className="p-3 text-center">{standing.stats.W}</td>
-                        <td className="p-3 text-center">{standing.stats.L}</td>
-                        <td className="p-3 text-center text-accent">{standing.stats.OTW}</td>
-                        <td className="p-3 text-center text-muted-foreground">{standing.stats.OTL}</td>
+                        <td className="p-3 text-center">{standing.games_played}</td>
+                        <td className="p-3 text-center font-bold text-primary">{standing.points}</td>
+                        <td className="p-3 text-center">{standing.win_60min}</td>
+                        <td className="p-3 text-center">{standing.win_ot}</td>
+                        <td className="p-3 text-center">{standing.win_pss}</td>
+                        <td className="p-3 text-center">{standing.lose_pss}</td>
+                        <td className="p-3 text-center">{standing.lose_ot}</td>
+                        <td className="p-3 text-center">{standing.lose_60min}</td>
+                        <td className="p-3 text-center text-xs">
+                          {standing.goals_for} - {standing.goals_against}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               )}
             </Card>
-            <div className="mt-4 text-xs text-muted-foreground space-y-1 px-2">
-              <p>• GP: 경기수 | PTS: 승점 | W: 승 | L: 패</p>
-              <p>• OTW: 연장 승 | OTL: 연장 패</p>
+            <div className="mt-4 text-xs text-muted-foreground space-y-2 px-2">
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground">📊 용어 설명</p>
+                <p>• <span className="font-medium">OT (Overtime)</span>: 연장전. 정규 시간 60분 동안 승부가 나지 않으면 진행합니다.</p>
+                <p>• <span className="font-medium">PSS (Penalty Shootout)</span>: 승부샷. 연장전에서도 승부가 나지 않을 경우 진행하는 승부치기입니다.</p>
+                <p>• <span className="font-medium">승점 방식</span>: 정규 60분 승(3점), 연장/승부샷 승(2점), 연장/승부샷 패(1점), 정규 60분 패(0점)</p>
+              </div>
             </div>
           </TabsContent>
 
@@ -201,11 +217,11 @@ const Standings = () => {
                         <td className="p-3">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={getTeamLogo(player.team.name) || player.team.logo.medium} 
-                              alt={getTeamName(player.team.name)}
+                              src={player.team.logo.medium} 
+                              alt={player.team.name}
                               className="w-5 h-5 object-contain"
                             />
-                            <span className="text-xs text-muted-foreground">{getTeamName(player.team.name)}</span>
+                            <span className="text-xs text-muted-foreground">{player.team.name}</span>
                           </div>
                         </td>
                         <td className="p-3 text-center">{player.regularStats.GP}</td>
