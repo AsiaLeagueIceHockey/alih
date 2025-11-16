@@ -103,8 +103,7 @@ const Home = () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, logo, english_name)')
-        .order('rank', { ascending: true })
-        .limit(3);
+        .order('rank', { ascending: true });
       
       if (error) throw error;
       
