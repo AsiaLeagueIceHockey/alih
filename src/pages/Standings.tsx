@@ -190,26 +190,26 @@ const Standings = () => {
 
           <TabsContent value="players">
             <Tabs defaultValue="goals" className="w-full">
-              <div className="flex gap-2 mb-4 border-b border-border pb-1">
+              <TabsList className="w-full h-auto bg-transparent p-0 border-b border-border mb-4">
                 <TabsTrigger 
                   value="goals" 
-                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none data-[state=inactive]:bg-transparent"
+                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none bg-transparent"
                 >
                   득점 순위
                 </TabsTrigger>
                 <TabsTrigger 
                   value="assists"
-                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none data-[state=inactive]:bg-transparent"
+                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none bg-transparent"
                 >
                   도움 순위
                 </TabsTrigger>
                 <TabsTrigger 
                   value="points"
-                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none data-[state=inactive]:bg-transparent"
+                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none bg-transparent"
                 >
                   포인트 순위
                 </TabsTrigger>
-              </div>
+              </TabsList>
 
               {/* 득점 순위 */}
               <TabsContent value="goals">
