@@ -28,13 +28,16 @@ interface TeamStanding {
 }
 
 interface PlayerStats {
-  player: { 
-    name: string; 
-    nationality: { slug: string; name: string };
-    flagUrl: string;
-  };
-  team: { name: string; logo: { medium: string } };
-  regularStats: { GP: number; G: number; A: number; PTS: number };
+  player_name: string;
+  jersey_number: string;
+  team_id: number;
+  goals: number;
+  assists: number;
+  points: number;
+  goals_rank: number | null;
+  assists_rank: number | null;
+  points_rank: number | null;
+  team?: AlihTeam;
 }
 
 interface AlihTeam {
@@ -81,11 +84,18 @@ const Standings = () => {
   const { data: playerStats, isLoading: isLoadingPlayers } = useQuery({
     queryKey: ['player-stats'],
     queryFn: async () => {
-      const response = await fetch(
-        'https://widget.eliteprospects.com/api/league/asia-league/scoring-leaders?season=2025-2026&statsType=regular'
-      );
-      const data = await response.json();
-      return data.data as PlayerStats[];
+      const { data, error } = await externalSupabase
+        .from('alih_player_stats')
+        .select('*, team:alih_teams(name, logo)')
+        .order('points_rank', { ascending: true });
+      
+      if (error) throw error;
+      
+      // Flatten the team data for easier access
+      return (data || []).map(player => ({
+        ...player,
+        team: player.team as unknown as AlihTeam
+      })) as PlayerStats[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
@@ -179,64 +189,232 @@ const Standings = () => {
           </TabsContent>
 
           <TabsContent value="players">
-            <Card className="overflow-x-auto border-border">
-              {isLoadingPlayers ? (
-                <div className="flex items-center justify-center p-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead className="border-b border-border">
-                    <tr className="text-left">
-                      <th className="p-3 font-semibold text-primary">#</th>
-                      <th className="p-3 font-semibold text-primary">선수명</th>
-                      <th className="p-3 font-semibold text-primary">팀</th>
-                      <th className="p-3 font-semibold text-primary text-center">경기</th>
-                      <th className="p-3 font-semibold text-primary text-center">골</th>
-                      <th className="p-3 font-semibold text-primary text-center">도움</th>
-                      <th className="p-3 font-semibold text-primary text-center">득점</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {playerStats?.slice(0, 20).map((player, index) => (
-                      <tr 
-                        key={index} 
-                        className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
-                      >
-                        <td className="p-3 font-bold text-primary">{index + 1}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <img 
-                              src={player.player.flagUrl} 
-                              alt={player.player.nationality.name}
-                              className="w-5 h-4 object-cover"
-                            />
-                            <span className="font-medium">{player.player.name}</span>
+            <Tabs defaultValue="goals" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="goals">득점 순위</TabsTrigger>
+                <TabsTrigger value="assists">도움 순위</TabsTrigger>
+                <TabsTrigger value="points">포인트 순위</TabsTrigger>
+              </TabsList>
+
+              {/* 득점 순위 */}
+              <TabsContent value="goals">
+                <Card className="border-border">
+                  {isLoadingPlayers ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/50">
+                      {playerStats
+                        ?.filter(p => p.goals_rank !== null)
+                        .sort((a, b) => (a.goals_rank || 0) - (b.goals_rank || 0))
+                        .map((player) => (
+                          <div 
+                            key={`goals-${player.player_name}-${player.team_id}`}
+                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-4"
+                          >
+                            {/* 순위 */}
+                            <div className="flex-shrink-0 w-8 text-center">
+                              {player.goals_rank === 1 ? (
+                                <div className="text-xl font-bold text-yellow-500">🥇</div>
+                              ) : player.goals_rank === 2 ? (
+                                <div className="text-xl font-bold text-gray-400">🥈</div>
+                              ) : player.goals_rank === 3 ? (
+                                <div className="text-xl font-bold text-orange-600">🥉</div>
+                              ) : (
+                                <div className="text-sm font-semibold text-muted-foreground">
+                                  {player.goals_rank}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 선수 정보 */}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <img 
+                                src={player.team?.logo || ''} 
+                                alt={player.team?.name || ''}
+                                className="w-10 h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
+                                loading="lazy"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-base text-foreground truncate">
+                                  {player.player_name}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>No.{player.jersey_number}</span>
+                                  <span>•</span>
+                                  <span className="truncate">{player.team?.name}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* 스탯 정보 */}
+                            <div className="flex items-center gap-4 flex-shrink-0">
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-primary">
+                                  {player.goals}
+                                </div>
+                                <div className="text-xs text-muted-foreground">골</div>
+                              </div>
+                              <div className="text-right opacity-50">
+                                <div className="text-sm text-muted-foreground">
+                                  {player.assists}A / {player.points}P
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <img 
-                              src={player.team.logo.medium} 
-                              alt={player.team.name}
-                              className="w-5 h-5 object-contain"
-                            />
-                            <span className="text-xs text-muted-foreground">{player.team.name}</span>
+                        ))}
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+
+              {/* 도움 순위 */}
+              <TabsContent value="assists">
+                <Card className="border-border">
+                  {isLoadingPlayers ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/50">
+                      {playerStats
+                        ?.filter(p => p.assists_rank !== null)
+                        .sort((a, b) => (a.assists_rank || 0) - (b.assists_rank || 0))
+                        .map((player) => (
+                          <div 
+                            key={`assists-${player.player_name}-${player.team_id}`}
+                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-4"
+                          >
+                            {/* 순위 */}
+                            <div className="flex-shrink-0 w-8 text-center">
+                              {player.assists_rank === 1 ? (
+                                <div className="text-xl font-bold text-yellow-500">🥇</div>
+                              ) : player.assists_rank === 2 ? (
+                                <div className="text-xl font-bold text-gray-400">🥈</div>
+                              ) : player.assists_rank === 3 ? (
+                                <div className="text-xl font-bold text-orange-600">🥉</div>
+                              ) : (
+                                <div className="text-sm font-semibold text-muted-foreground">
+                                  {player.assists_rank}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 선수 정보 */}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <img 
+                                src={player.team?.logo || ''} 
+                                alt={player.team?.name || ''}
+                                className="w-10 h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
+                                loading="lazy"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-base text-foreground truncate">
+                                  {player.player_name}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>No.{player.jersey_number}</span>
+                                  <span>•</span>
+                                  <span className="truncate">{player.team?.name}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* 스탯 정보 */}
+                            <div className="flex items-center gap-4 flex-shrink-0">
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-primary">
+                                  {player.assists}
+                                </div>
+                                <div className="text-xs text-muted-foreground">도움</div>
+                              </div>
+                              <div className="text-right opacity-50">
+                                <div className="text-sm text-muted-foreground">
+                                  {player.goals}G / {player.points}P
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </td>
-                        <td className="p-3 text-center">{player.regularStats.GP}</td>
-                        <td className="p-3 text-center">{player.regularStats.G}</td>
-                        <td className="p-3 text-center">{player.regularStats.A}</td>
-                        <td className="p-3 text-center font-bold text-primary">{player.regularStats.PTS}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </Card>
-            <div className="mt-4 text-xs text-muted-foreground space-y-1 px-2">
-              <p>• GP: 경기수 | G: 골 | A: 어시스트 | PTS: 득점</p>
-            </div>
+                        ))}
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+
+              {/* 포인트 순위 */}
+              <TabsContent value="points">
+                <Card className="border-border">
+                  {isLoadingPlayers ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/50">
+                      {playerStats
+                        ?.filter(p => p.points_rank !== null)
+                        .sort((a, b) => (a.points_rank || 0) - (b.points_rank || 0))
+                        .map((player) => (
+                          <div 
+                            key={`points-${player.player_name}-${player.team_id}`}
+                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-4"
+                          >
+                            {/* 순위 */}
+                            <div className="flex-shrink-0 w-8 text-center">
+                              {player.points_rank === 1 ? (
+                                <div className="text-xl font-bold text-yellow-500">🥇</div>
+                              ) : player.points_rank === 2 ? (
+                                <div className="text-xl font-bold text-gray-400">🥈</div>
+                              ) : player.points_rank === 3 ? (
+                                <div className="text-xl font-bold text-orange-600">🥉</div>
+                              ) : (
+                                <div className="text-sm font-semibold text-muted-foreground">
+                                  {player.points_rank}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 선수 정보 */}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <img 
+                                src={player.team?.logo || ''} 
+                                alt={player.team?.name || ''}
+                                className="w-10 h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
+                                loading="lazy"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-base text-foreground truncate">
+                                  {player.player_name}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>No.{player.jersey_number}</span>
+                                  <span>•</span>
+                                  <span className="truncate">{player.team?.name}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* 스탯 정보 */}
+                            <div className="flex items-center gap-4 flex-shrink-0">
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-primary">
+                                  {player.points}
+                                </div>
+                                <div className="text-xs text-muted-foreground">포인트</div>
+                              </div>
+                              <div className="text-right opacity-50">
+                                <div className="text-sm text-muted-foreground">
+                                  {player.goals}G / {player.assists}A
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
