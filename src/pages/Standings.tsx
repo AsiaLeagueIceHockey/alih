@@ -34,9 +34,6 @@ interface PlayerStats {
   goals: number;
   assists: number;
   points: number;
-  goals_rank: number | null;
-  assists_rank: number | null;
-  points_rank: number | null;
   team?: AlihTeam;
 }
 
@@ -81,25 +78,107 @@ const Standings = () => {
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
-  const { data: playerStats, isLoading: isLoadingPlayers } = useQuery({
-    queryKey: ['player-stats'],
+  // 득점 순위 데이터
+  const { data: goalLeaders, isLoading: isLoadingGoals } = useQuery({
+    queryKey: ['goal-leaders'],
     queryFn: async () => {
       const { data, error } = await externalSupabase
-        .from('alih_player_stats')
+        .from('alih_players')
         .select('*, team:alih_teams(name, logo)')
-        .order('points_rank', { ascending: true });
+        .order('goals', { ascending: false })
+        .order('assists', { ascending: false })
+        .order('points', { ascending: false });
       
       if (error) throw error;
       
-      // Flatten the team data for easier access
-      return (data || []).map(player => ({
+      const players = (data || []).map(player => ({
         ...player,
         team: player.team as unknown as AlihTeam
       })) as PlayerStats[];
+      
+      // 20등의 골 수를 찾고, 그 값 이상인 선수들만 반환
+      if (players.length > 20) {
+        const rank20Goals = players[19].goals;
+        return players.filter(p => p.goals >= rank20Goals);
+      }
+      return players;
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
-    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
   });
+
+  // 도움 순위 데이터
+  const { data: assistLeaders, isLoading: isLoadingAssists } = useQuery({
+    queryKey: ['assist-leaders'],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_players')
+        .select('*, team:alih_teams(name, logo)')
+        .order('assists', { ascending: false })
+        .order('goals', { ascending: false })
+        .order('points', { ascending: false });
+      
+      if (error) throw error;
+      
+      const players = (data || []).map(player => ({
+        ...player,
+        team: player.team as unknown as AlihTeam
+      })) as PlayerStats[];
+      
+      // 20등의 도움 수를 찾고, 그 값 이상인 선수들만 반환
+      if (players.length > 20) {
+        const rank20Assists = players[19].assists;
+        return players.filter(p => p.assists >= rank20Assists);
+      }
+      return players;
+    },
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
+
+  // 포인트 순위 데이터
+  const { data: pointLeaders, isLoading: isLoadingPoints } = useQuery({
+    queryKey: ['point-leaders'],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_players')
+        .select('*, team:alih_teams(name, logo)')
+        .order('points', { ascending: false })
+        .order('goals', { ascending: false })
+        .order('assists', { ascending: false });
+      
+      if (error) throw error;
+      
+      const players = (data || []).map(player => ({
+        ...player,
+        team: player.team as unknown as AlihTeam
+      })) as PlayerStats[];
+      
+      // 20등의 포인트를 찾고, 그 값 이상인 선수들만 반환
+      if (players.length > 20) {
+        const rank20Points = players[19].points;
+        return players.filter(p => p.points >= rank20Points);
+      }
+      return players;
+    },
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
+
+  // 순위 계산 함수 (동점자 처리)
+  const calculateRank = (players: PlayerStats[], statKey: 'goals' | 'assists' | 'points') => {
+    let currentRank = 1;
+    let previousValue = -1;
+    
+    return players.map((player, index) => {
+      const currentValue = player[statKey];
+      if (currentValue !== previousValue) {
+        currentRank = index + 1;
+        previousValue = currentValue;
+      }
+      return { ...player, rank: currentRank };
+    });
+  };
 
 
   return (
@@ -214,31 +293,28 @@ const Standings = () => {
               {/* 득점 순위 */}
               <TabsContent value="goals">
                 <Card className="border-border">
-                  {isLoadingPlayers ? (
+                  {isLoadingGoals ? (
                     <div className="flex items-center justify-center p-8">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   ) : (
                     <div className="divide-y divide-border/50">
-                      {playerStats
-                        ?.filter(p => p.goals_rank !== null)
-                        .sort((a, b) => (a.goals_rank || 0) - (b.goals_rank || 0))
-                        .map((player) => (
+                      {calculateRank(goalLeaders || [], 'goals').map((player) => (
                           <div 
                             key={`goals-${player.player_name}-${player.team_id}`}
                             className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
-                              {player.goals_rank === 1 ? (
+                              {player.rank === 1 ? (
                                 <div className="text-xl font-bold text-yellow-500">🥇</div>
-                              ) : player.goals_rank === 2 ? (
+                              ) : player.rank === 2 ? (
                                 <div className="text-xl font-bold text-gray-400">🥈</div>
-                              ) : player.goals_rank === 3 ? (
+                              ) : player.rank === 3 ? (
                                 <div className="text-xl font-bold text-orange-600">🥉</div>
                               ) : (
                                 <div className="text-sm font-semibold text-muted-foreground">
-                                  {player.goals_rank}
+                                  {player.rank}
                                 </div>
                               )}
                             </div>
@@ -287,31 +363,28 @@ const Standings = () => {
               {/* 도움 순위 */}
               <TabsContent value="assists">
                 <Card className="border-border">
-                  {isLoadingPlayers ? (
+                  {isLoadingAssists ? (
                     <div className="flex items-center justify-center p-8">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   ) : (
                     <div className="divide-y divide-border/50">
-                      {playerStats
-                        ?.filter(p => p.assists_rank !== null)
-                        .sort((a, b) => (a.assists_rank || 0) - (b.assists_rank || 0))
-                        .map((player) => (
+                      {calculateRank(assistLeaders || [], 'assists').map((player) => (
                           <div 
                             key={`assists-${player.player_name}-${player.team_id}`}
                             className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
-                              {player.assists_rank === 1 ? (
+                              {player.rank === 1 ? (
                                 <div className="text-xl font-bold text-yellow-500">🥇</div>
-                              ) : player.assists_rank === 2 ? (
+                              ) : player.rank === 2 ? (
                                 <div className="text-xl font-bold text-gray-400">🥈</div>
-                              ) : player.assists_rank === 3 ? (
+                              ) : player.rank === 3 ? (
                                 <div className="text-xl font-bold text-orange-600">🥉</div>
                               ) : (
                                 <div className="text-sm font-semibold text-muted-foreground">
-                                  {player.assists_rank}
+                                  {player.rank}
                                 </div>
                               )}
                             </div>
@@ -360,31 +433,28 @@ const Standings = () => {
               {/* 포인트 순위 */}
               <TabsContent value="points">
                 <Card className="border-border">
-                  {isLoadingPlayers ? (
+                  {isLoadingPoints ? (
                     <div className="flex items-center justify-center p-8">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   ) : (
                     <div className="divide-y divide-border/50">
-                      {playerStats
-                        ?.filter(p => p.points_rank !== null)
-                        .sort((a, b) => (a.points_rank || 0) - (b.points_rank || 0))
-                        .map((player) => (
+                      {calculateRank(pointLeaders || [], 'points').map((player) => (
                           <div 
                             key={`points-${player.player_name}-${player.team_id}`}
                             className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
-                              {player.points_rank === 1 ? (
+                              {player.rank === 1 ? (
                                 <div className="text-xl font-bold text-yellow-500">🥇</div>
-                              ) : player.points_rank === 2 ? (
+                              ) : player.rank === 2 ? (
                                 <div className="text-xl font-bold text-gray-400">🥈</div>
-                              ) : player.points_rank === 3 ? (
+                              ) : player.rank === 3 ? (
                                 <div className="text-xl font-bold text-orange-600">🥉</div>
                               ) : (
                                 <div className="text-sm font-semibold text-muted-foreground">
-                                  {player.points_rank}
+                                  {player.rank}
                                 </div>
                               )}
                             </div>
