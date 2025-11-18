@@ -190,11 +190,26 @@ const Standings = () => {
 
           <TabsContent value="players">
             <Tabs defaultValue="goals" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4">
-                <TabsTrigger value="goals">득점 순위</TabsTrigger>
-                <TabsTrigger value="assists">도움 순위</TabsTrigger>
-                <TabsTrigger value="points">포인트 순위</TabsTrigger>
-              </TabsList>
+              <div className="flex gap-2 mb-4 border-b border-border pb-1">
+                <TabsTrigger 
+                  value="goals" 
+                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none data-[state=inactive]:bg-transparent"
+                >
+                  득점 순위
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="assists"
+                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none data-[state=inactive]:bg-transparent"
+                >
+                  도움 순위
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="points"
+                  className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none data-[state=inactive]:bg-transparent"
+                >
+                  포인트 순위
+                </TabsTrigger>
+              </div>
 
               {/* 득점 순위 */}
               <TabsContent value="goals">
