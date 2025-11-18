@@ -252,7 +252,7 @@ const Standings = () => {
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-base text-foreground truncate">
+                                <div className="font-bold text-base text-foreground break-words">
                                   {player.player_name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -325,7 +325,7 @@ const Standings = () => {
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-base text-foreground truncate">
+                                <div className="font-bold text-base text-foreground break-words">
                                   {player.player_name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -398,7 +398,7 @@ const Standings = () => {
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-base text-foreground truncate">
+                                <div className="font-bold text-base text-foreground break-words">
                                   {player.player_name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
