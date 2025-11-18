@@ -16,6 +16,7 @@ const GameDetail = lazy(() => import("./pages/GameDetail"));
 const Highlights = lazy(() => import("./pages/Highlights"));
 const Standings = lazy(() => import("./pages/Standings"));
 const News = lazy(() => import("./pages/News"));
+const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/schedule/:gameNo" element={<GameDetail />} />
               <Route path="/highlights" element={<Highlights />} />
               <Route path="/standings" element={<Standings />} />
+              <Route path="/team/:teamId" element={<TeamDetail />} />
               <Route path="/news" element={<News />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

@@ -1,4 +1,4 @@
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2, ArrowLeft } from "lucide-react";
@@ -211,10 +211,13 @@ const GameDetail = () => {
         <Card className="p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             {/* 홈팀 */}
-            <div className="flex-1 flex flex-col items-center">
+            <Link 
+              to={`/team/${homeTeam.id}`}
+              className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-sm font-medium text-center">{homeTeam.name}</p>
-            </div>
+              <p className="text-sm font-medium text-center hover:text-primary transition-colors">{homeTeam.name}</p>
+            </Link>
 
             {/* 스코어 */}
             <div className="px-6 flex flex-col items-center">
@@ -227,10 +230,13 @@ const GameDetail = () => {
             </div>
 
             {/* 어웨이팀 */}
-            <div className="flex-1 flex flex-col items-center">
+            <Link 
+              to={`/team/${awayTeam.id}`}
+              className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-sm font-medium text-center">{awayTeam.name}</p>
-            </div>
+              <p className="text-sm font-medium text-center hover:text-primary transition-colors">{awayTeam.name}</p>
+            </Link>
           </div>
 
           {/* 경기 정보 */}
