@@ -226,7 +226,7 @@ const Standings = () => {
                         .map((player) => (
                           <div 
                             key={`goals-${player.player_name}-${player.team_id}`}
-                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-4"
+                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
@@ -244,15 +244,15 @@ const Standings = () => {
                             </div>
 
                             {/* 선수 정보 */}
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                               <img 
                                 src={player.team?.logo || ''} 
                                 alt={player.team?.name || ''}
-                                className="w-10 h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-base text-foreground break-words">
+                                <div className="font-bold text-sm md:text-base text-foreground truncate">
                                   {player.player_name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -264,15 +264,15 @@ const Standings = () => {
                             </div>
 
                             {/* 스탯 정보 */}
-                            <div className="flex items-center gap-4 flex-shrink-0">
+                            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                               <div className="text-right">
-                                <div className="text-2xl font-bold text-primary">
+                                <div className="text-xl md:text-2xl font-bold text-primary">
                                   {player.goals}
                                 </div>
-                                <div className="text-xs text-muted-foreground">골</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">골</div>
                               </div>
                               <div className="text-right opacity-50">
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-xs md:text-sm text-muted-foreground">
                                   {player.assists}A / {player.points}P
                                 </div>
                               </div>
@@ -299,7 +299,7 @@ const Standings = () => {
                         .map((player) => (
                           <div 
                             key={`assists-${player.player_name}-${player.team_id}`}
-                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-4"
+                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
@@ -317,15 +317,15 @@ const Standings = () => {
                             </div>
 
                             {/* 선수 정보 */}
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                               <img 
                                 src={player.team?.logo || ''} 
                                 alt={player.team?.name || ''}
-                                className="w-10 h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-base text-foreground break-words">
+                                <div className="font-bold text-sm md:text-base text-foreground truncate">
                                   {player.player_name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -337,15 +337,15 @@ const Standings = () => {
                             </div>
 
                             {/* 스탯 정보 */}
-                            <div className="flex items-center gap-4 flex-shrink-0">
+                            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                               <div className="text-right">
-                                <div className="text-2xl font-bold text-primary">
+                                <div className="text-xl md:text-2xl font-bold text-primary">
                                   {player.assists}
                                 </div>
-                                <div className="text-xs text-muted-foreground">도움</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">도움</div>
                               </div>
                               <div className="text-right opacity-50">
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-xs md:text-sm text-muted-foreground">
                                   {player.goals}G / {player.points}P
                                 </div>
                               </div>
@@ -372,7 +372,7 @@ const Standings = () => {
                         .map((player) => (
                           <div 
                             key={`points-${player.player_name}-${player.team_id}`}
-                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-4"
+                            className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
@@ -390,15 +390,15 @@ const Standings = () => {
                             </div>
 
                             {/* 선수 정보 */}
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                               <img 
                                 src={player.team?.logo || ''} 
                                 alt={player.team?.name || ''}
-                                className="w-10 h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-base text-foreground break-words">
+                                <div className="font-bold text-sm md:text-base text-foreground truncate">
                                   {player.player_name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -410,15 +410,15 @@ const Standings = () => {
                             </div>
 
                             {/* 스탯 정보 */}
-                            <div className="flex items-center gap-4 flex-shrink-0">
+                            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                               <div className="text-right">
-                                <div className="text-2xl font-bold text-primary">
+                                <div className="text-xl md:text-2xl font-bold text-primary">
                                   {player.points}
                                 </div>
-                                <div className="text-xs text-muted-foreground">포인트</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">포인트</div>
                               </div>
                               <div className="text-right opacity-50">
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-xs md:text-sm text-muted-foreground">
                                   {player.goals}G / {player.assists}A
                                 </div>
                               </div>
