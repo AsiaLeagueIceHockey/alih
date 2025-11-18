@@ -28,7 +28,7 @@ interface TeamStanding {
 }
 
 interface PlayerStats {
-  player_name: string;
+  name: string;
   jersey_number: string;
   team_id: number;
   goals: number;
@@ -96,10 +96,10 @@ const Standings = () => {
         team: player.team as unknown as AlihTeam
       })) as PlayerStats[];
       
-      // 20등의 골 수를 찾고, 그 값 이상인 선수들만 반환
-      if (players.length > 20) {
-        const rank20Goals = players[19].goals;
-        return players.filter(p => p.goals >= rank20Goals);
+      // 30등의 골 수를 찾고, 그 값 이상인 선수들만 반환
+      if (players.length > 30) {
+        const rank30Goals = players[29].goals;
+        return players.filter(p => p.goals >= rank30Goals);
       }
       return players;
     },
@@ -125,10 +125,10 @@ const Standings = () => {
         team: player.team as unknown as AlihTeam
       })) as PlayerStats[];
       
-      // 20등의 도움 수를 찾고, 그 값 이상인 선수들만 반환
-      if (players.length > 20) {
-        const rank20Assists = players[19].assists;
-        return players.filter(p => p.assists >= rank20Assists);
+      // 30등의 도움 수를 찾고, 그 값 이상인 선수들만 반환
+      if (players.length > 30) {
+        const rank30Assists = players[29].assists;
+        return players.filter(p => p.assists >= rank30Assists);
       }
       return players;
     },
@@ -154,10 +154,10 @@ const Standings = () => {
         team: player.team as unknown as AlihTeam
       })) as PlayerStats[];
       
-      // 20등의 포인트를 찾고, 그 값 이상인 선수들만 반환
-      if (players.length > 20) {
-        const rank20Points = players[19].points;
-        return players.filter(p => p.points >= rank20Points);
+      // 30등의 포인트를 찾고, 그 값 이상인 선수들만 반환
+      if (players.length > 30) {
+        const rank30Points = players[29].points;
+        return players.filter(p => p.points >= rank30Points);
       }
       return players;
     },
@@ -301,7 +301,7 @@ const Standings = () => {
                     <div className="divide-y divide-border/50">
                       {calculateRank(goalLeaders || [], 'goals').map((player) => (
                           <div 
-                            key={`goals-${player.player_name}-${player.team_id}`}
+                            key={`goals-${player.name}-${player.team_id}`}
                             className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
@@ -329,7 +329,7 @@ const Standings = () => {
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-bold text-sm md:text-base text-foreground truncate">
-                                  {player.player_name}
+                                  {player.name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
@@ -371,7 +371,7 @@ const Standings = () => {
                     <div className="divide-y divide-border/50">
                       {calculateRank(assistLeaders || [], 'assists').map((player) => (
                           <div 
-                            key={`assists-${player.player_name}-${player.team_id}`}
+                            key={`assists-${player.name}-${player.team_id}`}
                             className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
@@ -399,7 +399,7 @@ const Standings = () => {
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-bold text-sm md:text-base text-foreground truncate">
-                                  {player.player_name}
+                                  {player.name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
@@ -441,7 +441,7 @@ const Standings = () => {
                     <div className="divide-y divide-border/50">
                       {calculateRank(pointLeaders || [], 'points').map((player) => (
                           <div 
-                            key={`points-${player.player_name}-${player.team_id}`}
+                            key={`points-${player.name}-${player.team_id}`}
                             className="p-4 hover:bg-secondary/30 transition-colors flex items-center gap-2 md:gap-4"
                           >
                             {/* 순위 */}
@@ -469,7 +469,7 @@ const Standings = () => {
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-bold text-sm md:text-base text-foreground truncate">
-                                  {player.player_name}
+                                  {player.name}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
