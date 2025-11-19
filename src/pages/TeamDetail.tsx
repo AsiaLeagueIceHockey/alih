@@ -206,7 +206,7 @@ const TeamDetail = () => {
             {players && players.length > 0 && (
               <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">+/-</span> : 플러스 마이너스 (Plus/Minus) - 해당 선수가 출전한 시간 동안 팀이 득점한 골과 실점한 골의 차이를 나타냅니다.
+                  <span className="font-semibold text-foreground">+/−</span> : 선수가 얼음 위에 있는 동안, 5대5(또는 균등 인원 상황)에서 팀이 득점한 골과 실점한 골의 차이를 나타냅니다.
                 </p>
               </div>
             )}
