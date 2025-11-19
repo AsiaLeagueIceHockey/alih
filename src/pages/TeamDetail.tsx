@@ -31,7 +31,7 @@ interface Player {
   goals: number;
   assists: number;
   points: number;
-  penalty_minutes: number;
+  pim: number;
   plus_minus: number;
 }
 
@@ -186,13 +186,9 @@ const TeamDetail = () => {
                           {player.points}
                         </TableCell>
                         <TableCell className="text-center text-muted-foreground">
-                          {player.penalty_minutes}
+                          {player.pim}
                         </TableCell>
-                        <TableCell className={`text-center font-medium ${
-                          player.plus_minus > 0 ? 'text-green-600' : 
-                          player.plus_minus < 0 ? 'text-red-600' : 
-                          'text-muted-foreground'
-                        }`}>
+                        <TableCell className="text-center text-muted-foreground">
                           {player.plus_minus > 0 ? '+' : ''}{player.plus_minus}
                         </TableCell>
                       </TableRow>
@@ -204,6 +200,15 @@ const TeamDetail = () => {
               <p className="text-center text-muted-foreground py-8">
                 등록된 선수가 없습니다.
               </p>
+            )}
+            
+            {/* 통계 용어 설명 */}
+            {players && players.length > 0 && (
+              <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">+/-</span> : 플러스 마이너스 (Plus/Minus) - 해당 선수가 출전한 시간 동안 팀이 득점한 골과 실점한 골의 차이를 나타냅니다.
+                </p>
+              </div>
             )}
           </Card>
         </div>
