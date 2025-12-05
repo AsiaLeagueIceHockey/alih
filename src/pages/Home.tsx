@@ -1,7 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper } from "lucide-react";
+import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper, Coffee } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
@@ -498,6 +498,17 @@ const Home = () => {
             </Carousel>
           )}
         </section>
+
+        {/* Support Banner */}
+        <a 
+          href="https://qr.kakaopay.com/FQqvZxoia9c405515"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 py-3 px-4 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+        >
+          <Coffee className="w-5 h-5 text-primary" />
+          <span className="text-sm font-medium">개발자에게 커피 한 잔 후원하기</span>
+        </a>
 
         {/* League Standings Preview */}
         <section>
