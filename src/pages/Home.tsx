@@ -500,15 +500,20 @@ const Home = () => {
         </section>
 
         {/* Support Banner */}
-        <a 
-          href="https://qr.kakaopay.com/FQqvZxoia9c405515"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+        <button 
+          onClick={() => {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+              window.open('https://qr.kakaopay.com/FQqvZxoia9c405515', '_blank');
+            } else {
+              window.open('/images/kakaopay-qr.jpg', '_blank');
+            }
+          }}
+          className="flex items-center justify-center gap-2 py-3 px-4 bg-[hsl(48,100%,50%)]/20 hover:bg-[hsl(48,100%,50%)]/30 rounded-lg transition-colors w-full"
         >
-          <Coffee className="w-5 h-5 text-primary" />
-          <span className="text-sm font-medium">개발자에게 커피 한 잔 후원하기</span>
-        </a>
+          <Coffee className="w-5 h-5 text-[hsl(48,100%,35%)]" />
+          <span className="text-sm font-medium text-[hsl(48,100%,25%)]">개발자에게 커피 한 잔 후원하기</span>
+        </button>
 
         {/* League Standings Preview */}
         <section>
