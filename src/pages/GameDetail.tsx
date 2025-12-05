@@ -323,15 +323,6 @@ const GameDetail = () => {
         {/* 헤더 */}
         <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
           <div className="container mx-auto px-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate(-1)}
-              className="mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              돌아가기
-            </Button>
             <h1 className="text-2xl font-bold text-center mb-6">경기 정보</h1>
           </div>
         </div>
@@ -543,15 +534,6 @@ const GameDetail = () => {
       {/* 헤더 */}
       <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
         <div className="container mx-auto px-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            돌아가기
-          </Button>
           <h1 className="text-2xl font-bold text-center mb-6">경기 상세 기록</h1>
         </div>
       </div>
