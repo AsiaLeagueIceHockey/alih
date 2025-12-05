@@ -306,12 +306,9 @@ const GameDetail = () => {
     const homePlayers = players?.filter(p => p.team_id === homeTeam.id) || [];
     const awayPlayers = players?.filter(p => p.team_id === awayTeam.id) || [];
     
-    const homeTopScorers = [...homePlayers].sort((a, b) => b.goals - a.goals).slice(0, 3);
-    const awayTopScorers = [...awayPlayers].sort((a, b) => b.goals - a.goals).slice(0, 3);
-    const homeTopAssists = [...homePlayers].sort((a, b) => b.assists - a.assists).slice(0, 3);
-    const awayTopAssists = [...awayPlayers].sort((a, b) => b.assists - a.assists).slice(0, 3);
-    const homeTopGoalie = homePlayers.filter(p => p.position === 'G').sort((a, b) => b.games_played - a.games_played)[0];
-    const awayTopGoalie = awayPlayers.filter(p => p.position === 'G').sort((a, b) => b.games_played - a.games_played)[0];
+    // 공격 포인트(골+어시스트) 기준 상위 5명
+    const homeTopPlayers = [...homePlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
+    const awayTopPlayers = [...awayPlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
 
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -468,120 +465,62 @@ const GameDetail = () => {
             </TabsContent>
 
             {/* 스타 플레이어 */}
-            <TabsContent value="stars" className="space-y-4">
-              {playersLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : (
-                <>
-                  {/* 득점 리더 */}
-                  <Card className="p-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Goal className="h-4 w-4 text-primary" />
-                      득점 리더
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-sm font-medium">{homeTeam.name}</span>
+            <TabsContent value="stars">
+              <Card className="p-4">
+                <h3 className="font-semibold text-center mb-4">탑플레이어</h3>
+                {playersLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2">
+                      {/* 홈팀 */}
+                      <div className="border-t-2 border-destructive">
+                        <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
+                          <span className="text-sm text-muted-foreground">{homeTeam.name}</span>
+                          <div className="flex gap-4 text-xs text-muted-foreground">
+                            <span>득점</span>
+                            <span>도움</span>
+                          </div>
                         </div>
-                        {homeTopScorers.map((player, idx) => (
-                          <div key={player.id} className="flex justify-between text-sm py-1">
-                            <span className="truncate">{idx + 1}. {player.name}</span>
-                            <span className="font-medium ml-2">{player.goals}G</span>
+                        {homeTopPlayers.map((player, idx) => (
+                          <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
+                            <span className="text-sm truncate flex-1">{player.name}</span>
+                            <div className="flex gap-4 text-sm">
+                              <span className="w-6 text-center">{player.goals}</span>
+                              <span className="w-6 text-center">{player.assists}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-sm font-medium">{awayTeam.name}</span>
-                        </div>
-                        {awayTopScorers.map((player, idx) => (
-                          <div key={player.id} className="flex justify-between text-sm py-1">
-                            <span className="truncate">{idx + 1}. {player.name}</span>
-                            <span className="font-medium ml-2">{player.goals}G</span>
+                      
+                      {/* 어웨이팀 */}
+                      <div className="border-t-2 border-primary">
+                        <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
+                          <span className="text-sm text-muted-foreground">{awayTeam.name}</span>
+                          <div className="flex gap-4 text-xs text-muted-foreground">
+                            <span>득점</span>
+                            <span>도움</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* 어시스트 리더 */}
-                  <Card className="p-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Users className="h-4 w-4 text-primary" />
-                      어시스트 리더
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-sm font-medium">{homeTeam.name}</span>
                         </div>
-                        {homeTopAssists.map((player, idx) => (
-                          <div key={player.id} className="flex justify-between text-sm py-1">
-                            <span className="truncate">{idx + 1}. {player.name}</span>
-                            <span className="font-medium ml-2">{player.assists}A</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-sm font-medium">{awayTeam.name}</span>
-                        </div>
-                        {awayTopAssists.map((player, idx) => (
-                          <div key={player.id} className="flex justify-between text-sm py-1">
-                            <span className="truncate">{idx + 1}. {player.name}</span>
-                            <span className="font-medium ml-2">{player.assists}A</span>
+                        {awayTopPlayers.map((player, idx) => (
+                          <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
+                            <span className="text-sm truncate flex-1">{player.name}</span>
+                            <div className="flex gap-4 text-sm">
+                              <span className="w-6 text-center">{player.goals}</span>
+                              <span className="w-6 text-center">{player.assists}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
-                  </Card>
-
-                  {/* 주전 골리 */}
-                  <Card className="p-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-primary" />
-                      주전 골키퍼
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-sm font-medium">{homeTeam.name}</span>
-                        </div>
-                        {homeTopGoalie ? (
-                          <div className="text-sm py-1">
-                            <p className="font-medium">{homeTopGoalie.name} #{homeTopGoalie.jersey_number}</p>
-                            <p className="text-muted-foreground">{homeTopGoalie.games_played}경기 출전</p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">정보 없음</p>
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-sm font-medium">{awayTeam.name}</span>
-                        </div>
-                        {awayTopGoalie ? (
-                          <div className="text-sm py-1">
-                            <p className="font-medium">{awayTopGoalie.name} #{awayTopGoalie.jersey_number}</p>
-                            <p className="text-muted-foreground">{awayTopGoalie.games_played}경기 출전</p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">정보 없음</p>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                </>
-              )}
+                    <p className="text-xs text-muted-foreground text-center mt-4">
+                      탑플레이어는 팀 내 공격 포인트가 가장 많은 선수 기준입니다.
+                    </p>
+                  </>
+                )}
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
