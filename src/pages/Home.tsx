@@ -509,10 +509,10 @@ const Home = () => {
               window.open('/images/kakaopay-qr.jpg', '_blank');
             }
           }}
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-[hsl(48,100%,50%)]/20 hover:bg-[hsl(48,100%,50%)]/30 rounded-lg transition-colors w-full"
+          className="flex items-center justify-center gap-2 py-3 px-4 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors w-full"
         >
-          <Coffee className="w-5 h-5 text-[hsl(48,100%,35%)]" />
-          <span className="text-sm font-medium text-[hsl(48,100%,25%)]">개발자에게 커피 한 잔 후원하기</span>
+          <Coffee className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">개발자에게 커피 한 잔 후원하기</span>
         </button>
 
         {/* League Standings Preview */}
