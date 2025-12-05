@@ -90,13 +90,53 @@ const GameDetail = () => {
   const { gameNo } = useParams<{ gameNo: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const { homeTeam, awayTeam, matchDate } = location.state as { 
-    homeTeam: AlihTeam; 
-    awayTeam: AlihTeam;
-    matchDate: string;
-  };
+  
+  // location.state에서 팀 정보를 가져오되, 없으면 null로 처리
+  const stateData = location.state as { 
+    homeTeam?: AlihTeam; 
+    awayTeam?: AlihTeam;
+    matchDate?: string;
+  } | null;
 
-  const { data: gameDetail, isLoading, error } = useQuery({
+  // 스케줄 데이터 가져오기 (state가 없을 때 사용)
+  const { data: scheduleData, isLoading: scheduleLoading } = useQuery({
+    queryKey: ['schedule-for-game', gameNo],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_schedule')
+        .select('*')
+        .eq('game_no', gameNo)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!gameNo && !stateData?.homeTeam,
+  });
+
+  // 팀 정보 가져오기
+  const { data: teamsData, isLoading: teamsLoading } = useQuery({
+    queryKey: ['teams-for-game', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_teams')
+        .select('*')
+        .in('id', [scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id]);
+
+      if (error) throw error;
+      return data as AlihTeam[];
+    },
+    enabled: !!scheduleData && !stateData?.homeTeam,
+  });
+
+  // 팀 정보 결정: state에서 먼저 확인, 없으면 DB에서 가져온 데이터 사용
+  const homeTeamFromDB = teamsData?.find(t => t.id === scheduleData?.home_alih_team_id) || null;
+  const awayTeamFromDB = teamsData?.find(t => t.id === scheduleData?.away_alih_team_id) || null;
+  const homeTeam: AlihTeam | null = stateData?.homeTeam || homeTeamFromDB;
+  const awayTeam: AlihTeam | null = stateData?.awayTeam || awayTeamFromDB;
+  const matchDate: string = stateData?.matchDate || scheduleData?.match_at || '';
+
+  const { data: gameDetail, isLoading: detailLoading, error } = useQuery({
     queryKey: ['game-detail', gameNo],
     queryFn: async () => {
       const { data, error } = await externalSupabase
@@ -111,8 +151,15 @@ const GameDetail = () => {
     enabled: !!gameNo,
   });
 
+  // state가 없으면 DB에서 데이터를 불러와야 함
+  const needsDbFetch = !stateData?.homeTeam;
+  
+  // 로딩 상태: state가 없으면 DB에서 schedule + teams + detail 모두 필요
+  const isLoading = detailLoading || 
+    (needsDbFetch && (scheduleLoading || !teamsData || teamsLoading));
+
   const getPlayerName = (playerNo: number, teamId: number) => {
-    if (!gameDetail) return `#${playerNo}`;
+    if (!gameDetail || !homeTeam) return `#${playerNo}`;
     const roster = teamId === homeTeam.id ? gameDetail.home_roster : gameDetail.away_roster;
     const player = roster.find(p => p.no === playerNo);
     return player ? player.name : `#${playerNo}`;
@@ -146,7 +193,7 @@ const GameDetail = () => {
     );
   }
 
-  if (error || !gameDetail) {
+  if (error || !gameDetail || !homeTeam || !awayTeam) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <p className="text-destructive mb-4">경기 상세 기록을 불러올 수 없습니다</p>
