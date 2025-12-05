@@ -199,25 +199,31 @@ const Schedule = () => {
               const homeTeam = getTeamById(game.home_alih_team_id);
               const awayTeam = getTeamById(game.away_alih_team_id);
               const matchDate = new Date(game.match_at);
-              const isUpcoming = matchDate > new Date();
+              const now = new Date();
               const hasScore = game.home_alih_team_score !== null && game.away_alih_team_score !== null;
               const hasHighlight = game.highlight_url && game.highlight_url.trim() !== '';
               const isExpanded = expandedGameId === game.id;
               
+              // 게임 상태 계산
+              const getGameStatus = () => {
+                if (hasScore) return "종료";
+                if (matchDate <= now) return "진행 중";
+                return "예정";
+              };
+              const gameStatus = getGameStatus();
+              
               return (
                 <Card 
                   key={game.id} 
-                  className={`p-4 border-border relative ${hasScore ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
+                  className="p-4 border-border relative cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => {
-                    if (hasScore) {
-                      navigate(`/schedule/${game.game_no}`, { 
-                        state: { 
-                          homeTeam, 
-                          awayTeam,
-                          matchDate: game.match_at
-                        } 
-                      });
-                    }
+                    navigate(`/schedule/${game.game_no}`, { 
+                      state: { 
+                        homeTeam, 
+                        awayTeam,
+                        matchDate: game.match_at
+                      } 
+                    });
                   }}
                 >
                   {/* 우측 상단 배지와 버튼 */}
@@ -237,10 +243,10 @@ const Schedule = () => {
                       </Button>
                     )}
                     <Badge 
-                      variant={isUpcoming ? "default" : "outline"}
-                      className={isUpcoming ? "bg-accent" : ""}
+                      variant={gameStatus === "예정" ? "default" : "outline"}
+                      className={gameStatus === "예정" ? "bg-accent" : gameStatus === "진행 중" ? "bg-destructive text-destructive-foreground animate-pulse" : ""}
                     >
-                      {isUpcoming ? "예정" : "종료"}
+                      {gameStatus}
                     </Badge>
                   </div>
 
@@ -267,7 +273,7 @@ const Schedule = () => {
                     </div>
 
                     <div className="px-4">
-                      {isUpcoming ? (
+                      {!hasScore ? (
                         <span className="text-lg font-bold text-muted-foreground">VS</span>
                       ) : (
                         <span className="text-lg font-bold text-muted-foreground">:</span>
