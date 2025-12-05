@@ -403,126 +403,114 @@ const GameDetail = () => {
             )}
           </Card>
 
-          {/* 3. 맞대결 & 스타플레이어 탭 */}
-          <Tabs defaultValue="record" className="mb-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="record">
-                <Trophy className="h-4 w-4 mr-1.5" />
-                맞대결 전적
-              </TabsTrigger>
-              <TabsTrigger value="stars">
-                <Users className="h-4 w-4 mr-1.5" />
-                스타 플레이어
-              </TabsTrigger>
-            </TabsList>
-
-            {/* 맞대결 전적 */}
-            <TabsContent value="record">
-              <Card className="p-4">
-                <h3 className="font-semibold mb-4">최근 맞대결 기록</h3>
-                {h2hLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : headToHead && headToHead.length > 0 ? (
-                  <div className="space-y-3">
-                    {headToHead.map((game) => {
-                      const gameDate = new Date(game.match_at);
-                      const isHomeTeamHome = game.home_alih_team_id === homeTeam.id;
-                      const homeScore = isHomeTeamHome ? game.home_alih_team_score : game.away_alih_team_score;
-                      const awayScore = isHomeTeamHome ? game.away_alih_team_score : game.home_alih_team_score;
-                      const homeWin = (homeScore || 0) > (awayScore || 0);
-                      const awayWin = (awayScore || 0) > (homeScore || 0);
-                      
-                      return (
-                        <div 
-                          key={game.id} 
-                          className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                          onClick={() => navigate(`/schedule/${game.game_no}`)}
-                        >
-                          <div className="text-sm text-muted-foreground">
-                            {gameDate.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className={`flex items-center gap-2 ${homeWin ? 'font-bold' : ''}`}>
-                              <img src={homeTeam.logo} alt={homeTeam.name} className="w-6 h-6 object-contain" />
-                              <span>{homeScore}</span>
-                            </div>
-                            <span className="text-muted-foreground">:</span>
-                            <div className={`flex items-center gap-2 ${awayWin ? 'font-bold' : ''}`}>
-                              <span>{awayScore}</span>
-                              <img src={awayTeam.logo} alt={awayTeam.name} className="w-6 h-6 object-contain" />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">맞대결 기록이 없습니다</p>
-                )}
-              </Card>
-            </TabsContent>
-
-            {/* 스타 플레이어 */}
-            <TabsContent value="stars">
-              <Card className="p-4">
-                <h3 className="font-semibold text-center mb-4">탑플레이어</h3>
-                {playersLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2">
-                      {/* 홈팀 */}
-                      <div className="border-t-2 border-destructive">
-                        <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                          <span className="text-sm text-muted-foreground">{homeTeam.name}</span>
-                          <div className="flex gap-4 text-xs text-muted-foreground">
-                            <span>득점</span>
-                            <span>도움</span>
-                          </div>
-                        </div>
-                        {homeTopPlayers.map((player, idx) => (
-                          <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
-                            <span className="text-sm truncate flex-1">{player.name}</span>
-                            <div className="flex gap-4 text-sm">
-                              <span className="w-6 text-center">{player.goals}</span>
-                              <span className="w-6 text-center">{player.assists}</span>
-                            </div>
-                          </div>
-                        ))}
+          {/* 3. 맞대결 전적 */}
+          <Card className="p-4 mb-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              맞대결 전적
+            </h3>
+            {h2hLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : headToHead && headToHead.length > 0 ? (
+              <div className="space-y-3">
+                {headToHead.map((game) => {
+                  const gameDate = new Date(game.match_at);
+                  const isHomeTeamHome = game.home_alih_team_id === homeTeam.id;
+                  const homeScore = isHomeTeamHome ? game.home_alih_team_score : game.away_alih_team_score;
+                  const awayScore = isHomeTeamHome ? game.away_alih_team_score : game.home_alih_team_score;
+                  const homeWin = (homeScore || 0) > (awayScore || 0);
+                  const awayWin = (awayScore || 0) > (homeScore || 0);
+                  
+                  return (
+                    <div 
+                      key={game.id} 
+                      className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => navigate(`/schedule/${game.game_no}`)}
+                    >
+                      <div className="text-sm text-muted-foreground">
+                        {gameDate.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                       </div>
-                      
-                      {/* 어웨이팀 */}
-                      <div className="border-t-2 border-primary">
-                        <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                          <span className="text-sm text-muted-foreground">{awayTeam.name}</span>
-                          <div className="flex gap-4 text-xs text-muted-foreground">
-                            <span>득점</span>
-                            <span>도움</span>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className={`flex items-center gap-2 ${homeWin ? 'font-bold' : ''}`}>
+                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-6 h-6 object-contain" />
+                          <span>{homeScore}</span>
                         </div>
-                        {awayTopPlayers.map((player, idx) => (
-                          <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
-                            <span className="text-sm truncate flex-1">{player.name}</span>
-                            <div className="flex gap-4 text-sm">
-                              <span className="w-6 text-center">{player.goals}</span>
-                              <span className="w-6 text-center">{player.assists}</span>
-                            </div>
-                          </div>
-                        ))}
+                        <span className="text-muted-foreground">:</span>
+                        <div className={`flex items-center gap-2 ${awayWin ? 'font-bold' : ''}`}>
+                          <span>{awayScore}</span>
+                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-6 h-6 object-contain" />
+                        </div>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground text-center mt-4">
-                      탑플레이어는 팀 내 공격 포인트가 가장 많은 선수 기준입니다.
-                    </p>
-                  </>
-                )}
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">맞대결 기록이 없습니다</p>
+            )}
+          </Card>
+
+          {/* 4. 스타 플레이어 */}
+          <Card className="p-4 mb-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              스타 플레이어
+            </h3>
+            {playersLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2">
+                  {/* 홈팀 */}
+                  <div>
+                    <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
+                      <span className="text-sm text-muted-foreground">{homeTeam.name}</span>
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        <span>득점</span>
+                        <span>도움</span>
+                      </div>
+                    </div>
+                    {homeTopPlayers.map((player, idx) => (
+                      <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
+                        <span className="text-sm truncate flex-1">{player.name}</span>
+                        <div className="flex gap-4 text-sm">
+                          <span className="w-6 text-center">{player.goals}</span>
+                          <span className="w-6 text-center">{player.assists}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* 어웨이팀 */}
+                  <div>
+                    <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
+                      <span className="text-sm text-muted-foreground">{awayTeam.name}</span>
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        <span>득점</span>
+                        <span>도움</span>
+                      </div>
+                    </div>
+                    {awayTopPlayers.map((player, idx) => (
+                      <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
+                        <span className="text-sm truncate flex-1">{player.name}</span>
+                        <div className="flex gap-4 text-sm">
+                          <span className="w-6 text-center">{player.goals}</span>
+                          <span className="w-6 text-center">{player.assists}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground text-center mt-4">
+                  스타플레이어는 팀 내 공격 포인트가 가장 많은 선수 기준입니다.
+                </p>
+              </>
+            )}
+          </Card>
         </div>
       </div>
     );
