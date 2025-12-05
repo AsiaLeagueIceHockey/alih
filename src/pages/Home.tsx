@@ -249,7 +249,16 @@ const Home = () => {
               <p className="text-sm text-muted-foreground text-center">예정된 경기가 없습니다</p>
             </Card>
           ) : nextGames.length === 1 ? (
-            <Card className="p-4 shadow-card-glow border-primary/20">
+            <Card 
+              className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => navigate(`/schedule/${nextGames[0].game_no}`, {
+                state: {
+                  homeTeam: getTeamById(nextGames[0].home_alih_team_id),
+                  awayTeam: getTeamById(nextGames[0].away_alih_team_id),
+                  matchDate: nextGames[0].match_at
+                }
+              })}
+            >
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
                   {new Date(nextGames[0].match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(nextGames[0].match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
@@ -292,7 +301,16 @@ const Home = () => {
               <CarouselContent>
                 {nextGames.map((game) => (
                   <CarouselItem key={game.id}>
-                    <Card className="p-4 shadow-card-glow border-primary/20">
+                    <Card 
+                      className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => navigate(`/schedule/${game.game_no}`, {
+                        state: {
+                          homeTeam: getTeamById(game.home_alih_team_id),
+                          awayTeam: getTeamById(game.away_alih_team_id),
+                          matchDate: game.match_at
+                        }
+                      })}
+                    >
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="text-xs">
                           {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
