@@ -209,7 +209,7 @@ const GameDetail = () => {
     enabled: !!gameNo && isCompleted,
   });
 
-  // 맞대결 전적 가져오기 (미완료 경기용)
+  // 맞대결 전적 가져오기 (미완료 경기 또는 종료됐지만 gameDetail이 없는 경우)
   const { data: headToHead, isLoading: h2hLoading } = useQuery({
     queryKey: ['head-to-head', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id],
     queryFn: async () => {
@@ -224,7 +224,7 @@ const GameDetail = () => {
       if (error) throw error;
       return data as ScheduleData[];
     },
-    enabled: !!scheduleData && !isCompleted,
+    enabled: !!scheduleData && (!isCompleted || (isCompleted && !gameDetail)),
   });
 
   // 양 팀 선수 데이터 가져오기 (미완료 경기용 또는 live_data가 있는 경우)
