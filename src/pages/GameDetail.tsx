@@ -86,6 +86,34 @@ interface GameDetailData {
   }>;
 }
 
+interface LiveData {
+  shots: {
+    '1p': { home: number; away: number };
+    '2p': { home: number; away: number };
+    '3p': { home: number; away: number };
+    ovt: { home: number; away: number };
+    pss: { home: number; away: number };
+    total: { home: number; away: number };
+  };
+  events: Array<{
+    time: string;
+    scorer: { name: string; number: number };
+    assist1: { name: string; number: number } | null;
+    assist2: { name: string; number: number } | null;
+    team_id: number;
+    goal_type: string;
+  }>;
+  scores_by_period: {
+    '1p': { home: number | null; away: number | null };
+    '2p': { home: number | null; away: number | null };
+    '3p': { home: number | null; away: number | null };
+    ovt: { home: number | null; away: number | null };
+    pss: { home: number | null; away: number | null };
+  };
+  polled_at: string;
+  updated_at_source: string;
+}
+
 interface ScheduleData {
   id: number;
   game_no: number;
@@ -97,6 +125,7 @@ interface ScheduleData {
   match_place: string;
   live_url: string | null;
   game_status: string | null;
+  live_data: LiveData | null;
 }
 
 interface PlayerData {
@@ -198,7 +227,8 @@ const GameDetail = () => {
     enabled: !!scheduleData && !isCompleted,
   });
 
-  // 양 팀 선수 데이터 가져오기 (미완료 경기용)
+  // 양 팀 선수 데이터 가져오기 (미완료 경기용 또는 live_data가 있는 경우)
+  const hasLiveData = !!scheduleData?.live_data;
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['team-players', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id],
     queryFn: async () => {
@@ -210,7 +240,7 @@ const GameDetail = () => {
       if (error) throw error;
       return data as PlayerData[];
     },
-    enabled: !!scheduleData && !isCompleted,
+    enabled: !!scheduleData && (!isCompleted || hasLiveData),
   });
 
   // 로딩 상태
@@ -311,11 +341,27 @@ const GameDetail = () => {
     const homeTopPlayers = [...homePlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
     const awayTopPlayers = [...awayPlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
 
+    const liveData = scheduleData.live_data;
+    const isInProgress = gameStatus === "진행 중";
+
+    // live_data events에서 선수 이름 가져오기 (alih_players에서 team_id와 jersey_number로 매칭)
+    const getLivePlayerName = (teamId: number, jerseyNumber: number): string => {
+      const player = players?.find(p => p.team_id === teamId && p.jersey_number === jerseyNumber);
+      return player ? player.name : `#${jerseyNumber}`;
+    };
+
+    // goal_type 라벨
+    const getGoalTypeLabel = (goalType: string) => {
+      if (goalType === "+1") return "PPG";
+      if (goalType === "-1") return "SHG";
+      return "EQ";
+    };
+
     return (
       <div className="min-h-screen bg-background pb-20">
         <SEO 
-          title={`${homeTeam?.name} vs ${awayTeam?.name} - 경기 정보`}
-          description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} 경기 정보, 맞대결 전적, 스타플레이어를 확인하세요.`}
+          title={`${homeTeam?.name} vs ${awayTeam?.name} - ${isInProgress ? '실시간 경기' : '경기 정보'}`}
+          description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} ${isInProgress ? '실시간 경기 상황' : '경기 정보, 맞대결 전적, 스타플레이어'}를 확인하세요.`}
           keywords={`${homeTeam?.name}, ${awayTeam?.name}, 경기 정보, 맞대결, 전적`}
           path={`/schedule/${gameNo}`}
           structuredData={structuredData}
@@ -324,12 +370,14 @@ const GameDetail = () => {
         {/* 헤더 */}
         <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
           <div className="container mx-auto px-4">
-            <h1 className="text-2xl font-bold text-center mb-6">경기 정보</h1>
+            <h1 className="text-2xl font-bold text-center mb-6">
+              {isInProgress ? '실시간 경기' : '경기 정보'}
+            </h1>
           </div>
         </div>
 
         <div className="container mx-auto px-4 -mt-4">
-          {/* 1. 팀 정보 및 경기 장소 */}
+          {/* 1. 팀 정보 및 스코어 */}
           <Card className="p-6 mb-6">
             <div className="flex items-center justify-between mb-6">
               <Link 
@@ -341,13 +389,31 @@ const GameDetail = () => {
               </Link>
 
               <div className="px-6 flex flex-col items-center">
-                <span className="text-2xl font-bold text-muted-foreground">VS</span>
-                <Badge 
-                  variant={gameStatus === "진행 중" ? "default" : "outline"}
-                  className={`mt-2 ${gameStatus === "진행 중" ? "bg-destructive animate-pulse" : "bg-accent"}`}
-                >
-                  {gameStatus}
-                </Badge>
+                {isInProgress && liveData ? (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl font-bold text-destructive">{scheduleData.home_alih_team_score ?? 0}</span>
+                      <span className="text-2xl text-muted-foreground">:</span>
+                      <span className="text-4xl font-bold text-destructive">{scheduleData.away_alih_team_score ?? 0}</span>
+                    </div>
+                    <Badge 
+                      variant="default"
+                      className="mt-2 bg-destructive animate-pulse"
+                    >
+                      {scheduleData.game_status || "진행 중"}
+                    </Badge>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold text-muted-foreground">VS</span>
+                    <Badge 
+                      variant="outline"
+                      className="mt-2 bg-accent"
+                    >
+                      {gameStatus}
+                    </Badge>
+                  </>
+                )}
               </div>
 
               <Link 
@@ -369,6 +435,133 @@ const GameDetail = () => {
               <p>{scheduleData.match_place}</p>
             </div>
           </Card>
+
+          {/* 2. 경기 현황 (live_data가 있을 때만) */}
+          {liveData && (
+            <Card className="p-4 mb-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+                경기 현황
+              </h3>
+              
+              {/* 피리어드별 득점 */}
+              <div className="mb-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-20"></TableHead>
+                      <TableHead className="text-center">1P</TableHead>
+                      <TableHead className="text-center">2P</TableHead>
+                      <TableHead className="text-center">3P</TableHead>
+                      {(liveData.scores_by_period.ovt.home !== null || liveData.scores_by_period.pss.home !== null) && (
+                        <>
+                          {liveData.scores_by_period.ovt.home !== null && <TableHead className="text-center">OT</TableHead>}
+                          {liveData.scores_by_period.pss.home !== null && <TableHead className="text-center">PSS</TableHead>}
+                        </>
+                      )}
+                      <TableHead className="text-center font-bold">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain" />
+                          <span className="text-xs truncate">{homeTeam.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">{liveData.scores_by_period['1p'].home ?? '-'}</TableCell>
+                      <TableCell className="text-center">{liveData.scores_by_period['2p'].home ?? '-'}</TableCell>
+                      <TableCell className="text-center">{liveData.scores_by_period['3p'].home ?? '-'}</TableCell>
+                      {liveData.scores_by_period.ovt.home !== null && <TableCell className="text-center">{liveData.scores_by_period.ovt.home}</TableCell>}
+                      {liveData.scores_by_period.pss.home !== null && <TableCell className="text-center">{liveData.scores_by_period.pss.home}</TableCell>}
+                      <TableCell className="text-center font-bold text-destructive">{scheduleData.home_alih_team_score ?? 0}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain" />
+                          <span className="text-xs truncate">{awayTeam.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">{liveData.scores_by_period['1p'].away ?? '-'}</TableCell>
+                      <TableCell className="text-center">{liveData.scores_by_period['2p'].away ?? '-'}</TableCell>
+                      <TableCell className="text-center">{liveData.scores_by_period['3p'].away ?? '-'}</TableCell>
+                      {liveData.scores_by_period.ovt.away !== null && <TableCell className="text-center">{liveData.scores_by_period.ovt.away}</TableCell>}
+                      {liveData.scores_by_period.pss.away !== null && <TableCell className="text-center">{liveData.scores_by_period.pss.away}</TableCell>}
+                      <TableCell className="text-center font-bold text-destructive">{scheduleData.away_alih_team_score ?? 0}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* 슛 통계 */}
+              <div className="mb-4 p-3 bg-muted/30 rounded-lg">
+                <h4 className="text-sm font-medium mb-2 text-center">유효 슈팅 (SOG)</h4>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 text-right">
+                    <span className="text-2xl font-bold">{liveData.shots.total.home}</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-32 h-2 bg-muted rounded-full overflow-hidden flex">
+                      <div 
+                        className="h-full bg-primary transition-all" 
+                        style={{ width: `${(liveData.shots.total.home / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100}%` }}
+                      />
+                      <div 
+                        className="h-full bg-destructive transition-all" 
+                        style={{ width: `${(liveData.shots.total.away / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {liveData.shots['1p'].home}-{liveData.shots['1p'].away} / {liveData.shots['2p'].home}-{liveData.shots['2p'].away} / {liveData.shots['3p'].home}-{liveData.shots['3p'].away}
+                    </span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="text-2xl font-bold">{liveData.shots.total.away}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 득점 이벤트 */}
+              {liveData.events.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Goal className="h-4 w-4" />
+                    득점 기록
+                  </h4>
+                  <div className="space-y-2">
+                    {liveData.events.map((event, index) => {
+                      const scoringTeam = event.team_id === homeTeam.id ? homeTeam : awayTeam;
+                      return (
+                        <div 
+                          key={index} 
+                          className={`flex items-start gap-3 p-2 border rounded-lg ${event.team_id === homeTeam.id ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}
+                        >
+                          <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-8 h-8 object-contain" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-xs">{event.time}</Badge>
+                              <Badge className="text-xs">{getGoalTypeLabel(event.goal_type)}</Badge>
+                            </div>
+                            <p className="font-medium text-sm truncate">
+                              {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
+                            </p>
+                            {(event.assist1 || event.assist2) && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                A: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
+                                {event.assist2 && `, ${getLivePlayerName(event.team_id, event.assist2.number)} (#${event.assist2.number})`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* 2. 라이브 스트리밍 */}
           <Card className="p-4 mb-6">
