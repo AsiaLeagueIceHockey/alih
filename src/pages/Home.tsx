@@ -176,6 +176,15 @@ const Home = () => {
     return match?.[1] || null;
   };
 
+  const getGameStatus = (game: ScheduleGame) => {
+    const hasScore = game.home_alih_team_score !== null && game.away_alih_team_score !== null;
+    if (hasScore) return "종료";
+    const matchDateObj = new Date(game.match_at);
+    const now = new Date();
+    if (matchDateObj <= now) return "진행 중";
+    return "예정";
+  };
+
   const now = new Date();
   
   // 다음 경기: 미래의 가장 가까운 날짜의 모든 경기
@@ -263,7 +272,9 @@ const Home = () => {
                 <Badge variant="secondary" className="text-xs">
                   {new Date(nextGames[0].match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(nextGames[0].match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </Badge>
-                <Badge className="text-xs bg-accent">예정</Badge>
+                <Badge className={`text-xs ${getGameStatus(nextGames[0]) === "진행 중" ? "bg-destructive animate-pulse" : "bg-accent"}`}>
+                  {getGameStatus(nextGames[0])}
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
@@ -315,7 +326,9 @@ const Home = () => {
                         <Badge variant="secondary" className="text-xs">
                           {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                         </Badge>
-                        <Badge className="text-xs bg-accent">예정</Badge>
+                        <Badge className={`text-xs ${getGameStatus(game) === "진행 중" ? "bg-destructive animate-pulse" : "bg-accent"}`}>
+                          {getGameStatus(game)}
+                        </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-center flex-1">
