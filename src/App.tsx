@@ -17,6 +17,7 @@ const Highlights = lazy(() => import("./pages/Highlights"));
 const Standings = lazy(() => import("./pages/Standings"));
 const News = lazy(() => import("./pages/News"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
+const InstagramScore = lazy(() => import("./pages/InstagramScore"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -36,34 +37,47 @@ const LoadingFallback = () => (
   </div>
 );
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <ScrollToTop />
-        <div className="min-h-screen">
-          <Suspense fallback={<LoadingFallback />}>
+const App = () => {
+  return (
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/schedule" element={<Schedule />} />
-              <Route path="/schedule/:gameNo" element={<GameDetail />} />
-              <Route path="/highlights" element={<Highlights />} />
-              <Route path="/standings" element={<Standings />} />
-              <Route path="/team/:teamId" element={<TeamDetail />} />
-              <Route path="/news" element={<News />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+              {/* 인스타그램 전용 뷰 - BottomNav 없음 */}
+              <Route path="/instagram/score" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <InstagramScore />
+                </Suspense>
+              } />
+              
+              {/* 일반 페이지 - BottomNav 포함 */}
+              <Route path="*" element={
+                <div className="min-h-screen">
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/schedule" element={<Schedule />} />
+                      <Route path="/schedule/:gameNo" element={<GameDetail />} />
+                      <Route path="/highlights" element={<Highlights />} />
+                      <Route path="/standings" element={<Standings />} />
+                      <Route path="/team/:teamId" element={<TeamDetail />} />
+                      <Route path="/news" element={<News />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                  <BottomNav />
+                </div>
+              } />
             </Routes>
-          </Suspense>
-          <BottomNav />
-        </div>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-  </HelmetProvider>
-);
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  );
+};
 
 export default App;
