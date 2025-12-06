@@ -1,7 +1,7 @@
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
-import { Loader2, ArrowLeft, Trophy, Users, Goal, Shield } from "lucide-react";
+import { Loader2, ArrowLeft, Trophy, Users, Goal, Shield, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -124,6 +124,7 @@ interface ScheduleData {
   match_at: string;
   match_place: string;
   live_url: string | null;
+  highlight_url: string | null;
   game_status: string | null;
   live_data: LiveData | null;
 }
@@ -840,6 +841,25 @@ const GameDetail = () => {
             <p>관중: {gameDetail.spectators.toLocaleString()}명</p>
           </div>
         </Card>
+
+        {/* 경기 하이라이트 */}
+        {scheduleData?.highlight_url && (
+          <Card className="p-4 mb-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Play className="h-4 w-4" />
+              경기 하이라이트
+            </h3>
+            <div className="aspect-video w-full">
+              <iframe
+                className="w-full h-full rounded-lg"
+                src={`https://www.youtube.com/embed/${getYoutubeVideoId(scheduleData.highlight_url)}`}
+                title="경기 하이라이트"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </Card>
+        )}
 
         {/* 탭 인터페이스 */}
         <Tabs defaultValue="summary" className="mb-6">
