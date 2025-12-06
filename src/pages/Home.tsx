@@ -251,9 +251,9 @@ const Home = () => {
           <section>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-              <h2 className="text-lg font-bold text-destructive">진행 중인 경기</h2>
+              <h2 className="text-lg font-bold">진행 중인 경기</h2>
               {inProgressGames.length > 1 && (
-                <Badge variant="outline" className="text-xs ml-auto border-destructive text-destructive">
+                <Badge variant="outline" className="text-xs ml-auto">
                   {inProgressGames.length}경기
                 </Badge>
               )}
@@ -262,7 +262,7 @@ const Home = () => {
               {inProgressGames.map((game) => (
                 <Card 
                   key={game.id}
-                  className="p-4 border-destructive/50 bg-destructive/5 cursor-pointer hover:border-destructive transition-colors"
+                  className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => navigate(`/schedule/${game.game_no}`, {
                     state: {
                       homeTeam: getTeamById(game.home_alih_team_id),
