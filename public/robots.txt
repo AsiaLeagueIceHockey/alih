@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alih.lovable.app/sitemap.xml
+Sitemap: https://rmfwypuvpwndnhjznaig.supabase.co/functions/v1/generate-sitemap
