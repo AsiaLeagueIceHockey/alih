@@ -26,6 +26,7 @@ interface ScheduleGame {
   match_place: string;
   highlight_url: string | null;
   highlight_title: string | null;
+  game_status: string | null;
 }
 
 const MONTHS = [
@@ -206,7 +207,7 @@ const Schedule = () => {
               
               // 게임 상태 계산
               const getGameStatus = () => {
-                if (hasScore) return "종료";
+                if (game.game_status === 'Game Finished') return "종료";
                 if (matchDate <= now) return "진행 중";
                 return "예정";
               };
@@ -268,7 +269,7 @@ const Schedule = () => {
                       )}
                       <p className="text-sm font-medium mb-1">{homeTeam?.name || '미정'}</p>
                       {hasScore && (
-                        <p className="text-2xl font-bold">{game.home_alih_team_score}</p>
+                        <p className={`text-2xl font-bold ${gameStatus === "진행 중" ? "text-destructive" : ""}`}>{game.home_alih_team_score}</p>
                       )}
                     </div>
 
@@ -286,7 +287,7 @@ const Schedule = () => {
                       )}
                       <p className="text-sm font-medium mb-1">{awayTeam?.name || '미정'}</p>
                       {hasScore && (
-                        <p className="text-2xl font-bold">{game.away_alih_team_score}</p>
+                        <p className={`text-2xl font-bold ${gameStatus === "진행 중" ? "text-destructive" : ""}`}>{game.away_alih_team_score}</p>
                       )}
                     </div>
                   </div>
