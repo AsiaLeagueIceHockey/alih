@@ -136,28 +136,36 @@ const InstagramScore = () => {
 
   // 피리어드별 스코어 가져오기
   const getPeriodScores = () => {
+    // score 문자열 파싱 헬퍼 (형식: "0 : 0" 또는 "0-0")
+    const parseScore = (scoreStr: string): [number, number] => {
+      const parts = scoreStr.includes(':') 
+        ? scoreStr.split(':').map(s => parseInt(s.trim(), 10))
+        : scoreStr.split('-').map(s => parseInt(s.trim(), 10));
+      return [parts[0] || 0, parts[1] || 0];
+    };
+
     if (gameDetail?.game_summary) {
       const gs = gameDetail.game_summary;
       const periods = [];
       
       if (gs.period_1) {
-        const [home, away] = gs.period_1.score.split('-').map(Number);
+        const [home, away] = parseScore(gs.period_1.score);
         periods.push({ label: '1P', home, away });
       }
       if (gs.period_2) {
-        const [home, away] = gs.period_2.score.split('-').map(Number);
+        const [home, away] = parseScore(gs.period_2.score);
         periods.push({ label: '2P', home, away });
       }
       if (gs.period_3) {
-        const [home, away] = gs.period_3.score.split('-').map(Number);
+        const [home, away] = parseScore(gs.period_3.score);
         periods.push({ label: '3P', home, away });
       }
-      if (gs.overtime && gs.overtime.score !== '0-0') {
-        const [home, away] = gs.overtime.score.split('-').map(Number);
+      if (gs.overtime && gs.overtime.score !== '0 : 0' && gs.overtime.score !== '0-0') {
+        const [home, away] = parseScore(gs.overtime.score);
         periods.push({ label: 'OT', home, away });
       }
-      if (gs.shootout && gs.shootout.score !== '0-0') {
-        const [home, away] = gs.shootout.score.split('-').map(Number);
+      if (gs.shootout && gs.shootout.score !== '0 : 0' && gs.shootout.score !== '0-0') {
+        const [home, away] = parseScore(gs.shootout.score);
         periods.push({ label: 'SO', home, away });
       }
       
