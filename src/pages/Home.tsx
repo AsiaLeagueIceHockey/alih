@@ -31,6 +31,7 @@ interface ScheduleGame {
   match_place: string;
   highlight_url: string | null;
   highlight_title: string | null;
+  game_status: string | null;
 }
 
 interface TeamStanding {
@@ -177,8 +178,7 @@ const Home = () => {
   };
 
   const getGameStatus = (game: ScheduleGame) => {
-    const hasScore = game.home_alih_team_score !== null && game.away_alih_team_score !== null;
-    if (hasScore) return "종료";
+    if (game.game_status === 'Game Finished') return "종료";
     const matchDateObj = new Date(game.match_at);
     const now = new Date();
     if (matchDateObj <= now) return "진행 중";
@@ -289,8 +289,15 @@ const Home = () => {
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
                   <p className="text-sm font-bold">{getTeamById(nextGames[0].home_alih_team_id)?.name || '미정'}</p>
+                  {nextGames[0].home_alih_team_score !== null && (
+                    <p className={`text-2xl font-bold mt-1 ${getGameStatus(nextGames[0]) === "진행 중" ? "text-destructive" : ""}`}>
+                      {nextGames[0].home_alih_team_score}
+                    </p>
+                  )}
                 </div>
-                <div className="text-2xl font-bold text-muted-foreground px-4">VS</div>
+                <div className="text-2xl font-bold text-muted-foreground px-4">
+                  {nextGames[0].home_alih_team_score !== null ? ":" : "VS"}
+                </div>
                 <div className="text-center flex-1">
                   {getTeamById(nextGames[0].away_alih_team_id)?.logo ? (
                     <img 
@@ -303,6 +310,11 @@ const Home = () => {
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
                   <p className="text-sm font-bold">{getTeamById(nextGames[0].away_alih_team_id)?.name || '미정'}</p>
+                  {nextGames[0].away_alih_team_score !== null && (
+                    <p className={`text-2xl font-bold mt-1 ${getGameStatus(nextGames[0]) === "진행 중" ? "text-destructive" : ""}`}>
+                      {nextGames[0].away_alih_team_score}
+                    </p>
+                  )}
                 </div>
               </div>
               <p className="text-xs text-muted-foreground text-center mt-3">{nextGames[0].match_place}</p>
@@ -343,8 +355,15 @@ const Home = () => {
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                           )}
                           <p className="text-sm font-bold">{getTeamById(game.home_alih_team_id)?.name || '미정'}</p>
+                          {game.home_alih_team_score !== null && (
+                            <p className={`text-2xl font-bold mt-1 ${getGameStatus(game) === "진행 중" ? "text-destructive" : ""}`}>
+                              {game.home_alih_team_score}
+                            </p>
+                          )}
                         </div>
-                        <div className="text-2xl font-bold text-muted-foreground px-4">VS</div>
+                        <div className="text-2xl font-bold text-muted-foreground px-4">
+                          {game.home_alih_team_score !== null ? ":" : "VS"}
+                        </div>
                         <div className="text-center flex-1">
                           {getTeamById(game.away_alih_team_id)?.logo ? (
                             <img 
@@ -357,6 +376,11 @@ const Home = () => {
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                           )}
                           <p className="text-sm font-bold">{getTeamById(game.away_alih_team_id)?.name || '미정'}</p>
+                          {game.away_alih_team_score !== null && (
+                            <p className={`text-2xl font-bold mt-1 ${getGameStatus(game) === "진행 중" ? "text-destructive" : ""}`}>
+                              {game.away_alih_team_score}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>

@@ -96,6 +96,7 @@ interface ScheduleData {
   match_at: string;
   match_place: string;
   live_url: string | null;
+  game_status: string | null;
 }
 
 interface PlayerData {
@@ -160,8 +161,8 @@ const GameDetail = () => {
   const awayTeam: AlihTeam | null = stateData?.awayTeam || awayTeamFromDB;
   const matchDate: string = stateData?.matchDate || scheduleData?.match_at || '';
 
-  // 경기 완료 여부 확인
-  const isCompleted = scheduleData?.home_alih_team_score !== null && scheduleData?.away_alih_team_score !== null;
+  // 경기 완료 여부 확인 (game_status 기반)
+  const isCompleted = scheduleData?.game_status === 'Game Finished';
 
   // 경기 상세 데이터 (완료된 경기만)
   const { data: gameDetail, isLoading: detailLoading } = useQuery({
@@ -251,7 +252,7 @@ const GameDetail = () => {
 
   // 게임 상태 계산
   const getGameStatus = () => {
-    if (isCompleted) return "종료";
+    if (scheduleData?.game_status === 'Game Finished') return "종료";
     const matchDateObj = new Date(matchDate);
     const now = new Date();
     if (matchDateObj <= now) return "진행 중";
