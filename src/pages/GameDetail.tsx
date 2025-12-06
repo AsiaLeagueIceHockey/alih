@@ -449,47 +449,47 @@ const GameDetail = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-20"></TableHead>
-                      <TableHead className="text-center">1P</TableHead>
-                      <TableHead className="text-center">2P</TableHead>
-                      <TableHead className="text-center">3P</TableHead>
+                      <TableHead className="min-w-[100px]"></TableHead>
+                      <TableHead className="text-center w-10 px-1">1P</TableHead>
+                      <TableHead className="text-center w-10 px-1">2P</TableHead>
+                      <TableHead className="text-center w-10 px-1">3P</TableHead>
                       {(liveData.scores_by_period.ovt.home !== null || liveData.scores_by_period.pss.home !== null) && (
                         <>
-                          {liveData.scores_by_period.ovt.home !== null && <TableHead className="text-center">OT</TableHead>}
-                          {liveData.scores_by_period.pss.home !== null && <TableHead className="text-center">PSS</TableHead>}
+                          {liveData.scores_by_period.ovt.home !== null && <TableHead className="text-center w-10 px-1">OT</TableHead>}
+                          {liveData.scores_by_period.pss.home !== null && <TableHead className="text-center w-10 px-1">PSS</TableHead>}
                         </>
                       )}
-                      <TableHead className="text-center font-bold">Total</TableHead>
+                      <TableHead className="text-center w-12 px-1 font-bold">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-xs truncate">{homeTeam.name}</span>
+                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
+                          <span className="text-xs">{homeTeam.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">{liveData.scores_by_period['1p'].home ?? '-'}</TableCell>
-                      <TableCell className="text-center">{liveData.scores_by_period['2p'].home ?? '-'}</TableCell>
-                      <TableCell className="text-center">{liveData.scores_by_period['3p'].home ?? '-'}</TableCell>
-                      {liveData.scores_by_period.ovt.home !== null && <TableCell className="text-center">{liveData.scores_by_period.ovt.home}</TableCell>}
-                      {liveData.scores_by_period.pss.home !== null && <TableCell className="text-center">{liveData.scores_by_period.pss.home}</TableCell>}
-                      <TableCell className="text-center font-bold text-destructive">{scheduleData.home_alih_team_score ?? 0}</TableCell>
+                      <TableCell className="text-center px-1">{liveData.scores_by_period['1p'].home ?? '-'}</TableCell>
+                      <TableCell className="text-center px-1">{liveData.scores_by_period['2p'].home ?? '-'}</TableCell>
+                      <TableCell className="text-center px-1">{liveData.scores_by_period['3p'].home ?? '-'}</TableCell>
+                      {liveData.scores_by_period.ovt.home !== null && <TableCell className="text-center px-1">{liveData.scores_by_period.ovt.home}</TableCell>}
+                      {liveData.scores_by_period.pss.home !== null && <TableCell className="text-center px-1">{liveData.scores_by_period.pss.home}</TableCell>}
+                      <TableCell className="text-center px-1 font-bold text-destructive">{scheduleData.home_alih_team_score ?? 0}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain" />
-                          <span className="text-xs truncate">{awayTeam.name}</span>
+                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
+                          <span className="text-xs">{awayTeam.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">{liveData.scores_by_period['1p'].away ?? '-'}</TableCell>
-                      <TableCell className="text-center">{liveData.scores_by_period['2p'].away ?? '-'}</TableCell>
-                      <TableCell className="text-center">{liveData.scores_by_period['3p'].away ?? '-'}</TableCell>
-                      {liveData.scores_by_period.ovt.away !== null && <TableCell className="text-center">{liveData.scores_by_period.ovt.away}</TableCell>}
-                      {liveData.scores_by_period.pss.away !== null && <TableCell className="text-center">{liveData.scores_by_period.pss.away}</TableCell>}
-                      <TableCell className="text-center font-bold text-destructive">{scheduleData.away_alih_team_score ?? 0}</TableCell>
+                      <TableCell className="text-center px-1">{liveData.scores_by_period['1p'].away ?? '-'}</TableCell>
+                      <TableCell className="text-center px-1">{liveData.scores_by_period['2p'].away ?? '-'}</TableCell>
+                      <TableCell className="text-center px-1">{liveData.scores_by_period['3p'].away ?? '-'}</TableCell>
+                      {liveData.scores_by_period.ovt.away !== null && <TableCell className="text-center px-1">{liveData.scores_by_period.ovt.away}</TableCell>}
+                      {liveData.scores_by_period.pss.away !== null && <TableCell className="text-center px-1">{liveData.scores_by_period.pss.away}</TableCell>}
+                      <TableCell className="text-center px-1 font-bold text-destructive">{scheduleData.away_alih_team_score ?? 0}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -503,14 +503,14 @@ const GameDetail = () => {
                     <span className="text-2xl font-bold">{liveData.shots.total.home}</span>
                   </div>
                   <div className="flex flex-col items-center gap-1">
-                    <div className="w-32 h-2 bg-muted rounded-full overflow-hidden flex">
+                    <div className="w-32 h-3 bg-muted rounded-full overflow-hidden flex">
                       <div 
-                        className="h-full bg-primary transition-all" 
-                        style={{ width: `${(liveData.shots.total.home / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100}%` }}
+                        className="h-full bg-primary" 
+                        style={{ width: `${Math.round((liveData.shots.total.home / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100)}%` }}
                       />
                       <div 
-                        className="h-full bg-destructive transition-all" 
-                        style={{ width: `${(liveData.shots.total.away / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100}%` }}
+                        className="h-full bg-destructive" 
+                        style={{ width: `${Math.round((liveData.shots.total.away / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100)}%` }}
                       />
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -533,23 +533,36 @@ const GameDetail = () => {
                   <div className="space-y-2">
                     {liveData.events.map((event, index) => {
                       const scoringTeam = event.team_id === homeTeam.id ? homeTeam : awayTeam;
+                      // 시간을 기반으로 피리어드 계산 (MM:SS 형식)
+                      const [minutes] = event.time.split(':').map(Number);
+                      let period = 1;
+                      let adjustedMinutes = minutes;
+                      if (minutes >= 40) {
+                        period = 3;
+                        adjustedMinutes = minutes - 40;
+                      } else if (minutes >= 20) {
+                        period = 2;
+                        adjustedMinutes = minutes - 20;
+                      }
+                      const adjustedTime = `${adjustedMinutes}:${event.time.split(':')[1]}`;
+                      
                       return (
                         <div 
                           key={index} 
-                          className={`flex items-start gap-3 p-2 border rounded-lg ${event.team_id === homeTeam.id ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}
+                          className="flex items-start gap-3 p-3 border rounded-lg"
                         >
-                          <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-8 h-8 object-contain" />
+                          <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="text-xs">{event.time}</Badge>
+                              <Badge variant="outline" className="text-xs">{period}P {adjustedTime}</Badge>
                               <Badge className="text-xs">{getGoalTypeLabel(event.goal_type)}</Badge>
                             </div>
                             <p className="font-medium text-sm truncate">
-                              {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
+                              득점: {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
                             </p>
                             {(event.assist1 || event.assist2) && (
                               <p className="text-xs text-muted-foreground truncate">
-                                A: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
+                                어시스트: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
                                 {event.assist2 && `, ${getLivePlayerName(event.team_id, event.assist2.number)} (#${event.assist2.number})`}
                               </p>
                             )}
