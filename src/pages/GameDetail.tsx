@@ -312,24 +312,70 @@ const GameDetail = () => {
   const matchDateObj = new Date(matchDate);
   const gameStatus = getGameStatus();
 
+  // SportsEvent structured data for SEO
+  const getEventStatus = () => {
+    if (isCompleted) return "https://schema.org/EventScheduled";
+    const matchDateObj = new Date(matchDate);
+    const now = new Date();
+    if (matchDateObj <= now) return "https://schema.org/EventScheduled";
+    return "https://schema.org/EventScheduled";
+  };
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
-    "name": `${homeTeam?.name} vs ${awayTeam?.name}`,
+    "name": `${awayTeam?.name} vs ${homeTeam?.name} - 아시아리그 아이스하키`,
+    "description": `${matchDateObj.toLocaleDateString('ko-KR')} ${scheduleData.match_place}에서 열리는 ${homeTeam?.name}과 ${awayTeam?.name}의 아시아리그 아이스하키 경기`,
     "sport": "Ice Hockey",
     "startDate": matchDate,
+    "endDate": matchDate,
+    "eventStatus": getEventStatus(),
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
     "location": {
       "@type": "Place",
-      "name": scheduleData.match_place
+      "name": scheduleData.match_place,
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": scheduleData.match_place.includes("안양") ? "KR" : "JP"
+      }
     },
     "homeTeam": {
       "@type": "SportsTeam",
-      "name": homeTeam?.name
+      "name": homeTeam?.name,
+      "logo": homeTeam?.logo,
+      "url": `https://alih.lovable.app/team/${homeTeam?.id}`
     },
     "awayTeam": {
       "@type": "SportsTeam",
-      "name": awayTeam?.name
-    }
+      "name": awayTeam?.name,
+      "logo": awayTeam?.logo,
+      "url": `https://alih.lovable.app/team/${awayTeam?.id}`
+    },
+    "organizer": {
+      "@type": "SportsOrganization",
+      "name": "아시아리그 아이스하키",
+      "url": "https://alih.lovable.app"
+    },
+    ...(isCompleted && scheduleData.home_alih_team_score !== null && {
+      "competitor": [
+        {
+          "@type": "SportsTeam",
+          "name": homeTeam?.name,
+          "result": {
+            "@type": "QuantitativeValue",
+            "value": scheduleData.home_alih_team_score
+          }
+        },
+        {
+          "@type": "SportsTeam",
+          "name": awayTeam?.name,
+          "result": {
+            "@type": "QuantitativeValue",
+            "value": scheduleData.away_alih_team_score
+          }
+        }
+      ]
+    })
   };
 
   // 미완료 경기 UI 또는 종료됐지만 gameDetail이 없는 경우 (live_data 기반)
