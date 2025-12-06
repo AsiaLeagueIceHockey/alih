@@ -187,6 +187,12 @@ const Home = () => {
 
   const now = new Date();
   
+  // 진행 중인 경기: match_at <= now && game_status !== 'Game Finished'
+  const inProgressGames = schedules?.filter(game => {
+    const matchDate = new Date(game.match_at);
+    return matchDate <= now && game.game_status !== 'Game Finished';
+  }) || [];
+  
   // 다음 경기: 미래의 가장 가까운 날짜의 모든 경기
   const nextGame = schedules?.find(game => new Date(game.match_at) > now);
   const nextGames = schedules?.filter(game => {
@@ -196,11 +202,9 @@ const Home = () => {
     return gameDate === nextGameDate;
   }) || [];
 
-  // 최근 결과: 과거의 가장 최근 날짜의 모든 완료된 경기
+  // 최근 결과: game_status === 'Game Finished'인 경기 중 가장 최근 날짜
   const completedGames = schedules?.filter(game => 
-    new Date(game.match_at) < now && 
-    game.home_alih_team_score !== null && 
-    game.away_alih_team_score !== null
+    game.game_status === 'Game Finished'
   ).reverse() || [];
   
   const recentGame = completedGames[0];
@@ -242,6 +246,87 @@ const Home = () => {
       <PageHeader title="아시아리그 아이스하키" subtitle="2025-26 시즌" />
 
       <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* In Progress Games */}
+        {inProgressGames.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+              <h2 className="text-lg font-bold text-destructive">진행 중인 경기</h2>
+              {inProgressGames.length > 1 && (
+                <Badge variant="outline" className="text-xs ml-auto border-destructive text-destructive">
+                  {inProgressGames.length}경기
+                </Badge>
+              )}
+            </div>
+            <div className="space-y-3">
+              {inProgressGames.map((game) => (
+                <Card 
+                  key={game.id}
+                  className="p-4 border-destructive/50 bg-destructive/5 cursor-pointer hover:border-destructive transition-colors"
+                  onClick={() => navigate(`/schedule/${game.game_no}`, {
+                    state: {
+                      homeTeam: getTeamById(game.home_alih_team_id),
+                      awayTeam: getTeamById(game.away_alih_team_id),
+                      matchDate: game.match_at
+                    }
+                  })}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                    </Badge>
+                    <Badge className="text-xs bg-destructive animate-pulse">
+                      진행 중
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-center flex-1">
+                      {getTeamById(game.home_alih_team_id)?.logo ? (
+                        <img 
+                          src={getTeamById(game.home_alih_team_id)!.logo} 
+                          alt={getTeamById(game.home_alih_team_id)!.name}
+                          className="w-12 h-12 object-contain mx-auto mb-2"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
+                      )}
+                      <p className="text-sm font-bold">{getTeamById(game.home_alih_team_id)?.name || '미정'}</p>
+                      {game.home_alih_team_score !== null && (
+                        <p className="text-2xl font-bold mt-1 text-destructive">
+                          {game.home_alih_team_score}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-muted-foreground px-4">
+                      {game.home_alih_team_score !== null ? ":" : "VS"}
+                    </div>
+                    <div className="text-center flex-1">
+                      {getTeamById(game.away_alih_team_id)?.logo ? (
+                        <img 
+                          src={getTeamById(game.away_alih_team_id)!.logo} 
+                          alt={getTeamById(game.away_alih_team_id)!.name}
+                          className="w-12 h-12 object-contain mx-auto mb-2"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
+                      )}
+                      <p className="text-sm font-bold">{getTeamById(game.away_alih_team_id)?.name || '미정'}</p>
+                      {game.away_alih_team_score !== null && (
+                        <p className="text-2xl font-bold mt-1 text-destructive">
+                          {game.away_alih_team_score}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center mt-3">{game.match_place}</p>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Next Game */}
         <section>
           <div className="flex items-center gap-2 mb-3">
