@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { MapPin, Home, Calendar, Trophy, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, Home, Calendar, Trophy, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { TeamInfo } from "@/types/team";
 
 interface TeamInfoCardProps {
@@ -79,22 +78,12 @@ const TeamInfoCard = ({ teamInfo }: TeamInfoCardProps) => {
               {teamInfo.history_summary}
             </p>
             {teamInfo.history_summary.length > 150 && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="mt-2 px-0 h-auto text-primary"
+                className="mt-2 text-sm text-primary hover:underline focus:outline-none"
               >
-                {isExpanded ? (
-                  <>
-                    접기 <ChevronUp className="h-4 w-4 ml-1" />
-                  </>
-                ) : (
-                  <>
-                    더보기 <ChevronDown className="h-4 w-4 ml-1" />
-                  </>
-                )}
-              </Button>
+                {isExpanded ? "접기" : "더보기"}
+              </button>
             )}
           </div>
         )}
