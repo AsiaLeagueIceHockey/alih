@@ -99,9 +99,18 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans;
+    /* BottomNav 높이(64px) + safe-area 여백 */
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
   }
 
   #lovable-badge {
     display: none !important;
+  }
+}
+
+/* Safe area padding utility */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
