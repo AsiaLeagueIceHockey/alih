@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
@@ -46,6 +46,16 @@ const LoadingFallback = () => (
   </div>
 );
 
+// BottomNav를 조건부로 표시하는 컴포넌트
+const ConditionalBottomNav = () => {
+  const location = useLocation();
+  // 인스타그램 경로에서는 BottomNav 숨김
+  if (location.pathname.startsWith('/instagram')) {
+    return null;
+  }
+  return <BottomNav />;
+};
+
 const App = () => {
   return (
     <HelmetProvider>
@@ -76,25 +86,53 @@ const App = () => {
               } />
               
               {/* 일반 페이지 - BottomNav 포함 */}
+              <Route path="/" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Home />
+                </Suspense>
+              } />
+              <Route path="/schedule" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Schedule />
+                </Suspense>
+              } />
+              <Route path="/schedule/:gameNo" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <GameDetail />
+                </Suspense>
+              } />
+              <Route path="/highlights" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Highlights />
+                </Suspense>
+              } />
+              <Route path="/standings" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Standings />
+                </Suspense>
+              } />
+              <Route path="/team/:teamId" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <TeamDetail />
+                </Suspense>
+              } />
+              <Route path="/roster/:teamId" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <TeamRoster />
+                </Suspense>
+              } />
+              <Route path="/news" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <News />
+                </Suspense>
+              } />
               <Route path="*" element={
-                <div className="min-h-screen">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/schedule" element={<Schedule />} />
-                      <Route path="/schedule/:gameNo" element={<GameDetail />} />
-                      <Route path="/highlights" element={<Highlights />} />
-                      <Route path="/standings" element={<Standings />} />
-                      <Route path="/team/:teamId" element={<TeamDetail />} />
-                      <Route path="/roster/:teamId" element={<TeamRoster />} />
-                      <Route path="/news" element={<News />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                  <BottomNav />
-                </div>
+                <Suspense fallback={<LoadingFallback />}>
+                  <NotFound />
+                </Suspense>
               } />
             </Routes>
+            <ConditionalBottomNav />
           </BrowserRouter>
         </TooltipProvider>
       </PersistQueryClientProvider>
