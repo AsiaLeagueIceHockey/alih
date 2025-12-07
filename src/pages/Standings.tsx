@@ -206,20 +206,20 @@ const Standings = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <table className="w-full text-sm">
+                <table className="w-full text-sm min-w-[600px]">
                   <thead className="border-b border-border">
                     <tr className="text-left">
-                      <th className="p-3 font-semibold text-primary">#</th>
-                      <th className="p-3 font-semibold text-primary">팀</th>
-                      <th className="p-3 font-semibold text-primary text-center">경기</th>
-                      <th className="p-3 font-semibold text-primary text-center">승점</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">정규승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">연장승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">승부승</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">정규패</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">연장패</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">승부패</th>
-                      <th className="p-3 font-semibold text-muted-foreground text-center">골득실</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary">#</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary whitespace-nowrap">팀</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary text-center whitespace-nowrap">경기</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary text-center whitespace-nowrap">승점</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">정규승</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">연장승</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">승부승</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">정규패</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">연장패</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">승부패</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">골득실</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -230,29 +230,29 @@ const Standings = () => {
                           standing.team?.name === "안양 한라" ? "bg-primary/5" : ""
                         }`}
                       >
-                        <td className="p-3 font-bold text-primary">{standing.rank}</td>
-                        <td className="p-3">
+                        <td className="p-2 md:p-3 font-bold text-primary">{standing.rank}</td>
+                        <td className="p-2 md:p-3">
                           <Link 
                             to={`/team/${standing.team_id}`}
-                            className="flex items-center gap-2 hover:text-primary transition-colors"
+                            className="flex items-center gap-2 hover:text-primary transition-colors whitespace-nowrap"
                           >
                             <img 
                               src={standing.team?.logo || ''} 
                               alt={standing.team?.name || ''}
-                              className="w-6 h-6 object-contain"
+                              className="w-6 h-6 object-contain flex-shrink-0"
                             />
                             <span className="font-medium hover:underline">{standing.team?.name}</span>
                           </Link>
                         </td>
-                        <td className="p-3 text-center">{standing.games_played}</td>
-                        <td className="p-3 text-center font-bold text-primary">{standing.points}</td>
-                        <td className="p-3 text-center">{standing.win_60min}</td>
-                        <td className="p-3 text-center">{standing.win_ot}</td>
-                        <td className="p-3 text-center">{standing.win_pss}</td>
-                        <td className="p-3 text-center">{standing.lose_60min}</td>
-                        <td className="p-3 text-center">{standing.lose_ot}</td>
-                        <td className="p-3 text-center">{standing.lose_pss}</td>
-                        <td className="p-3 text-center text-xs">
+                        <td className="p-2 md:p-3 text-center">{standing.games_played}</td>
+                        <td className="p-2 md:p-3 text-center font-bold text-primary">{standing.points}</td>
+                        <td className="p-2 md:p-3 text-center">{standing.win_60min}</td>
+                        <td className="p-2 md:p-3 text-center">{standing.win_ot}</td>
+                        <td className="p-2 md:p-3 text-center">{standing.win_pss}</td>
+                        <td className="p-2 md:p-3 text-center">{standing.lose_60min}</td>
+                        <td className="p-2 md:p-3 text-center">{standing.lose_ot}</td>
+                        <td className="p-2 md:p-3 text-center">{standing.lose_pss}</td>
+                        <td className="p-2 md:p-3 text-center text-xs whitespace-nowrap">
                           {standing.goals_for} - {standing.goals_against}
                         </td>
                       </tr>
