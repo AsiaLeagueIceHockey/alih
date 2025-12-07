@@ -47,7 +47,7 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
       <h2 className="text-lg font-bold mb-4 px-1">최근 경기</h2>
       
       <Card className="p-3">
-        <div className="space-y-2">
+        <div className="divide-y divide-border">
           {games.map((game) => {
             const isHome = game.home_alih_team_id === teamId;
             const homeTeam = getTeamById(game.home_alih_team_id);
@@ -69,15 +69,12 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
               <div
                 key={game.id}
                 onClick={() => navigate(`/schedule/${game.game_no}`)}
-                className="p-3 flex items-center gap-3 cursor-pointer hover:bg-secondary/30 rounded-lg transition-colors"
+                className="py-3 flex items-center gap-3 cursor-pointer hover:bg-secondary/30 rounded-lg transition-colors first:pt-0 last:pb-0"
               >
                 {/* 날짜 */}
-                <div className="text-center w-12 flex-shrink-0">
+                <div className="text-center w-16 flex-shrink-0">
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(game.match_at), "M/d", { locale: ko })}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(game.match_at), "EEE", { locale: ko })}
+                    {format(new Date(game.match_at), "M/d (EEE)", { locale: ko })}
                   </p>
                 </div>
 
