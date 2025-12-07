@@ -167,6 +167,15 @@ const GameDetail = () => {
       return data as ScheduleData;
     },
     enabled: !!gameNo,
+    // 진행 중인 경기일 때 1분마다 자동 갱신 (깜빡임 없음)
+    refetchInterval: (query) => {
+      const data = query.state.data as ScheduleData | undefined;
+      if (!data) return false;
+      const isPast = new Date(data.match_at) < new Date();
+      const isFinished = data.game_status === 'Game Finished';
+      return isPast && !isFinished ? 60000 : false; // 1분 = 60000ms
+    },
+    refetchIntervalInBackground: false, // 탭 비활성화 시 갱신 중단
   });
 
   // 팀 정보 가져오기
