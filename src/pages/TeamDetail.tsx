@@ -9,7 +9,8 @@ import TeamInfoCard from "@/components/team/TeamInfoCard";
 import RecentGames from "@/components/team/RecentGames";
 import LeagueStandingsSection from "@/components/team/LeagueStandingsSection";
 import StarPlayers from "@/components/team/StarPlayers";
-import { Team, Player, TeamStanding, ScheduleGame } from "@/types/team";
+import { Team, Player, TeamStanding } from "@/types/team";
+import { useTeams } from "@/hooks/useTeams";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -18,6 +19,7 @@ const externalSupabase = createClient(
 
 const TeamDetail = () => {
   const { teamId } = useParams<{ teamId: string }>();
+  const { data: teams = [] } = useTeams();
 
   // 팀 정보 조회
   const { data: team, isLoading: isLoadingTeam } = useQuery({
@@ -83,18 +85,14 @@ const TeamDetail = () => {
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
-        .select('*, home_team:alih_teams!alih_schedule_home_alih_team_id_fkey(name, logo), away_team:alih_teams!alih_schedule_away_alih_team_id_fkey(name, logo)')
+        .select('*')
         .or(`home_alih_team_id.eq.${teamId},away_alih_team_id.eq.${teamId}`)
         .eq('game_status', 'Game Finished')
         .order('match_at', { ascending: false })
         .limit(5);
 
       if (error) throw error;
-      return (data || []).map(game => ({
-        ...game,
-        home_team: game.home_team as unknown as { name: string; logo: string },
-        away_team: game.away_team as unknown as { name: string; logo: string }
-      })) as ScheduleGame[];
+      return data || [];
     },
     enabled: !!teamId,
     staleTime: 1000 * 60 * 60,
@@ -142,7 +140,7 @@ const TeamDetail = () => {
           {team.team_info && <TeamInfoCard teamInfo={team.team_info} />}
 
           {/* 최근 경기 */}
-          <RecentGames games={recentGames || []} teamId={Number(teamId)} />
+          <RecentGames games={recentGames || []} teams={teams} teamId={Number(teamId)} />
 
           {/* 리그 순위 */}
           {standings && standings.length > 0 && (

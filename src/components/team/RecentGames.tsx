@@ -2,15 +2,34 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { ScheduleGame } from "@/types/team";
+
+interface TeamBasic {
+  id: number;
+  name: string;
+  logo: string;
+}
+
+interface ScheduleGameRaw {
+  id: number;
+  game_no: number;
+  match_at: string;
+  home_alih_team_id: number;
+  away_alih_team_id: number;
+  home_alih_team_score: number | null;
+  away_alih_team_score: number | null;
+  game_status: string | null;
+}
 
 interface RecentGamesProps {
-  games: ScheduleGame[];
+  games: ScheduleGameRaw[];
+  teams: TeamBasic[];
   teamId: number;
 }
 
-const RecentGames = ({ games, teamId }: RecentGamesProps) => {
+const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
   const navigate = useNavigate();
+
+  const getTeamById = (id: number) => teams.find(t => t.id === id);
 
   if (!games || games.length === 0) {
     return (
@@ -32,7 +51,8 @@ const RecentGames = ({ games, teamId }: RecentGamesProps) => {
           const isHome = game.home_alih_team_id === teamId;
           const myScore = isHome ? game.home_alih_team_score : game.away_alih_team_score;
           const opponentScore = isHome ? game.away_alih_team_score : game.home_alih_team_score;
-          const opponent = isHome ? game.away_team : game.home_team;
+          const opponentId = isHome ? game.away_alih_team_id : game.home_alih_team_id;
+          const opponent = getTeamById(opponentId);
           
           // 승패 판정
           let result: "win" | "lose" | "draw" | null = null;
