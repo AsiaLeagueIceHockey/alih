@@ -33,7 +33,7 @@ const StarPlayers = ({ players, teamId }: StarPlayersProps) => {
     <section className="mb-6">
       <h2 className="text-lg font-bold mb-4 px-1">주요 선수</h2>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 골 랭킹 */}
         <Card className="p-4">
           <h3 className="text-sm font-bold text-center mb-3 text-muted-foreground">골 랭킹</h3>
