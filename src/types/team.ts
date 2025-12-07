@@ -74,13 +74,13 @@ export interface ScheduleGame {
   id: number;
   game_no: number;
   match_at: string;
-  home_team_id: number;
-  away_team_id: number;
-  home_score: number | null;
-  away_score: number | null;
+  home_alih_team_id: number;
+  away_alih_team_id: number;
+  home_alih_team_score: number | null;
+  away_alih_team_score: number | null;
   game_status: string;
   highlight_url: string | null;
-  venue: string;
+  match_place: string;
   home_team?: { name: string; logo: string };
   away_team?: { name: string; logo: string };
 }

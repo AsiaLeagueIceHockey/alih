@@ -29,9 +29,9 @@ const RecentGames = ({ games, teamId }: RecentGamesProps) => {
       
       <div className="space-y-2">
         {games.map((game) => {
-          const isHome = game.home_team_id === teamId;
-          const myScore = isHome ? game.home_score : game.away_score;
-          const opponentScore = isHome ? game.away_score : game.home_score;
+          const isHome = game.home_alih_team_id === teamId;
+          const myScore = isHome ? game.home_alih_team_score : game.away_alih_team_score;
+          const opponentScore = isHome ? game.away_alih_team_score : game.home_alih_team_score;
           const opponent = isHome ? game.away_team : game.home_team;
           
           // 승패 판정

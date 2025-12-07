@@ -658,7 +658,11 @@ const Home = () => {
             <Card className="p-4 border-border">
               <div className="space-y-3">
                 {topThreeStandings.map((standing) => (
-                  <div key={standing.rank} className="flex items-center justify-between">
+                  <div
+                    key={standing.rank}
+                    className="flex items-center justify-between cursor-pointer hover:bg-secondary/30 p-2 -mx-2 rounded-lg transition-colors"
+                    onClick={() => navigate(`/team/${standing.team_id}`)}
+                  >
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-bold text-primary w-6">{standing.rank}</span>
                       <div className="flex items-center gap-2">

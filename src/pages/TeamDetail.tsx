@@ -83,8 +83,8 @@ const TeamDetail = () => {
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
-        .select('*, home_team:alih_teams!alih_schedule_home_team_id_fkey(name, logo), away_team:alih_teams!alih_schedule_away_team_id_fkey(name, logo)')
-        .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+        .select('*, home_team:alih_teams!alih_schedule_home_alih_team_id_fkey(name, logo), away_team:alih_teams!alih_schedule_away_alih_team_id_fkey(name, logo)')
+        .or(`home_alih_team_id.eq.${teamId},away_alih_team_id.eq.${teamId}`)
         .eq('game_status', 'Game Finished')
         .order('match_at', { ascending: false })
         .limit(5);
