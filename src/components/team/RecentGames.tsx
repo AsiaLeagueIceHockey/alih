@@ -1,0 +1,122 @@
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { ScheduleGame } from "@/types/team";
+
+interface RecentGamesProps {
+  games: ScheduleGame[];
+  teamId: number;
+}
+
+const RecentGames = ({ games, teamId }: RecentGamesProps) => {
+  const navigate = useNavigate();
+
+  if (!games || games.length === 0) {
+    return (
+      <section className="mb-6">
+        <h2 className="text-lg font-bold mb-4 px-1">최근 경기</h2>
+        <Card className="p-6 text-center text-muted-foreground">
+          최근 경기 기록이 없습니다.
+        </Card>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mb-6">
+      <h2 className="text-lg font-bold mb-4 px-1">최근 경기</h2>
+      
+      <div className="space-y-2">
+        {games.map((game) => {
+          const isHome = game.home_team_id === teamId;
+          const myScore = isHome ? game.home_score : game.away_score;
+          const opponentScore = isHome ? game.away_score : game.home_score;
+          const opponent = isHome ? game.away_team : game.home_team;
+          
+          // 승패 판정
+          let result: "win" | "lose" | "draw" | null = null;
+          if (myScore !== null && opponentScore !== null) {
+            if (myScore > opponentScore) result = "win";
+            else if (myScore < opponentScore) result = "lose";
+            else result = "draw";
+          }
+
+          return (
+            <Card
+              key={game.id}
+              onClick={() => navigate(`/schedule/${game.game_no}`)}
+              className="p-4 flex items-center gap-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+            >
+              {/* 날짜 */}
+              <div className="text-center w-14 flex-shrink-0">
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(game.match_at), "M/d", { locale: ko })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(game.match_at), "EEE", { locale: ko })}
+                </p>
+              </div>
+
+              {/* 홈/원정 표시 */}
+              <div className="text-xs text-muted-foreground w-8">
+                {isHome ? "홈" : "원정"}
+              </div>
+
+              {/* 상대팀 */}
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-sm text-muted-foreground">vs</span>
+                <img
+                  src={opponent?.logo || ""}
+                  alt={opponent?.name || ""}
+                  className="w-6 h-6 object-contain flex-shrink-0"
+                  loading="lazy"
+                />
+                <span className="font-medium truncate">{opponent?.name}</span>
+              </div>
+
+              {/* 스코어 */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {myScore !== null && opponentScore !== null ? (
+                  <>
+                    <span
+                      className={`text-lg font-bold ${
+                        result === "win"
+                          ? "text-blue-500"
+                          : result === "lose"
+                          ? "text-red-500"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {myScore}
+                    </span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="text-lg font-bold text-muted-foreground">
+                      {opponentScore}
+                    </span>
+                    {/* 승패 표시 */}
+                    <span
+                      className={`text-sm font-bold ml-2 ${
+                        result === "win"
+                          ? "text-blue-500"
+                          : result === "lose"
+                          ? "text-red-500"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {result === "win" ? "승" : result === "lose" ? "패" : "무"}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">예정</span>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+export default RecentGames;
