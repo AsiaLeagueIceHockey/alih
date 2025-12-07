@@ -9,9 +9,30 @@ interface TeamHeaderProps {
 
 const TeamHeader = ({ team, rank }: TeamHeaderProps) => {
   return (
-    <div className="flex flex-col items-center text-center py-8 px-4">
-      {/* 소셜 링크 - 우측 상단 */}
-      <div className="absolute right-4 top-4 flex gap-3">
+    <div className="flex items-center gap-4 py-4 px-4">
+      {/* 팀 로고 */}
+      <img
+        src={team.logo}
+        alt={team.name}
+        className="w-20 h-20 md:w-24 md:h-24 object-contain flex-shrink-0"
+        loading="lazy"
+      />
+
+      {/* 팀 정보 */}
+      <div className="flex-1 min-w-0">
+        <h1 className="text-xl md:text-2xl font-bold">{team.name}</h1>
+        <p className="text-sm text-muted-foreground mb-2">{team.english_name}</p>
+        
+        {/* 순위 뱃지 */}
+        {rank && (
+          <Badge variant="secondary" className="text-xs px-3 py-0.5">
+            현재 순위: {rank}위
+          </Badge>
+        )}
+      </div>
+
+      {/* 소셜 링크 */}
+      <div className="flex gap-2 flex-shrink-0">
         {team.instagram_url && (
           <a
             href={team.instagram_url}
@@ -35,25 +56,6 @@ const TeamHeader = ({ team, rank }: TeamHeaderProps) => {
           </a>
         )}
       </div>
-
-      {/* 팀 로고 */}
-      <img
-        src={team.logo}
-        alt={team.name}
-        className="w-28 h-28 md:w-36 md:h-36 object-contain mb-4"
-        loading="lazy"
-      />
-
-      {/* 팀명 */}
-      <h1 className="text-2xl md:text-3xl font-bold mb-2">{team.name}</h1>
-      <p className="text-muted-foreground mb-3">{team.english_name}</p>
-
-      {/* 순위 뱃지 */}
-      {rank && (
-        <Badge variant="secondary" className="text-sm px-4 py-1">
-          현재 순위: {rank}위
-        </Badge>
-      )}
     </div>
   );
 };
