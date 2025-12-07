@@ -3,15 +3,10 @@ import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@supabase/supabase-js";
+import { externalSupabase } from "@/lib/supabase-external";
 import { useTeams } from "@/hooks/useTeams";
 import { Loader2, Play } from "lucide-react";
 import SEO from "@/components/SEO";
-
-const externalSupabase = createClient(
-  "https://nvlpbdyqfzmlrjauvhxx.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68"
-);
 
 interface ScheduleGame {
   id: number;
@@ -43,8 +38,6 @@ const Highlights = () => {
   const { data: games, isLoading, error } = useQuery({
     queryKey: ['alih-schedule-highlights'],
     queryFn: async () => {
-      console.log('🔵 Supabase 연결 시도: alih_schedule 하이라이트 조회');
-      
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
@@ -52,24 +45,12 @@ const Highlights = () => {
         .neq('highlight_url', '')
         .order('match_at', { ascending: false });
       
-      if (error) {
-        console.error('❌ Supabase 에러:', error);
-        throw error;
-      }
-      
-      console.log('✅ Supabase 연결 성공! 조회된 하이라이트 수:', data?.length || 0);
-      console.log('📊 조회된 데이터:', data);
-      
+      if (error) throw error;
       return data as ScheduleGame[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
-
-  // 에러 발생 시 로그
-  if (error) {
-    console.error('❌ 영상 데이터 로드 실패:', error);
-  }
 
   const getTeamById = (teamId: number) => {
     if (!teams) return null;
@@ -189,6 +170,7 @@ const Highlights = () => {
                       src={getYoutubeThumbnail(game.highlight_url) || ''}
                       alt={game.highlight_title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
                       <div className="w-12 h-12 rounded-full bg-primary/80 flex items-center justify-center">
