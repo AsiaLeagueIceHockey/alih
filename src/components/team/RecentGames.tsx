@@ -65,62 +65,51 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
               else result = "draw";
             }
 
+            const opponentTeam = isHome ? awayTeam : homeTeam;
+
             return (
               <div
                 key={game.id}
                 onClick={() => navigate(`/schedule/${game.game_no}`)}
-                className="py-3 flex items-center gap-3 cursor-pointer hover:bg-secondary/30 rounded-lg transition-colors first:pt-0 last:pb-0"
+                className="py-3 flex items-center gap-2 cursor-pointer hover:bg-secondary/30 rounded-lg transition-colors first:pt-0 last:pb-0"
               >
                 {/* 날짜 */}
-                <div className="text-center w-16 flex-shrink-0">
+                <div className="text-center w-14 flex-shrink-0">
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(game.match_at), "M/d (EEE)", { locale: ko })}
                   </p>
                 </div>
 
-                {/* 홈팀 */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                  <span className={`text-sm truncate ${isHome ? "font-bold" : ""}`}>
-                    {homeTeam?.name}
-                  </span>
+                {/* vs 상대팀 */}
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <span className="text-xs text-muted-foreground flex-shrink-0">vs</span>
                   <img
-                    src={homeTeam?.logo || ""}
-                    alt={homeTeam?.name || ""}
-                    className="w-6 h-6 object-contain flex-shrink-0"
+                    src={opponentTeam?.logo || ""}
+                    alt={opponentTeam?.name || ""}
+                    className="w-5 h-5 object-contain flex-shrink-0"
                     loading="lazy"
                   />
+                  <span className="text-sm truncate">{opponentTeam?.name}</span>
                 </div>
 
-                {/* 스코어 */}
-                <div className="flex items-center gap-1 flex-shrink-0 min-w-[80px] justify-center">
-                  {homeScore !== null && awayScore !== null ? (
+                {/* 스코어 (우리팀:상대팀) */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {myScore !== null && opponentScore !== null ? (
                     <>
                       <span
-                        className={`text-lg font-bold ${
-                          isHome
-                            ? result === "win"
-                              ? "text-blue-500"
-                              : result === "lose"
-                              ? "text-red-500"
-                              : "text-muted-foreground"
+                        className={`text-base font-bold ${
+                          result === "win"
+                            ? "text-blue-500"
+                            : result === "lose"
+                            ? "text-red-500"
                             : "text-muted-foreground"
                         }`}
                       >
-                        {homeScore}
+                        {myScore}
                       </span>
                       <span className="text-muted-foreground">:</span>
-                      <span
-                        className={`text-lg font-bold ${
-                          !isHome
-                            ? result === "win"
-                              ? "text-blue-500"
-                              : result === "lose"
-                              ? "text-red-500"
-                              : "text-muted-foreground"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {awayScore}
+                      <span className="text-base font-bold text-muted-foreground">
+                        {opponentScore}
                       </span>
                     </>
                   ) : (
@@ -128,21 +117,8 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                   )}
                 </div>
 
-                {/* 원정팀 */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <img
-                    src={awayTeam?.logo || ""}
-                    alt={awayTeam?.name || ""}
-                    className="w-6 h-6 object-contain flex-shrink-0"
-                    loading="lazy"
-                  />
-                  <span className={`text-sm truncate ${!isHome ? "font-bold" : ""}`}>
-                    {awayTeam?.name}
-                  </span>
-                </div>
-
                 {/* 승패 표시 */}
-                <div className="w-8 flex-shrink-0 text-center">
+                <div className="w-6 flex-shrink-0 text-center">
                   {result && (
                     <span
                       className={`text-sm font-bold ${
