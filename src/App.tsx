@@ -17,6 +17,7 @@ const Highlights = lazy(() => import("./pages/Highlights"));
 const Standings = lazy(() => import("./pages/Standings"));
 const News = lazy(() => import("./pages/News"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
+const TeamRoster = lazy(() => import("./pages/TeamRoster"));
 const InstagramScore = lazy(() => import("./pages/InstagramScore"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -65,6 +66,7 @@ const App = () => {
                       <Route path="/highlights" element={<Highlights />} />
                       <Route path="/standings" element={<Standings />} />
                       <Route path="/team/:teamId" element={<TeamDetail />} />
+                      <Route path="/roster/:teamId" element={<TeamRoster />} />
                       <Route path="/news" element={<News />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
