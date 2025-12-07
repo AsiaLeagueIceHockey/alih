@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@supabase/supabase-js";
+import { externalSupabase } from "@/lib/supabase-external";
 import { Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
 import TeamHeader from "@/components/team/TeamHeader";
@@ -11,11 +11,6 @@ import LeagueStandingsSection from "@/components/team/LeagueStandingsSection";
 import StarPlayers from "@/components/team/StarPlayers";
 import { Team, Player, TeamStanding } from "@/types/team";
 import { useTeams } from "@/hooks/useTeams";
-
-const externalSupabase = createClient(
-  'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68'
-);
 
 const TeamDetail = () => {
   const { teamId } = useParams<{ teamId: string }>();

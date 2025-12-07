@@ -3,14 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { externalSupabase } from "@/lib/supabase-external";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
-
-const externalSupabase = createClient(
-  "https://nvlpbdyqfzmlrjauvhxx.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68"
-);
 
 interface TeamStanding {
   rank: number;
@@ -45,20 +40,6 @@ interface AlihTeam {
 }
 
 const Standings = () => {
-  const { data: alihTeams } = useQuery({
-    queryKey: ['alih-teams'],
-    queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_teams')
-        .select('english_name, name, logo');
-      
-      if (error) throw error;
-      return data as AlihTeam[];
-    },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
-    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
-  });
-
   const { data: teamStandings, isLoading: isLoadingTeams } = useQuery({
     queryKey: ['team-standings'],
     queryFn: async () => {
@@ -240,6 +221,7 @@ const Standings = () => {
                               src={standing.team?.logo || ''} 
                               alt={standing.team?.name || ''}
                               className="w-6 h-6 object-contain flex-shrink-0"
+                              loading="lazy"
                             />
                             <span className="font-medium hover:underline">{standing.team?.name}</span>
                           </Link>

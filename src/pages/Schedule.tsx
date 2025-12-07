@@ -4,16 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@supabase/supabase-js";
+import { externalSupabase } from "@/lib/supabase-external";
 import { useTeams } from "@/hooks/useTeams";
-import { Loader2, Video, FileText } from "lucide-react";
+import { Loader2, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
-
-const externalSupabase = createClient(
-  'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68'
-);
 
 interface ScheduleGame {
   id: number;
@@ -61,21 +56,12 @@ const Schedule = () => {
   const { data: schedules, isLoading: schedulesLoading, error } = useQuery({
     queryKey: ['alih-schedules'],
     queryFn: async () => {
-      console.log('🔵 Supabase 연결 시도: alih_schedule 테이블 조회');
-      
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
         .order('match_at', { ascending: true });
       
-      if (error) {
-        console.error('❌ Supabase 에러 (alih_schedule):', error);
-        throw error;
-      }
-      
-      console.log('✅ alih_schedule 연결 성공! 조회된 경기 수:', data?.length || 0);
-      console.log('📊 일정 데이터:', data);
-      
+      if (error) throw error;
       return data as ScheduleGame[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시

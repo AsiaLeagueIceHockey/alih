@@ -1,7 +1,9 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense } from "react";
@@ -25,11 +27,17 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5분 기본 캐시
-      gcTime: 1000 * 60 * 30, // 30분 동안 메모리 유지
+      gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리 유지 (persist용으로 증가)
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
+});
+
+// localStorage에 React Query 캐시를 영구 저장
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
+  key: 'alih-cache',
 });
 
 const LoadingFallback = () => (
@@ -41,7 +49,19 @@ const LoadingFallback = () => (
 const App = () => {
   return (
     <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister,
+          maxAge: 1000 * 60 * 60 * 24, // 24시간 후 캐시 만료
+          dehydrateOptions: {
+            shouldDehydrateQuery: (query) => {
+              // 에러가 없는 쿼리만 저장
+              return query.state.status === 'success';
+            },
+          },
+        }}
+      >
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -77,7 +97,7 @@ const App = () => {
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </HelmetProvider>
   );
 };
