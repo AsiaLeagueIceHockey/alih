@@ -674,7 +674,7 @@ const Home = () => {
                             loading="lazy"
                           />
                         )}
-                        <span className="text-sm">{standing.team?.name}</span>
+                        <span className="text-sm hover:text-primary hover:underline transition-colors">{standing.team?.name}</span>
                       </div>
                     </div>
                     <span className="text-sm font-bold">{standing.points}P</span>
