@@ -655,32 +655,43 @@ const Home = () => {
               </div>
             </Card>
           ) : (
-            <Card className="p-4 border-border">
-              <div className="space-y-3">
-                {topThreeStandings.map((standing) => (
-                  <div
-                    key={standing.rank}
-                    className="flex items-center justify-between cursor-pointer hover:bg-secondary/30 p-2 -mx-2 rounded-lg transition-colors"
-                    onClick={() => navigate(`/team/${standing.team_id}`)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-primary w-6">{standing.rank}</span>
-                      <div className="flex items-center gap-2">
-                        {standing.team?.logo && (
-                          <img 
-                            src={standing.team.logo} 
-                            alt={standing.team.name}
-                            className="w-5 h-5 object-contain"
-                            loading="lazy"
-                          />
-                        )}
-                        <span className="text-sm hover:text-primary hover:underline transition-colors">{standing.team?.name}</span>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold">{standing.points}P</span>
-                  </div>
-                ))}
-              </div>
+            <Card className="overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="border-b border-border bg-muted/30">
+                  <tr>
+                    <th className="p-3 text-left font-semibold">#</th>
+                    <th className="p-3 text-left font-semibold">팀</th>
+                    <th className="p-3 text-center font-semibold">경기</th>
+                    <th className="p-3 text-center font-semibold">승점</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topThreeStandings.map((standing) => (
+                    <tr
+                      key={standing.rank}
+                      className="border-b border-border/50 hover:bg-secondary/30 cursor-pointer"
+                      onClick={() => navigate(`/team/${standing.team_id}`)}
+                    >
+                      <td className="p-3 font-bold text-primary">{standing.rank}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          {standing.team?.logo && (
+                            <img 
+                              src={standing.team.logo} 
+                              alt={standing.team.name}
+                              className="w-5 h-5 object-contain"
+                              loading="lazy"
+                            />
+                          )}
+                          <span className="font-medium hover:text-primary transition-colors">{standing.team?.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 text-center">{standing.games_played}</td>
+                      <td className="p-3 text-center font-bold text-primary">{standing.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </Card>
           )}
         </section>
