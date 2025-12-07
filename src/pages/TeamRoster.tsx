@@ -5,9 +5,9 @@ import { Loader2, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import PageHeader from "@/components/PageHeader";
 import SEO from "@/components/SEO";
-import { Team, Player } from "@/types/team";
+import TeamHeader from "@/components/team/TeamHeader";
+import { Team, Player, TeamStanding } from "@/types/team";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -33,6 +33,28 @@ const TeamRoster = () => {
     staleTime: 1000 * 60 * 60,
     gcTime: 1000 * 60 * 60 * 24,
   });
+
+  // 순위 정보 조회
+  const { data: standings } = useQuery({
+    queryKey: ['team-standings'],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_standings')
+        .select('*, team:alih_teams(name, logo)')
+        .order('rank', { ascending: true });
+
+      if (error) throw error;
+      return (data || []).map(standing => ({
+        ...standing,
+        team: standing.team as unknown as { name: string; logo: string }
+      })) as TeamStanding[];
+    },
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
+
+  // 해당 팀의 현재 순위
+  const currentRank = standings?.find(s => s.team_id === Number(teamId))?.rank;
 
   const { data: players, isLoading: isLoadingPlayers } = useQuery({
     queryKey: ['team-players', teamId],
@@ -77,7 +99,10 @@ const TeamRoster = () => {
       />
 
       <div className="min-h-screen pb-20">
-        <PageHeader title={team.name} subtitle="선수단" />
+        {/* 헤더 & 팀 아이덴티티 */}
+        <div className="relative bg-gradient-to-b from-secondary/50 to-background">
+          <TeamHeader team={team} rank={currentRank} />
+        </div>
 
         <div className="container mx-auto px-4 py-6">
           {/* 팀 페이지로 돌아가기 */}
@@ -87,20 +112,6 @@ const TeamRoster = () => {
               팀 페이지로
             </Link>
           </Button>
-
-          {/* 팀 로고 & 이름 */}
-          <div className="flex items-center gap-4 mb-6">
-            <img
-              src={team.logo}
-              alt={team.name}
-              className="w-16 h-16 object-contain"
-              loading="lazy"
-            />
-            <div>
-              <h1 className="text-xl font-bold">{team.name}</h1>
-              <p className="text-muted-foreground">{team.english_name}</p>
-            </div>
-          </div>
 
           {/* 선수 명단 */}
           <Card className="p-4 md:p-6">
