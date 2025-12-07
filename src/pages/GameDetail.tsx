@@ -659,7 +659,9 @@ const GameDetail = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
-                해당 경기는 유튜브 라이브가 없습니다
+                {isInProgress 
+                  ? "이 경기는 라이브 스트리밍이 제공되지 않습니다"
+                  : "라이브 스트리밍 링크 업데이트 예정입니다"}
               </div>
             )}
           </Card>
