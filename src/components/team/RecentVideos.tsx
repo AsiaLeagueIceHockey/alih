@@ -3,7 +3,6 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { Play } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { RecentVideo } from "@/types/team";
 
 interface RecentVideosProps {
@@ -57,9 +56,7 @@ const RecentVideos = ({ videos }: RecentVideosProps) => {
       {/* 영상 재생 모달 */}
       <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black">
-          <VisuallyHidden>
-            <DialogTitle>{selectedVideo?.title || "영상 재생"}</DialogTitle>
-          </VisuallyHidden>
+          <DialogTitle className="sr-only">{selectedVideo?.title || "영상 재생"}</DialogTitle>
           <div className="aspect-video">
             {selectedVideo && (
               <iframe
