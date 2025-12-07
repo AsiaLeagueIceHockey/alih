@@ -231,7 +231,7 @@ const Standings = () => {
                         }`}
                       >
                         <td className="p-2 md:p-3 font-bold text-primary">{standing.rank}</td>
-                        <td className="p-2 md:p-3">
+                        <td className="p-2 md:p-3 pr-4 md:pr-6">
                           <Link 
                             to={`/team/${standing.team_id}`}
                             className="flex items-center gap-2 hover:text-primary transition-colors whitespace-nowrap"
