@@ -36,7 +36,10 @@ const LeagueStandingsSection = ({ standings, currentTeamId }: LeagueStandingsSec
               >
                 <td className="p-3 font-bold text-primary">{standing.rank}</td>
                 <td className="p-3">
-                  <div className="flex items-center gap-2">
+                  <Link
+                    to={`/team/${standing.team_id}`}
+                    className="flex items-center gap-2 hover:text-primary transition-colors"
+                  >
                     <img
                       src={standing.team?.logo || ""}
                       alt={standing.team?.name || ""}
@@ -44,7 +47,7 @@ const LeagueStandingsSection = ({ standings, currentTeamId }: LeagueStandingsSec
                       loading="lazy"
                     />
                     <span className="font-medium">{standing.team?.name}</span>
-                  </div>
+                  </Link>
                 </td>
                 <td className="p-3 text-center">{standing.games_played}</td>
                 <td className="p-3 text-center font-bold text-primary">{standing.points}</td>

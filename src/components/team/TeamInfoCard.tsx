@@ -73,7 +73,9 @@ const TeamInfoCard = ({ teamInfo }: TeamInfoCardProps) => {
         {teamInfo.history_summary && (
           <div className="pt-2 border-t border-border">
             <p className="text-sm text-muted-foreground mb-2">팀 소개</p>
-            <p className={`text-sm leading-relaxed ${!isExpanded ? "line-clamp-3" : ""}`}>
+            <p 
+              className={`text-sm leading-relaxed whitespace-pre-line ${!isExpanded ? "line-clamp-3" : ""}`}
+            >
               {teamInfo.history_summary}
             </p>
             {teamInfo.history_summary.length > 150 && (

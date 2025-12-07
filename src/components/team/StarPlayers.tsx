@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, User } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Player } from "@/types/team";
@@ -10,48 +10,79 @@ interface StarPlayersProps {
 }
 
 const StarPlayers = ({ players, teamId }: StarPlayersProps) => {
-  // 상위 3명만 표시 (골리 제외, 포인트 순)
-  const topPlayers = players
-    .filter((p) => p.position !== "G")
-    .sort((a, b) => b.points - a.points)
+  // 골리 제외
+  const fieldPlayers = players.filter((p) => p.position !== "G");
+  
+  // 골 랭킹 상위 3명
+  const topGoalScorers = [...fieldPlayers]
+    .sort((a, b) => b.goals - a.goals)
     .slice(0, 3);
+  
+  // 어시스트 랭킹 상위 3명
+  const topAssistPlayers = [...fieldPlayers]
+    .sort((a, b) => b.assists - a.assists)
+    .slice(0, 3);
+
+  const getRankEmoji = (index: number) => {
+    if (index === 0) return "🥇";
+    if (index === 1) return "🥈";
+    return "🥉";
+  };
 
   return (
     <section className="mb-6">
-      <h2 className="text-lg font-bold mb-4 px-1">Star Players</h2>
+      <h2 className="text-lg font-bold mb-4 px-1">주요 선수</h2>
       
-      <div className="grid grid-cols-3 gap-3">
-        {topPlayers.map((player, index) => (
-          <Card key={player.id} className="p-4 text-center relative">
-            {/* 순위 뱃지 */}
-            <div className="absolute top-2 left-2 text-lg">
-              {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-            </div>
-
-            {/* 선수 아바타 (플레이스홀더) */}
-            <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
-              <User className="h-8 w-8 text-muted-foreground" />
-            </div>
-
-            {/* 선수 정보 */}
-            <p className="font-bold text-sm truncate">{player.name}</p>
-            <p className="text-xs text-muted-foreground mb-2">
-              No.{player.jersey_number} · {player.position}
-            </p>
-
-            {/* 스탯 */}
-            <div className="flex justify-center gap-3 text-xs">
-              <div>
-                <p className="font-bold text-primary text-lg">{player.goals}</p>
-                <p className="text-muted-foreground">골</p>
+      <div className="grid grid-cols-2 gap-4">
+        {/* 골 랭킹 */}
+        <Card className="p-4">
+          <h3 className="text-sm font-bold text-center mb-3 text-muted-foreground">골 랭킹</h3>
+          <div className="space-y-2">
+            {topGoalScorers.map((player, index) => (
+              <div
+                key={player.id}
+                className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30"
+              >
+                <span className="text-base flex-shrink-0">{getRankEmoji(index)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{player.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    No.{player.jersey_number}
+                  </p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="font-bold text-lg text-primary">{player.goals}</p>
+                  <p className="text-xs text-muted-foreground">골</p>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-lg">{player.assists}</p>
-                <p className="text-muted-foreground">도움</p>
+            ))}
+          </div>
+        </Card>
+
+        {/* 어시스트 랭킹 */}
+        <Card className="p-4">
+          <h3 className="text-sm font-bold text-center mb-3 text-muted-foreground">어시스트 랭킹</h3>
+          <div className="space-y-2">
+            {topAssistPlayers.map((player, index) => (
+              <div
+                key={player.id}
+                className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30"
+              >
+                <span className="text-base flex-shrink-0">{getRankEmoji(index)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{player.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    No.{player.jersey_number}
+                  </p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="font-bold text-lg text-primary">{player.assists}</p>
+                  <p className="text-xs text-muted-foreground">도움</p>
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            ))}
+          </div>
+        </Card>
       </div>
 
       {/* 선수단 전체 보기 버튼 */}

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Play } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { RecentVideo } from "@/types/team";
 
 interface RecentVideosProps {
@@ -11,15 +12,50 @@ interface RecentVideosProps {
 
 const RecentVideos = ({ videos }: RecentVideosProps) => {
   const [selectedVideo, setSelectedVideo] = useState<RecentVideo | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   if (!videos || videos.length === 0) return null;
 
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 280;
+      scrollContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <section className="mb-6">
-      <h2 className="text-lg font-bold mb-4 px-1">최신 영상</h2>
+      <div className="flex items-center justify-between mb-4 px-1">
+        <h2 className="text-lg font-bold">최신 영상</h2>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => scroll("left")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => scroll("right")}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
       
       {/* 가로 스크롤 캐러셀 */}
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+      <div
+        ref={scrollContainerRef}
+        className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {videos.map((video) => (
           <button
             key={video.id}
