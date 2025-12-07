@@ -441,10 +441,10 @@ const GameDetail = () => {
             <div className="flex items-center justify-between mb-6">
               <Link 
                 to={`/team/${homeTeam.id}`}
-                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
-                <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" />
-                <p className="text-sm font-medium text-center hover:text-primary transition-colors">{homeTeam.name}</p>
+                <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" loading="lazy" />
+                <p className="text-sm font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
               </Link>
 
               <div className="px-6 flex flex-col items-center">
@@ -481,10 +481,10 @@ const GameDetail = () => {
 
               <Link 
                 to={`/team/${awayTeam.id}`}
-                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
-                <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" />
-                <p className="text-sm font-medium text-center hover:text-primary transition-colors">{awayTeam.name}</p>
+                <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" loading="lazy" />
+                <p className="text-sm font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
               </Link>
             </div>
 
@@ -527,10 +527,10 @@ const GameDetail = () => {
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
+                      <TableCell className="font-medium min-w-[90px]">
+                        <div className="flex items-center gap-1.5">
                           <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
-                          <span className="text-xs">{homeTeam.name}</span>
+                          <span className="text-xs whitespace-nowrap">{homeTeam.name}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center px-1">{liveData.scores_by_period['1p'].home ?? '-'}</TableCell>
@@ -541,10 +541,10 @@ const GameDetail = () => {
                       <TableCell className="text-center px-1 font-bold">{scheduleData.home_alih_team_score ?? 0}</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
+                      <TableCell className="font-medium min-w-[90px]">
+                        <div className="flex items-center gap-1.5">
                           <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
-                          <span className="text-xs">{awayTeam.name}</span>
+                          <span className="text-xs whitespace-nowrap">{awayTeam.name}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center px-1">{liveData.scores_by_period['1p'].away ?? '-'}</TableCell>
@@ -727,11 +727,12 @@ const GameDetail = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2">
+                {/* 모바일: 세로 배치, 데스크탑: 가로 배치 */}
+                <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2">
                   {/* 홈팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                      <span className="text-sm text-muted-foreground">{homeTeam.name}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{homeTeam.name}</span>
                       <div className="flex gap-4 text-xs text-muted-foreground">
                         <span>득점</span>
                         <span>도움</span>
@@ -751,7 +752,7 @@ const GameDetail = () => {
                   {/* 어웨이팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                      <span className="text-sm text-muted-foreground">{awayTeam.name}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{awayTeam.name}</span>
                       <div className="flex gap-4 text-xs text-muted-foreground">
                         <span>득점</span>
                         <span>도움</span>
