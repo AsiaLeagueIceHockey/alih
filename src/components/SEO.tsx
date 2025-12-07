@@ -13,7 +13,7 @@ const SEO = ({
   title, 
   description, 
   keywords = "아시아리그, 아이스하키, ALIH, HL 안양, 레드 이글스 홋카이도, 경기 일정, 순위",
-  ogImage = "https://storage.googleapis.com/gpt-engineer-file-uploads/ESWxMxkHf8hhedCIzWSSJTlsnAQ2/social-images/social-1763130912807-asia_league_2025-26.png",
+  ogImage = "https://alih.lovable.app/og-image.png",
   path = "",
   structuredData
 }: SEOProps) => {
