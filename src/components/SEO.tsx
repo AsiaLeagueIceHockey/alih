@@ -13,11 +13,11 @@ const SEO = ({
   title, 
   description, 
   keywords = "아시아리그, 아이스하키, ALIH, HL 안양, 레드 이글스 홋카이도, 경기 일정, 순위",
-  ogImage = "https://alih.lovable.app/og-image.png",
+  ogImage = "https://alhockey.fans/og-image.png",
   path = "",
   structuredData
 }: SEOProps) => {
-  const siteUrl = "https://alih.lovable.app";
+  const siteUrl = "https://alhockey.fans";
   const fullUrl = `${siteUrl}${path}`;
 
   return (

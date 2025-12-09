@@ -6,7 +6,7 @@
 - **목적**: 아시아리그 아이스하키 2025-26 시즌 정보 제공 앱
 - **주요 기능**: 경기 일정, 실시간 결과, 하이라이트, 순위, 뉴스, 팀/선수 정보
 - **타겟**: 모바일 퍼스트 PWA 스타일 SPA (한국어 UI)
-- **배포 URL**: https://alih.lovable.app
+- **배포 URL**: https://alhockey.fans
 
 ---
 
@@ -432,8 +432,8 @@ const teamLogo = getTeamLogo(englishName, teams);
   title="경기 제목"
   description="경기 설명"
   keywords="아시아리그, 아이스하키"
-  ogImage="https://alih.lovable.app/og-image.png"
-  canonical="https://alih.lovable.app/schedule/48"
+  ogImage="https://alhockey.fans/og-image.png"
+  canonical="https://alhockey.fans/schedule/48"
 />
 ```
 

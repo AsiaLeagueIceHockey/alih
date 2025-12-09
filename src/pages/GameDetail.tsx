@@ -353,18 +353,18 @@ const GameDetail = () => {
       "@type": "SportsTeam",
       "name": homeTeam?.name,
       "logo": homeTeam?.logo,
-      "url": `https://alih.lovable.app/team/${homeTeam?.id}`
+      "url": `https://alhockey.fans/team/${homeTeam?.id}`
     },
     "awayTeam": {
       "@type": "SportsTeam",
       "name": awayTeam?.name,
       "logo": awayTeam?.logo,
-      "url": `https://alih.lovable.app/team/${awayTeam?.id}`
+      "url": `https://alhockey.fans/team/${awayTeam?.id}`
     },
     "organizer": {
       "@type": "SportsOrganization",
       "name": "아시아리그 아이스하키",
-      "url": "https://alih.lovable.app"
+      "url": "https://alhockey.fans"
     },
     ...(isCompleted && scheduleData.home_alih_team_score !== null && {
       "competitor": [

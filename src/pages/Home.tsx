@@ -226,7 +226,7 @@ const Home = () => {
     "@type": "SportsOrganization",
     "name": "아시아리그 아이스하키",
     "sport": "Ice Hockey",
-    "url": "https://alih.lovable.app",
+    "url": "https://alhockey.fans",
     "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 결과, 영상, 순위, 스탯, 뉴스를 한 곳에서",
     "memberOf": {
       "@type": "SportsLeague",

@@ -17,7 +17,7 @@ serve(async (req) => {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68'
     );
 
-    const siteUrl = 'https://alih.lovable.app';
+    const siteUrl = 'https://alhockey.fans';
     const today = new Date().toISOString().split('T')[0];
 
     // Fetch all schedules for game pages

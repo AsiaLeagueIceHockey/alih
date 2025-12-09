@@ -2,31 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- 메인 페이지 -->
   <url>
-    <loc>https://alih.lovable.app/</loc>
+    <loc>https://alhockey.fans/</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule</loc>
+    <loc>https://alhockey.fans/schedule</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/standings</loc>
+    <loc>https://alhockey.fans/standings</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/highlights</loc>
+    <loc>https://alhockey.fans/highlights</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/news</loc>
+    <loc>https://alhockey.fans/news</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
@@ -34,37 +34,37 @@
 
   <!-- 팀 상세 페이지 (6개) -->
   <url>
-    <loc>https://alih.lovable.app/team/1</loc>
+    <loc>https://alhockey.fans/team/1</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/team/2</loc>
+    <loc>https://alhockey.fans/team/2</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/team/3</loc>
+    <loc>https://alhockey.fans/team/3</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/team/4</loc>
+    <loc>https://alhockey.fans/team/4</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/team/5</loc>
+    <loc>https://alhockey.fans/team/5</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/team/6</loc>
+    <loc>https://alhockey.fans/team/6</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -72,721 +72,721 @@
 
   <!-- 경기 상세 페이지 (120개) -->
   <url>
-    <loc>https://alih.lovable.app/schedule/1</loc>
+    <loc>https://alhockey.fans/schedule/1</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/2</loc>
+    <loc>https://alhockey.fans/schedule/2</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/3</loc>
+    <loc>https://alhockey.fans/schedule/3</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/4</loc>
+    <loc>https://alhockey.fans/schedule/4</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/5</loc>
+    <loc>https://alhockey.fans/schedule/5</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/6</loc>
+    <loc>https://alhockey.fans/schedule/6</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/7</loc>
+    <loc>https://alhockey.fans/schedule/7</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/8</loc>
+    <loc>https://alhockey.fans/schedule/8</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/9</loc>
+    <loc>https://alhockey.fans/schedule/9</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/10</loc>
+    <loc>https://alhockey.fans/schedule/10</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/11</loc>
+    <loc>https://alhockey.fans/schedule/11</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/12</loc>
+    <loc>https://alhockey.fans/schedule/12</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/13</loc>
+    <loc>https://alhockey.fans/schedule/13</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/14</loc>
+    <loc>https://alhockey.fans/schedule/14</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/15</loc>
+    <loc>https://alhockey.fans/schedule/15</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/16</loc>
+    <loc>https://alhockey.fans/schedule/16</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/17</loc>
+    <loc>https://alhockey.fans/schedule/17</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/18</loc>
+    <loc>https://alhockey.fans/schedule/18</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/19</loc>
+    <loc>https://alhockey.fans/schedule/19</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/20</loc>
+    <loc>https://alhockey.fans/schedule/20</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/21</loc>
+    <loc>https://alhockey.fans/schedule/21</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/22</loc>
+    <loc>https://alhockey.fans/schedule/22</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/23</loc>
+    <loc>https://alhockey.fans/schedule/23</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/24</loc>
+    <loc>https://alhockey.fans/schedule/24</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/25</loc>
+    <loc>https://alhockey.fans/schedule/25</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/26</loc>
+    <loc>https://alhockey.fans/schedule/26</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/27</loc>
+    <loc>https://alhockey.fans/schedule/27</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/28</loc>
+    <loc>https://alhockey.fans/schedule/28</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/29</loc>
+    <loc>https://alhockey.fans/schedule/29</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/30</loc>
+    <loc>https://alhockey.fans/schedule/30</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/31</loc>
+    <loc>https://alhockey.fans/schedule/31</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/32</loc>
+    <loc>https://alhockey.fans/schedule/32</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/33</loc>
+    <loc>https://alhockey.fans/schedule/33</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/34</loc>
+    <loc>https://alhockey.fans/schedule/34</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/35</loc>
+    <loc>https://alhockey.fans/schedule/35</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/36</loc>
+    <loc>https://alhockey.fans/schedule/36</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/37</loc>
+    <loc>https://alhockey.fans/schedule/37</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/38</loc>
+    <loc>https://alhockey.fans/schedule/38</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/39</loc>
+    <loc>https://alhockey.fans/schedule/39</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/40</loc>
+    <loc>https://alhockey.fans/schedule/40</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/41</loc>
+    <loc>https://alhockey.fans/schedule/41</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/42</loc>
+    <loc>https://alhockey.fans/schedule/42</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/43</loc>
+    <loc>https://alhockey.fans/schedule/43</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/44</loc>
+    <loc>https://alhockey.fans/schedule/44</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/45</loc>
+    <loc>https://alhockey.fans/schedule/45</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/46</loc>
+    <loc>https://alhockey.fans/schedule/46</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/47</loc>
+    <loc>https://alhockey.fans/schedule/47</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/48</loc>
+    <loc>https://alhockey.fans/schedule/48</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/49</loc>
+    <loc>https://alhockey.fans/schedule/49</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/50</loc>
+    <loc>https://alhockey.fans/schedule/50</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/51</loc>
+    <loc>https://alhockey.fans/schedule/51</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/52</loc>
+    <loc>https://alhockey.fans/schedule/52</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/53</loc>
+    <loc>https://alhockey.fans/schedule/53</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/54</loc>
+    <loc>https://alhockey.fans/schedule/54</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/55</loc>
+    <loc>https://alhockey.fans/schedule/55</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/56</loc>
+    <loc>https://alhockey.fans/schedule/56</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/57</loc>
+    <loc>https://alhockey.fans/schedule/57</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/58</loc>
+    <loc>https://alhockey.fans/schedule/58</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/59</loc>
+    <loc>https://alhockey.fans/schedule/59</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/60</loc>
+    <loc>https://alhockey.fans/schedule/60</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/61</loc>
+    <loc>https://alhockey.fans/schedule/61</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/62</loc>
+    <loc>https://alhockey.fans/schedule/62</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/63</loc>
+    <loc>https://alhockey.fans/schedule/63</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/64</loc>
+    <loc>https://alhockey.fans/schedule/64</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/65</loc>
+    <loc>https://alhockey.fans/schedule/65</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/66</loc>
+    <loc>https://alhockey.fans/schedule/66</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/67</loc>
+    <loc>https://alhockey.fans/schedule/67</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/68</loc>
+    <loc>https://alhockey.fans/schedule/68</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/69</loc>
+    <loc>https://alhockey.fans/schedule/69</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/70</loc>
+    <loc>https://alhockey.fans/schedule/70</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/71</loc>
+    <loc>https://alhockey.fans/schedule/71</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/72</loc>
+    <loc>https://alhockey.fans/schedule/72</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/73</loc>
+    <loc>https://alhockey.fans/schedule/73</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/74</loc>
+    <loc>https://alhockey.fans/schedule/74</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/75</loc>
+    <loc>https://alhockey.fans/schedule/75</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/76</loc>
+    <loc>https://alhockey.fans/schedule/76</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/77</loc>
+    <loc>https://alhockey.fans/schedule/77</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/78</loc>
+    <loc>https://alhockey.fans/schedule/78</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/79</loc>
+    <loc>https://alhockey.fans/schedule/79</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/80</loc>
+    <loc>https://alhockey.fans/schedule/80</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/81</loc>
+    <loc>https://alhockey.fans/schedule/81</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/82</loc>
+    <loc>https://alhockey.fans/schedule/82</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/83</loc>
+    <loc>https://alhockey.fans/schedule/83</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/84</loc>
+    <loc>https://alhockey.fans/schedule/84</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/85</loc>
+    <loc>https://alhockey.fans/schedule/85</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/86</loc>
+    <loc>https://alhockey.fans/schedule/86</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/87</loc>
+    <loc>https://alhockey.fans/schedule/87</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/88</loc>
+    <loc>https://alhockey.fans/schedule/88</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/89</loc>
+    <loc>https://alhockey.fans/schedule/89</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/90</loc>
+    <loc>https://alhockey.fans/schedule/90</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/91</loc>
+    <loc>https://alhockey.fans/schedule/91</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/92</loc>
+    <loc>https://alhockey.fans/schedule/92</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/93</loc>
+    <loc>https://alhockey.fans/schedule/93</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/94</loc>
+    <loc>https://alhockey.fans/schedule/94</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/95</loc>
+    <loc>https://alhockey.fans/schedule/95</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/96</loc>
+    <loc>https://alhockey.fans/schedule/96</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/97</loc>
+    <loc>https://alhockey.fans/schedule/97</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/98</loc>
+    <loc>https://alhockey.fans/schedule/98</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/99</loc>
+    <loc>https://alhockey.fans/schedule/99</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/100</loc>
+    <loc>https://alhockey.fans/schedule/100</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/101</loc>
+    <loc>https://alhockey.fans/schedule/101</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/102</loc>
+    <loc>https://alhockey.fans/schedule/102</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/103</loc>
+    <loc>https://alhockey.fans/schedule/103</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/104</loc>
+    <loc>https://alhockey.fans/schedule/104</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/105</loc>
+    <loc>https://alhockey.fans/schedule/105</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/106</loc>
+    <loc>https://alhockey.fans/schedule/106</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/107</loc>
+    <loc>https://alhockey.fans/schedule/107</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/108</loc>
+    <loc>https://alhockey.fans/schedule/108</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/109</loc>
+    <loc>https://alhockey.fans/schedule/109</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/110</loc>
+    <loc>https://alhockey.fans/schedule/110</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/111</loc>
+    <loc>https://alhockey.fans/schedule/111</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/112</loc>
+    <loc>https://alhockey.fans/schedule/112</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/113</loc>
+    <loc>https://alhockey.fans/schedule/113</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/114</loc>
+    <loc>https://alhockey.fans/schedule/114</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/115</loc>
+    <loc>https://alhockey.fans/schedule/115</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/116</loc>
+    <loc>https://alhockey.fans/schedule/116</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/117</loc>
+    <loc>https://alhockey.fans/schedule/117</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/118</loc>
+    <loc>https://alhockey.fans/schedule/118</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/119</loc>
+    <loc>https://alhockey.fans/schedule/119</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://alih.lovable.app/schedule/120</loc>
+    <loc>https://alhockey.fans/schedule/120</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>

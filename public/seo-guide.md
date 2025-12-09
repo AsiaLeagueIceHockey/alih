@@ -27,23 +27,23 @@
 ### Google Search Console
 1. [Google Search Console](https://search.google.com/search-console) 접속
 2. 속성 추가 → URL 접두어 방식 선택
-3. 사이트 URL 입력: `https://alih.lovable.app`
+3. 사이트 URL 입력: `https://alhockey.fans`
 4. 소유권 확인 (HTML 파일 업로드 또는 메타 태그 추가)
-5. Sitemap 제출: `https://alih.lovable.app/sitemap.xml`
+5. Sitemap 제출: `https://alhockey.fans/sitemap.xml`
 
 ### Naver 웹마스터 도구
 1. [네이버 서치어드바이저](https://searchadvisor.naver.com/) 접속
 2. 웹마스터 도구 → 사이트 등록
-3. 사이트 URL 입력: `https://alih.lovable.app`
+3. 사이트 URL 입력: `https://alhockey.fans`
 4. 소유권 확인 (HTML 파일 업로드)
-5. 사이트맵 제출: `https://alih.lovable.app/sitemap.xml`
+5. 사이트맵 제출: `https://alhockey.fans/sitemap.xml`
 
 ### Bing Webmaster Tools
 1. [Bing Webmaster Tools](https://www.bing.com/webmasters) 접속
 2. 사이트 추가
-3. 사이트 URL 입력: `https://alih.lovable.app`
+3. 사이트 URL 입력: `https://alhockey.fans`
 4. 소유권 확인
-5. Sitemap 제출: `https://alih.lovable.app/sitemap.xml`
+5. Sitemap 제출: `https://alhockey.fans/sitemap.xml`
 
 ## 3. 추가 최적화 팁
 

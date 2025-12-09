@@ -26,7 +26,7 @@
 | Edge Functions | generate-sitemap | SEO 동적 사이트맵 | ⭐ 쉬움 | 🟡 중간 |
 | Edge Functions | send-analytics-report | 이메일 리포트 (현재 미사용) | ⭐ 쉬움 | 🟢 낮음 |
 | Edge Functions | scrape-news/schedule/standings | 데이터 스크래핑 (예비 기능) | ⭐ 쉬움 | 🟢 낮음 |
-| 도메인 | alih.lovable.app | SEO, OG 태그, sitemap | ⭐ 쉬움 | 🔴 높음 |
+| 도메인 | alhockey.fans | SEO, OG 태그, sitemap | ⭐ 쉬움 | 🔴 높음 |
 | 개발 도구 | lovable-tagger | Vite 플러그인 | ⭐ 쉬움 | 🟢 낮음 |
 | UI 요소 | #lovable-badge | CSS 숨김 처리 | ⭐ 쉬움 | 🟢 낮음 |
 
@@ -140,7 +140,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 #### 현재 코드에서 하드코딩된 URL
 ```typescript
 // supabase/functions/generate-sitemap/index.ts (line 20)
-const siteUrl = 'https://alih.lovable.app';  // ← 변경 필요
+const siteUrl = 'https://alhockey.fans';  // ← 변경 필요
 ```
 
 #### 마이그레이션 방법
@@ -253,10 +253,10 @@ supabase functions deploy scrape-standings
 | 파일 | 현재 URL | 용도 |
 |-----|---------|------|
 | `public/robots.txt` | Lovable Cloud Edge Function URL | 검색엔진 sitemap 참조 |
-| `public/sitemap.xml` | alih.lovable.app | 정적 sitemap (Google Search Console용) |
-| `index.html` | alih.lovable.app | OG 이미지 URL |
-| `src/components/SEO.tsx` | alih.lovable.app | 모든 페이지 SEO 메타 태그 |
-| `supabase/functions/generate-sitemap/index.ts` | alih.lovable.app | 동적 sitemap 생성 |
+| `public/sitemap.xml` | alhockey.fans | 정적 sitemap (Google Search Console용) |
+| `index.html` | alhockey.fans | OG 이미지 URL |
+| `src/components/SEO.tsx` | alhockey.fans | 모든 페이지 SEO 메타 태그 |
+| `supabase/functions/generate-sitemap/index.ts` | alhockey.fans | 동적 sitemap 생성 |
 | `supabase/functions/send-analytics-report/index.ts` | api.lovable.dev | 애널리틱스 API |
 
 ### 4.2 상세 수정 가이드
@@ -273,18 +273,18 @@ Allow: /
 **유스케이스:** 검색엔진 크롤러가 이 URL을 통해 동적 sitemap 접근
 
 #### B. public/sitemap.xml
-전체 파일에서 `alih.lovable.app` → 새 도메인으로 일괄 변경:
+전체 파일에서 `alhockey.fans` → 새 도메인으로 일괄 변경:
 ```bash
 # 일괄 치환 (Linux/Mac)
-sed -i 's/alih.lovable.app/your-new-domain.com/g' public/sitemap.xml
+sed -i 's/alhockey.fans/your-new-domain.com/g' public/sitemap.xml
 ```
 
 **유스케이스:** Google Search Console에 제출된 정적 sitemap
 
 #### C. index.html
 ```diff
-- <meta property="og:image" content="https://alih.lovable.app/og-image.png">
-- <meta name="twitter:image" content="https://alih.lovable.app/og-image.png">
+- <meta property="og:image" content="https://alhockey.fans/og-image.png">
+- <meta name="twitter:image" content="https://alhockey.fans/og-image.png">
 + <meta property="og:image" content="https://your-new-domain.com/og-image.png">
 + <meta name="twitter:image" content="https://your-new-domain.com/og-image.png">
 ```
@@ -294,7 +294,7 @@ sed -i 's/alih.lovable.app/your-new-domain.com/g' public/sitemap.xml
 #### D. src/components/SEO.tsx
 ```diff
 const SEO = ({ ... }: SEOProps) => {
--  const siteUrl = "https://alih.lovable.app";
+-  const siteUrl = "https://alhockey.fans";
 +  const siteUrl = "https://your-new-domain.com";
   // 또는 환경 변수 사용:
 + const siteUrl = import.meta.env.VITE_SITE_URL || "https://your-new-domain.com";
