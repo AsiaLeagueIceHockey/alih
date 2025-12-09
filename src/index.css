@@ -41,7 +41,7 @@ All colors MUST be HSL.
     --ice-gradient: linear-gradient(135deg, hsl(195, 90%, 55%), hsl(185, 80%, 50%));
     --ice-glow: 0 0 30px hsl(195 90% 55% / 0.3);
     --card-glow: 0 4px 20px hsl(195 90% 55% / 0.1);
-    
+
     --sidebar-background: 220 20% 12%;
     --sidebar-foreground: 195 100% 98%;
     --sidebar-primary: 195 90% 55%;
@@ -80,7 +80,7 @@ All colors MUST be HSL.
     --border: 220 15% 22%;
     --input: 220 15% 22%;
     --ring: 195 90% 55%;
-    
+
     --sidebar-background: 220 20% 12%;
     --sidebar-foreground: 195 100% 98%;
     --sidebar-primary: 195 90% 55%;
@@ -104,18 +104,15 @@ All colors MUST be HSL.
     padding-bottom: calc(4rem + constant(safe-area-inset-bottom));
     padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
   }
-  
+
   /* 스크롤바 숨기기 (Android 등) */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-
-  #lovable-badge {
-    display: none !important;
   }
 }
 

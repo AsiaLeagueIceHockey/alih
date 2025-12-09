@@ -1,7 +1,4 @@
-project_id = "rmfwypuvpwndnhjznaig"
+project_id = "nvlpbdyqfzmlrjauvhxx"
 
 [functions.generate-sitemap]
-verify_jwt = false
-
-[functions.send-analytics-report]
 verify_jwt = false
