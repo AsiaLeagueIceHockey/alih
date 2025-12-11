@@ -295,7 +295,7 @@ const InstagramScore = () => {
             <div className="inline-flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full px-8 py-4">
               <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
               <span className="text-slate-300 text-xl font-medium">
-                @alhockey_fan
+                @alhockey_fans
               </span>
             </div>
           </div>

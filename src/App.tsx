@@ -21,6 +21,7 @@ const News = lazy(() => import("./pages/News"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const TeamRoster = lazy(() => import("./pages/TeamRoster"));
 const InstagramScore = lazy(() => import("./pages/InstagramScore"));
+const InstagramPreview = lazy(() => import("./pages/InstagramPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -82,6 +83,11 @@ const App = () => {
               <Route path="/instagram/score" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <InstagramScore />
+                </Suspense>
+              } />
+              <Route path="/instagram/preview" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <InstagramPreview />
                 </Suspense>
               } />
               
