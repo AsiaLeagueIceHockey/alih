@@ -269,7 +269,7 @@ const InstagramPreview = () => {
           </div>
 
           {/* Series Games - 경기 일정 */}
-          <div className="flex flex-col gap-5 py-6" style={{ marginLeft: '15%', marginRight: '15%' }}>
+          <div className="flex flex-col gap-5 py-6" style={{ marginLeft: '10%', marginRight: '10%' }}>
             <h2 className="text-slate-300 text-2xl font-semibold text-center mb-2">
               📅 경기 일정
             </h2>
@@ -304,7 +304,7 @@ const InstagramPreview = () => {
           </div>
 
           {/* Past Matchups - 컴팩트한 가로 배치 */}
-          <div className="py-4 mt-6" style={{ marginLeft: '10%', marginRight: '10%' }}>
+          <div className="py-4 mt-6 pt-6 pb-6" style={{ marginLeft: '10%', marginRight: '10%' }}>
             <h2 className="text-slate-300 text-2xl font-semibold text-center mb-3">
               ⚔️ 이번 시즌 맞대결
             </h2>
