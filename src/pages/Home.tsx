@@ -161,23 +161,23 @@ const Home = () => {
     refetchOnMount: false,
   });
 
-  const { data: latestNews } = useQuery({
-    queryKey: ['latest-news'],
+  const { data: allNews } = useQuery({
+    queryKey: ['alih-news'],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_news')
         .select('*')
-        .order('published_at', { ascending: false })
-        .limit(3);
+        .order('published_at', { ascending: false });
       
       if (error) throw error;
       return data as AlihNews[];
     },
     staleTime: 1000 * 60 * 30, // 30분 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
   });
+
+  // 홈에서는 최신 3개만 표시
+  const latestNews = allNews?.slice(0, 3);
 
   const getTeamById = (teamId: number) => {
     if (!teams) return null;
