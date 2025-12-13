@@ -36,8 +36,8 @@ interface GameSummary {
   period_1: { score: string };
   period_2: { score: string };
   period_3: { score: string };
-  overtime?: { score: string };
-  shootout?: { score: string };
+  ovt?: { score: string };
+  pss?: { score: string | null };
 }
 
 interface GameDetailData {
@@ -160,12 +160,12 @@ const InstagramScore = () => {
         const [home, away] = parseScore(gs.period_3.score);
         periods.push({ label: '3P', home, away });
       }
-      if (gs.overtime && gs.overtime.score !== '0 : 0' && gs.overtime.score !== '0-0') {
-        const [home, away] = parseScore(gs.overtime.score);
+      if (gs.ovt && gs.ovt.score && gs.ovt.score !== '0 : 0' && gs.ovt.score !== '0-0') {
+        const [home, away] = parseScore(gs.ovt.score);
         periods.push({ label: 'OT', home, away });
       }
-      if (gs.shootout && gs.shootout.score !== '0 : 0' && gs.shootout.score !== '0-0') {
-        const [home, away] = parseScore(gs.shootout.score);
+      if (gs.pss && gs.pss.score && gs.pss.score !== '0 : 0' && gs.pss.score !== '0-0') {
+        const [home, away] = parseScore(gs.pss.score);
         periods.push({ label: 'SO', home, away });
       }
       
