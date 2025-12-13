@@ -64,8 +64,20 @@ const Schedule = () => {
       if (error) throw error;
       return data as ScheduleGame[];
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
+    staleTime: 1000 * 60 * 5, // 5분 동안 캐시 (진행 중 경기 대응)
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
+    // 진행 중인 경기가 있을 때만 1분마다 polling
+    refetchInterval: (query) => {
+      const data = query.state.data as ScheduleGame[] | undefined;
+      if (!data) return false;
+      const now = new Date();
+      const hasInProgress = data.some(game => {
+        const matchDate = new Date(game.match_at);
+        return matchDate <= now && game.game_status !== 'Game Finished';
+      });
+      return hasInProgress ? 60000 : false;
+    },
+    refetchIntervalInBackground: false,
   });
 
   const getTeamById = (teamId: number) => {
