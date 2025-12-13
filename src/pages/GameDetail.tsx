@@ -45,6 +45,8 @@ interface GameDetailData {
     period_1: { score: string; sog: string; pim: string; ppgf: string; shgf: string };
     period_2: { score: string; sog: string; pim: string; ppgf: string; shgf: string };
     period_3: { score: string; sog: string; pim: string; ppgf: string; shgf: string };
+    ovt?: { score: string; sog: string; pim: string; ppgf: string; shgf: string };
+    pss?: { score: string | null; sog: string | null; pim: string | null; ppgf: string | null; shgf: string | null };
     total: { score: string; sog: string; pim: string; ppgf: string; shgf: string };
   };
   goalkeepers: {
@@ -271,7 +273,7 @@ const GameDetail = () => {
     return "EV (이븐)";
   };
 
-  // 피리어드별 시간 조정 함수 (2P는 -20분, 3P는 -40분)
+  // 피리어드별 시간 조정 함수 (2P는 -20분, 3P는 -40분, OT는 -60분)
   const adjustGameTime = (period: number, time: string) => {
     const [minutes, seconds] = time.split(':').map(Number);
     let adjustedMinutes = minutes;
@@ -280,9 +282,22 @@ const GameDetail = () => {
       adjustedMinutes = minutes - 20;
     } else if (period === 3) {
       adjustedMinutes = minutes - 40;
+    } else if (period === 4) {
+      // OT (overtime) - 60분 이후
+      adjustedMinutes = minutes - 60;
+    } else if (period === 5) {
+      // SO (shootout) - 별도 처리
+      adjustedMinutes = minutes - 65; // 65분 이후로 가정
     }
     
     return `${adjustedMinutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // 피리어드 라벨 변환 (4 -> OT, 5 -> SO)
+  const getPeriodLabel = (period: number) => {
+    if (period === 4) return 'OT';
+    if (period === 5) return 'SO';
+    return `${period}P`;
   };
 
   const getYoutubeVideoId = (url: string) => {
@@ -914,6 +929,22 @@ const GameDetail = () => {
                       <TableCell className="text-center">{gameDetail.game_summary.period_3.sog}</TableCell>
                       <TableCell className="text-center">{gameDetail.game_summary.period_3.pim}</TableCell>
                     </TableRow>
+                    {gameDetail.game_summary.ovt && gameDetail.game_summary.ovt.score && (
+                      <TableRow>
+                        <TableCell className="font-medium">OT</TableCell>
+                        <TableCell className="text-center">{gameDetail.game_summary.ovt.score}</TableCell>
+                        <TableCell className="text-center">{gameDetail.game_summary.ovt.sog}</TableCell>
+                        <TableCell className="text-center">{gameDetail.game_summary.ovt.pim}</TableCell>
+                      </TableRow>
+                    )}
+                    {gameDetail.game_summary.pss && gameDetail.game_summary.pss.score && (
+                      <TableRow>
+                        <TableCell className="font-medium">SO</TableCell>
+                        <TableCell className="text-center">{gameDetail.game_summary.pss.score}</TableCell>
+                        <TableCell className="text-center">{gameDetail.game_summary.pss.sog}</TableCell>
+                        <TableCell className="text-center">{gameDetail.game_summary.pss.pim}</TableCell>
+                      </TableRow>
+                    )}
                     <TableRow className="bg-muted/50 font-semibold">
                       <TableCell>Total</TableCell>
                       <TableCell className="text-center">{gameDetail.game_summary.total.score}</TableCell>
@@ -967,7 +998,7 @@ const GameDetail = () => {
                             <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="outline" className="text-xs">{goal.period}P {adjustGameTime(goal.period, goal.time)}</Badge>
+                                <Badge variant="outline" className="text-xs">{getPeriodLabel(goal.period)} {adjustGameTime(goal.period, goal.time)}</Badge>
                                 <Badge className="text-xs">{getSituationLabel(goal.situation)}</Badge>
                               </div>
                               <p className="font-medium">
@@ -991,7 +1022,7 @@ const GameDetail = () => {
                             <img src={penaltyTeam.logo} alt={penaltyTeam.name} className="w-10 h-10 object-contain" />
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="outline" className="text-xs">{penalty.period}P {adjustGameTime(penalty.period, penalty.time)}</Badge>
+                                <Badge variant="outline" className="text-xs">{getPeriodLabel(penalty.period)} {adjustGameTime(penalty.period, penalty.time)}</Badge>
                                 <Badge variant="destructive" className="text-xs">{penalty.minutes}분</Badge>
                               </div>
                               <p className="font-medium">
@@ -1022,7 +1053,7 @@ const GameDetail = () => {
                     <TableRow>
                       <TableHead className="w-16">번호</TableHead>
                       <TableHead>이름</TableHead>
-                      <TableHead className="text-center w-16">포지션</TableHead>
+                      <TableHead className="text-center w-16 whitespace-nowrap">포지션</TableHead>
                       <TableHead className="text-center w-16">SOG</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1061,7 +1092,7 @@ const GameDetail = () => {
                     <TableRow>
                       <TableHead className="w-16">번호</TableHead>
                       <TableHead>이름</TableHead>
-                      <TableHead className="text-center w-16">포지션</TableHead>
+                      <TableHead className="text-center w-16 whitespace-nowrap">포지션</TableHead>
                       <TableHead className="text-center w-16">SOG</TableHead>
                     </TableRow>
                   </TableHeader>
