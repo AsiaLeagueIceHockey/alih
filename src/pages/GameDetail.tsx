@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlihTeam } from "@/hooks/useTeams";
+import { useScheduleByGameNo, ScheduleGame } from "@/hooks/useSchedules";
 import SEO from "@/components/SEO";
 
 const externalSupabase = createClient(
@@ -155,30 +156,11 @@ const GameDetail = () => {
     matchDate?: string;
   } | null;
 
-  // 스케줄 데이터 가져오기 (항상 필요 - live_url 확인용)
-  const { data: scheduleData, isLoading: scheduleLoading } = useQuery({
-    queryKey: ['schedule-for-game', gameNo],
-    queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_schedule')
-        .select('*')
-        .eq('game_no', gameNo)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data as ScheduleData;
-    },
-    enabled: !!gameNo,
-    // 진행 중인 경기일 때 1분마다 자동 갱신 (깜빡임 없음)
-    refetchInterval: (query) => {
-      const data = query.state.data as ScheduleData | undefined;
-      if (!data) return false;
-      const isPast = new Date(data.match_at) < new Date();
-      const isFinished = data.game_status === 'Game Finished';
-      return isPast && !isFinished ? 60000 : false; // 1분 = 60000ms
-    },
-    refetchIntervalInBackground: false, // 탭 비활성화 시 갱신 중단
-  });
+  // 스케줄 데이터 가져오기 (공통 훅 사용 - 캐시 일관성 보장)
+  const { data: scheduleData, isLoading: scheduleLoading } = useScheduleByGameNo(gameNo) as {
+    data: ScheduleGame | undefined;
+    isLoading: boolean;
+  };
 
   // 팀 정보 가져오기
   const { data: teamsData, isLoading: teamsLoading } = useQuery({

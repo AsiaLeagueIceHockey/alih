@@ -3,26 +3,13 @@ import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { externalSupabase } from "@/lib/supabase-external";
 import { useTeams } from "@/hooks/useTeams";
+import { useSchedules, ScheduleGame } from "@/hooks/useSchedules";
 import { Loader2, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 
-interface ScheduleGame {
-  id: number;
-  game_no: number;
-  home_alih_team_id: number;
-  away_alih_team_id: number;
-  home_alih_team_score: number | null;
-  away_alih_team_score: number | null;
-  match_at: string;
-  match_place: string;
-  highlight_url: string | null;
-  highlight_title: string | null;
-  game_status: string | null;
-}
+
 
 const MONTHS = [
   { value: 9, label: "9월", year: 2025 },
@@ -53,32 +40,7 @@ const Schedule = () => {
 
   const { data: teams, isLoading: teamsLoading } = useTeams();
 
-  const { data: schedules, isLoading: schedulesLoading, error } = useQuery({
-    queryKey: ['alih-schedules'],
-    queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_schedule')
-        .select('*')
-        .order('match_at', { ascending: true });
-      
-      if (error) throw error;
-      return data as ScheduleGame[];
-    },
-    staleTime: 1000 * 60 * 5, // 5분 동안 캐시 (진행 중 경기 대응)
-    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
-    // 진행 중인 경기가 있을 때만 1분마다 polling
-    refetchInterval: (query) => {
-      const data = query.state.data as ScheduleGame[] | undefined;
-      if (!data) return false;
-      const now = new Date();
-      const hasInProgress = data.some(game => {
-        const matchDate = new Date(game.match_at);
-        return matchDate <= now && game.game_status !== 'Game Finished';
-      });
-      return hasInProgress ? 60000 : false;
-    },
-    refetchIntervalInBackground: false,
-  });
+  const { data: schedules, isLoading: schedulesLoading, error } = useSchedules();
 
   const getTeamById = (teamId: number) => {
     if (!teams) return null;

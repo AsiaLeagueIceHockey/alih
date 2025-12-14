@@ -6,6 +6,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { useTeams } from "@/hooks/useTeams";
+import { useSchedules, ScheduleGame } from "@/hooks/useSchedules";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -20,19 +21,7 @@ const externalSupabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68'
 );
 
-interface ScheduleGame {
-  id: number;
-  game_no: number;
-  home_alih_team_id: number;
-  away_alih_team_id: number;
-  home_alih_team_score: number | null;
-  away_alih_team_score: number | null;
-  match_at: string;
-  match_place: string;
-  highlight_url: string | null;
-  highlight_title: string | null;
-  game_status: string | null;
-}
+
 
 interface TeamStanding {
   rank: number;
@@ -95,34 +84,7 @@ const Home = () => {
     });
   }, [recentGamesApi]);
 
-  const { data: schedules } = useQuery({
-    queryKey: ['alih-schedules'],
-    queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_schedule')
-        .select('*')
-        .order('match_at', { ascending: true });
-      
-      if (error) throw error;
-      return data as ScheduleGame[];
-    },
-    staleTime: 1000 * 60 * 5, // 5분 동안 캐시 (진행 중 경기 대응)
-    gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    // 진행 중인 경기가 있을 때만 1분마다 polling
-    refetchInterval: (query) => {
-      const data = query.state.data as ScheduleGame[] | undefined;
-      if (!data) return false;
-      const now = new Date();
-      const hasInProgress = data.some(game => {
-        const matchDate = new Date(game.match_at);
-        return matchDate <= now && game.game_status !== 'Game Finished';
-      });
-      return hasInProgress ? 60000 : false;
-    },
-    refetchIntervalInBackground: false,
-  });
+  const { data: schedules } = useSchedules();
 
   const { data: alihTeams } = useQuery({
     queryKey: ['alih-teams-standings'],
