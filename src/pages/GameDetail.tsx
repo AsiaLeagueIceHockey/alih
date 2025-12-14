@@ -205,13 +205,14 @@ const GameDetail = () => {
 
   // 맞대결 전적 가져오기 (미완료 경기 또는 종료됐지만 gameDetail이 없는 경우)
   const { data: headToHead, isLoading: h2hLoading } = useQuery({
-    queryKey: ['head-to-head', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id],
+    queryKey: ['head-to-head', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id, gameNo],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
         .or(`and(home_alih_team_id.eq.${scheduleData?.home_alih_team_id},away_alih_team_id.eq.${scheduleData?.away_alih_team_id}),and(home_alih_team_id.eq.${scheduleData?.away_alih_team_id},away_alih_team_id.eq.${scheduleData?.home_alih_team_id})`)
-        .not('home_alih_team_score', 'is', null)
+        .eq('game_status', 'Game Finished') // 완료된 경기만
+        .neq('game_no', Number(gameNo)) // 현재 경기 제외
         .order('match_at', { ascending: false })
         .limit(5);
 
