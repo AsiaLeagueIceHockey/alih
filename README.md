@@ -1,73 +1,74 @@
-# Welcome to your Lovable project
+# 아시아리그 아이스하키 팬사이트
 
-## Project info
+아시아리그 아이스하키 2025-26 시즌 정보를 제공하는 팬 사이트입니다.
 
-**URL**: https://lovable.dev/projects/503e0f31-4fca-46f6-adcb-2ad1586c9fb6
+🔗 **사이트**: [https://alhockey.fans](https://alhockey.fans)
 
-## How can I edit this code?
+## 주요 기능
 
-There are several ways of editing your application.
+- 🏒 **경기 일정/결과**: 월별/팀별 필터링, 실시간 스코어 업데이트
+- 📊 **리그 순위**: 팀 순위 및 개인 기록 (득점왕, 도움왕 등)
+- 🎬 **하이라이트**: 경기별 하이라이트 영상
+- 📰 **뉴스**: 한국어/일본어/영어 뉴스 통합 제공
+- 🏆 **팀 상세**: 팀 정보, 로스터, 최근 경기 결과
+- 📱 **모바일 최적화**: PWA 스타일 반응형 디자인
 
-**Use Lovable**
+## 기술 스택
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/503e0f31-4fca-46f6-adcb-2ad1586c9fb6) and start prompting.
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Data**: Supabase, TanStack React Query
+- **SEO**: react-helmet-async, 동적 sitemap
+- **Hosting**: Vercel
 
-Changes made via Lovable will be committed automatically to this repo.
+## 개발 환경 설정
 
-**Use your preferred IDE**
+```bash
+# 의존성 설치
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 개발 서버 실행
 npm run dev
+
+# 프로덕션 빌드
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## 프로젝트 구조
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+src/
+├── components/       # UI 컴포넌트
+│   ├── team/        # 팀 상세 페이지 전용
+│   └── ui/          # shadcn/ui 컴포넌트
+├── hooks/           # 커스텀 훅
+│   ├── useTeams.tsx     # 팀 데이터
+│   └── useSchedules.ts  # 일정 데이터 (캐시 공유)
+├── pages/           # 페이지 컴포넌트
+├── lib/             # 유틸리티
+└── types/           # 타입 정의
+```
 
-**Use GitHub Codespaces**
+## 주요 라우트
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+| 경로 | 설명 |
+|------|------|
+| `/` | 홈 (다음 경기, 뉴스, 순위) |
+| `/schedule` | 경기 일정 (월별/팀별 필터) |
+| `/schedule/:gameNo` | 경기 상세 |
+| `/highlights` | 하이라이트 영상 |
+| `/standings` | 팀/개인 순위 |
+| `/news` | 뉴스 목록 |
+| `/team/:teamId` | 팀 상세 |
 
-## What technologies are used for this project?
+## 기여하기
 
-This project is built with:
+이슈 및 PR 환영합니다!
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 라이선스
 
-## How can I deploy this project?
+MIT License
 
-Simply open [Lovable](https://lovable.dev/projects/503e0f31-4fca-46f6-adcb-2ad1586c9fb6) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+*Made with ❤️ for Asian ice hockey fans*

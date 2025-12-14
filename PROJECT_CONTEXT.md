@@ -64,6 +64,7 @@ src/
 │
 ├── hooks/
 │   ├── useTeams.tsx             # 팀 데이터 조회 훅 (캐싱)
+│   ├── useSchedules.ts          # 스케줄 데이터 공통 훅 (캐시 일관성 보장) ⭐
 │   ├── use-mobile.tsx           # 모바일 감지 훅
 │   └── use-toast.ts             # 토스트 알림 훅
 │
@@ -80,7 +81,8 @@ src/
 │   ├── News.tsx                 # 뉴스 목록
 │   ├── TeamDetail.tsx           # 팀 상세 페이지
 │   ├── TeamRoster.tsx           # 팀 전체 로스터
-│   ├── InstagramScore.tsx       # SNS 자동화용 스크린샷 페이지
+│   ├── InstagramScore.tsx       # SNS 자동화용 경기 결과 스크린샷
+│   ├── InstagramPreview.tsx     # SNS 자동화용 시리즈 프리뷰 ⭐
 │   └── NotFound.tsx             # 404 페이지
 │
 ├── types/
@@ -383,13 +385,14 @@ const getGameStatus = (game: ScheduleGame) => {
 ### 7.2 진행 중 경기 자동 폴링
 
 ```typescript
-// GameDetail.tsx
-const { data: schedule } = useQuery({
-  queryKey: ['schedule', gameNo],
-  queryFn: fetchSchedule,
-  refetchInterval: isInProgress ? 60000 : false,  // 60초
-  refetchIntervalInBackground: false,
-});
+// useSchedules.ts - 공통 훅 사용
+import { useSchedules, useScheduleByGameNo } from "@/hooks/useSchedules";
+
+// 전체 일정 (Home, Schedule)
+const { data: schedules } = useSchedules();
+
+// 특정 경기 (GameDetail)
+const { data: scheduleData } = useScheduleByGameNo(gameNo);
 ```
 
 ### 7.3 팀명 한국어 변환
@@ -464,7 +467,8 @@ npm run build
 | `/news` | News | 뉴스 목록 |
 | `/team/:teamId` | TeamDetail | 팀 상세 |
 | `/roster/:teamId` | TeamRoster | 팀 로스터 |
-| `/instagram/score` | InstagramScore | SNS 자동화용 |
+| `/instagram/score` | InstagramScore | SNS 경기결과 스크린샷 |
+| `/instagram/preview` | InstagramPreview | SNS 시리즈 프리뷰 스크린샷 |
 
 ---
 
@@ -482,6 +486,9 @@ npm run build
 
 | 날짜 | 변경 내용 |
 |------|----------|
+| 2025-12-14 | useSchedules 공통 훅 추가 (Home/Schedule/GameDetail 캐시 일관성) |
+| 2025-12-14 | InstagramPreview 페이지 추가 (시리즈 프리뷰 SNS 자동화) |
+| 2025-12-11 | OT/SO(연장/슛아웃) 피리어드 표시 지원 추가 |
 | 2025-12-10 | 도메인 마이그레이션 (alih.lovable.app → alhockey.fans) |
 | 2025-12-10 | Lovable 종속성 제거 (lovable-tagger, integrations/supabase/) |
 | 2025-12-10 | 미사용 Edge Functions 삭제 (send-analytics-report, scrape-*) |
@@ -489,4 +496,4 @@ npm run build
 
 ---
 
-*마지막 업데이트: 2025-12-10*
+*마지막 업데이트: 2025-12-14*
