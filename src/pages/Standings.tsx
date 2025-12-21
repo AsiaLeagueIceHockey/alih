@@ -162,14 +162,37 @@ const Standings = () => {
     });
   };
 
+  // 순위 페이지용 구조화 데이터
+  const standingsStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Table",
+    "name": "아시아리그 아이스하키 2025-26 시즌 순위표",
+    "description": "아시아리그 아이스하키 팀 순위, 승점, 승패, 골득실 정보",
+    "about": {
+      "@type": "SportsLeague",
+      "name": "Asia League Ice Hockey",
+      "season": "2025-26"
+    }
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": "순위", "item": "https://alhockey.fans/standings" }
+    ]
+  };
+
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO 
-        title="아시아리그 순위 - 팀 순위 및 선수 스탯"
-        description="아시아리그 아이스하키 2025-26 시즌 팀 순위표와 개인 기록을 확인하세요. 승점, 골, 어시스트, 포인트 등 상세 스탯을 제공합니다."
-        keywords="아시아리그 순위, 아이스하키 순위표, 팀 순위, 선수 스탯, 득점 순위"
+        title="아시아리그 순위 - 팀 순위표, 선수 스탯 | 2025-26 시즌"
+        description="아시아리그 아이스하키 2025-26 시즌 팀 순위표와 개인 기록 확인. 승점, 승패, 골득실, 득점왕, 어시스트왕, 포인트 리더 등 상세 스탯 제공. HL안양, 홋카이도 레드이글스 순위 실시간 업데이트."
+        keywords="아시아리그 순위, 아이스하키 순위표, 팀 순위, 선수 스탯, 득점 순위, 아시아리그 팀 순위, 2025-26 시즌 순위, HL안양 순위, 안양한라 순위, 홋카이도 레드이글스 순위, 도호쿠 프리블레이즈 순위, 닛코 아이스벅스 순위, 요코하마 그리츠 순위, 스타즈 고베 순위, 승점 순위, 득점왕, 어시스트왕, 포인트 순위, 골득실"
         path="/standings"
+        structuredData={[standingsStructuredData, breadcrumbData]}
       />
       <PageHeader title="순위" subtitle="2025-26 시즌 기록" />
       

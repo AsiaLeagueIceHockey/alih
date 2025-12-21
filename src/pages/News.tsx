@@ -62,13 +62,44 @@ const News = () => {
     }
   };
 
+  // 뉴스 페이지용 구조화 데이터
+  const newsStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "아시아리그 아이스하키 뉴스",
+    "description": "아시아리그 아이스하키 2025-26 시즌 최신 뉴스와 소식",
+    "url": "https://alhockey.fans/news",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": paginatedNews.slice(0, 5).map((news, index) => ({
+        "@type": "NewsArticle",
+        "position": index + 1,
+        "headline": news.title,
+        "description": news.summary,
+        "datePublished": news.published_at,
+        "url": news.origin_url,
+        "inLanguage": news.language
+      }))
+    }
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": "뉴스", "item": "https://alhockey.fans/news" }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO 
-        title="아시아리그 뉴스 - 최신 소식 및 업데이트"
-        description="아시아리그 아이스하키 2025-26 시즌 최신 뉴스, 경기 분석, 선수 인터뷰, 팀 소식을 실시간으로 확인하세요."
-        keywords="아시아리그 뉴스, 아이스하키 뉴스, ALIH 소식, 경기 분석, 선수 인터뷰"
+        title="아시아리그 뉴스 - 최신 소식, 경기 분석, 선수 인터뷰 | 2025-26 시즌"
+        description="아시아리그 아이스하키 2025-26 시즌 최신 뉴스, 경기 분석, 선수 인터뷰, 팀 소식을 실시간으로 확인. 한국어, 일본어, 영어 뉴스 제공. HL안양, 홋카이도 레드이글스 등 모든 팀 소식."
+        keywords="아시아리그 아이스하키 뉴스, 아시아리그 뉴스, 아이스하키 뉴스, 경기 분석, 선수 인터뷰, 아시아리그 소식, HL안양 뉴스, 안양한라 소식, 홋카이도 레드이글스 뉴스, 도호쿠 프리블레이즈 소식, 닛코 아이스벅스 뉴스, 요코하마 그리츠 소식, 스타즈 고베 뉴스, 아이스하키 트레이드, 선수 이적, 시즌 프리뷰"
         path="/news"
+        structuredData={[newsStructuredData, breadcrumbData]}
       />
       <PageHeader title="아시아리그 뉴스" subtitle="2025-26 소식" />
       

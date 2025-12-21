@@ -84,13 +84,44 @@ const TeamRoster = () => {
     );
   }
 
+  // 로스터 페이지용 구조화 데이터
+  const rosterStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "SportsTeam",
+    "name": team.name,
+    "alternateName": team.english_name,
+    "sport": "Ice Hockey",
+    "logo": team.logo,
+    "url": `https://alhockey.fans/roster/${teamId}`,
+    "athlete": players?.slice(0, 10).map(player => ({
+      "@type": "Person",
+      "name": player.name,
+      "jobTitle": player.position,
+      "memberOf": {
+        "@type": "SportsTeam", 
+        "name": team.name
+      }
+    })) || []
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": team.name, "item": `https://alhockey.fans/team/${teamId}` },
+      { "@type": "ListItem", "position": 3, "name": "선수단", "item": `https://alhockey.fans/roster/${teamId}` }
+    ]
+  };
+
   return (
     <>
       <SEO
-        title={`${team.name} 선수단 - 선수 명단 및 통계`}
-        description={`${team.name}의 전체 선수 명단과 시즌 통계를 확인하세요.`}
-        keywords={`${team.name}, 선수 명단, 아시아리그, 아이스하키`}
+        title={`${team.name} 선수단 - 선수 명단, 시즌 통계 | 아시아리그 아이스하키`}
+        description={`${team.name}(${team.english_name}) 전체 선수 명단과 2025-26 시즌 통계 확인. 득점, 도움, 포인트, +/-, 페널티 등 선수별 상세 기록 제공.`}
+        keywords={`${team.name} 선수, ${team.name} 선수 명단, ${team.english_name} roster, 아시아리그 선수, ${team.name} 득점왕, ${team.name} 스탯, 아이스하키 선수 통계`}
         path={`/roster/${teamId}`}
+        structuredData={[rosterStructuredData, breadcrumbData]}
       />
 
       <div className="min-h-screen pb-20">

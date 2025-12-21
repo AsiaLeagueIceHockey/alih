@@ -110,13 +110,60 @@ const TeamDetail = () => {
     );
   }
 
+  // 팀 상세 페이지용 구조화 데이터
+  const teamStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "SportsTeam",
+    "name": team.name,
+    "alternateName": team.english_name,
+    "sport": "Ice Hockey",
+    "logo": team.logo,
+    "url": `https://alhockey.fans/team/${teamId}`,
+    "memberOf": {
+      "@type": "SportsLeague",
+      "name": "Asia League Ice Hockey",
+      "url": "https://alhockey.fans"
+    },
+    ...(team.team_info && {
+      "location": {
+        "@type": "Place",
+        "name": team.team_info.hometown,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": team.team_info.hometown
+        }
+      },
+      "foundingDate": team.team_info.founding_year?.toString()
+    }),
+    ...(team.instagram_url && {
+      "sameAs": [team.instagram_url].filter(Boolean)
+    })
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": team.name, "item": `https://alhockey.fans/team/${teamId}` }
+    ]
+  };
+
+  // home_stadium이 객체인 경우 name 속성 사용
+  const homeStadiumName = team.team_info?.home_stadium 
+    ? (typeof team.team_info.home_stadium === 'string' 
+        ? team.team_info.home_stadium 
+        : team.team_info.home_stadium.name)
+    : '';
+
   return (
     <>
       <SEO
-        title={`${team.name} - 팀 상세 정보`}
-        description={`${team.name}의 팀 정보, 최신 영상, 최근 경기 결과, 주요 선수를 확인하세요.`}
-        keywords={`${team.name}, ${team.english_name}, 아시아리그, 아이스하키`}
+        title={`${team.name} - 팀 정보, 선수단, 경기 결과 | 아시아리그 아이스하키`}
+        description={`${team.name}(${team.english_name})의 팀 정보, 최신 영상, 경기 결과, 주요 선수, 리그 순위를 확인하세요.${team.team_info ? ` 홈구장: ${homeStadiumName}, 연고지: ${team.team_info.hometown}` : ''}`}
+        keywords={`${team.name}, ${team.english_name}, 아시아리그, 아이스하키, ${team.name} 선수, ${team.name} 경기 일정, ${team.name} 순위, ${team.name} 하이라이트, ${team.team_info?.hometown || ''} 아이스하키`}
         path={`/team/${teamId}`}
+        structuredData={[teamStructuredData, breadcrumbData]}
       />
 
       <div className="min-h-screen pb-20">

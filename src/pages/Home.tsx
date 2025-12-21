@@ -197,25 +197,55 @@ const Home = () => {
 
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "SportsOrganization",
+    "@type": "WebSite",
     "name": "아시아리그 아이스하키",
-    "sport": "Ice Hockey",
+    "alternateName": ["Asia League Ice Hockey", "아시아리그하키"],
     "url": "https://alhockey.fans",
-    "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 결과, 영상, 순위, 스탯, 뉴스를 한 곳에서",
-    "memberOf": {
-      "@type": "SportsLeague",
-      "name": "Asia League Ice Hockey"
-    }
+    "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 실시간 스코어, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한 곳에서",
+    "inLanguage": "ko-KR",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://alhockey.fans/schedule?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "아시아리그 아이스하키",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://alhockey.fans/og-image.png"
+      }
+    },
+    "sameAs": [
+      "https://www.instagram.com/alhockey_fans"
+    ]
   };
+
+  // 메인 페이지용 BreadcrumbList
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://alhockey.fans"
+    }]
+  };
+
+  const combinedStructuredData = [structuredData, breadcrumbData];
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO 
-        title="아시아리그 아이스하키 - 2025-26 시즌"
-        description="아시아리그 아이스하키 2025-26 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요."
-        keywords="아시아리그, 아이스하키, ALIH, HL 안양, 레드 이글스 홋카이도, 도호쿠 프리 블레이즈, 2025-26 시즌, 경기 일정, 하이라이트"
+        title="아시아리그 아이스하키 - 경기 일정, 실시간 스코어, 하이라이트 | 2025-26 시즌"
+        description="아시아리그 아이스하키 2025-26 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요. HL안양, 홋카이도 레드이글스, 도호쿠 프리블레이즈 등 전 팀 정보 제공."
+        keywords="아시아리그 아이스하키, 아시아리그, 아이스하키, 2025-26 시즌, HL안양, 안양한라, 홋카이도 레드이글스, 도호쿠 프리블레이즈, 닛코 아이스벅스, 요코하마 그리츠, 스타즈 고베, HL ANYANG, RED EAGLES HOKKAIDO, TOHOKU FREE BLADES, NIKKO ICEBUCKS, YOKOHAMA GRITS, STARS KOBE, 경기 일정, 경기 결과, 실시간 스코어, 하이라이트 영상, 팀 순위, 승점, 선수 스탯, 득점 순위, 도움 순위, 아이스하키 뉴스, ALIH"
         path="/"
-        structuredData={structuredData}
+        structuredData={combinedStructuredData}
       />
       <PageHeader title="아시아리그 아이스하키" subtitle="2025-26 시즌" />
 

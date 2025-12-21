@@ -417,9 +417,9 @@ const GameDetail = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <SEO 
-          title={`${homeTeam?.name} vs ${awayTeam?.name} - ${isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'}`}
-          description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} ${isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기 상황' : '경기 정보, 맞대결 전적, 스타플레이어'}를 확인하세요.`}
-          keywords={`${homeTeam?.name}, ${awayTeam?.name}, 경기 정보, 맞대결, 전적`}
+          title={`${homeTeam?.name} vs ${awayTeam?.name} - ${isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'} | 아시아리그 아이스하키`}
+          description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} ${isFinishedWithLiveData ? '경기 결과, 스코어, 득점 기록' : isInProgress ? '실시간 경기 상황, 라이브 스코어' : '경기 정보, 맞대결 전적, 스타플레이어'}을 확인하세요. ${scheduleData?.match_place || ''}`}
+          keywords={`${homeTeam?.name} vs ${awayTeam?.name}, ${homeTeam?.name} 경기, ${awayTeam?.name} 경기, 아시아리그 경기 결과, 실시간 스코어, 라이브 경기, 맞대결 전적, ${scheduleData?.match_place || ''}`}
           path={`/schedule/${gameNo}`}
           structuredData={structuredData}
         />
@@ -796,9 +796,9 @@ const GameDetail = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO 
-        title={`${homeTeam?.name} vs ${awayTeam?.name} - 경기 상세 기록`}
-        description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} 경기의 상세 기록, 스코어, 슈팅, 득점 정보를 확인하세요.`}
-        keywords={`${homeTeam?.name}, ${awayTeam?.name}, 경기 기록, 상세 스탯, 득점, 어시스트`}
+        title={`${homeTeam?.name} vs ${awayTeam?.name} - 경기 상세 기록, 스코어, 득점 | 아시아리그 아이스하키`}
+        description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} 경기 상세 기록. 스코어, 피리어드별 득점, 슈팅, 득점자, 어시스트, 페널티, 로스터 정보까지 완벽 분석.`}
+        keywords={`${homeTeam?.name} vs ${awayTeam?.name}, ${homeTeam?.name} 경기 결과, ${awayTeam?.name} 경기 결과, 아시아리그 경기 기록, 상세 스탯, 득점 기록, 어시스트, 슈팅 통계, 피리어드별 스코어`}
         path={`/schedule/${gameNo}`}
         structuredData={structuredData}
       />

@@ -74,13 +74,44 @@ const Highlights = () => {
     return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
   };
 
+  // 하이라이트 페이지용 구조화 데이터
+  const highlightStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "아시아리그 아이스하키 하이라이트 영상",
+    "description": "아시아리그 아이스하키 2025-26 시즌 경기 하이라이트 영상 모음",
+    "url": "https://alhockey.fans/highlights",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": filteredGames?.slice(0, 5).map((game, index) => ({
+        "@type": "VideoObject",
+        "position": index + 1,
+        "name": game.highlight_title || `${getTeamById(game.home_alih_team_id)?.name} vs ${getTeamById(game.away_alih_team_id)?.name} 하이라이트`,
+        "description": `아시아리그 아이스하키 경기 하이라이트 - ${getTeamById(game.home_alih_team_id)?.name} vs ${getTeamById(game.away_alih_team_id)?.name}`,
+        "thumbnailUrl": getYoutubeThumbnail(game.highlight_url),
+        "uploadDate": game.match_at,
+        "contentUrl": game.highlight_url
+      })) || []
+    }
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": "하이라이트", "item": "https://alhockey.fans/highlights" }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO 
-        title="아시아리그 하이라이트 - 경기 영상 모음"
-        description="아시아리그 아이스하키 2025-26 시즌 하이라이트 영상을 팀별로 확인하세요. 최신 경기 하이라이트를 제공합니다."
-        keywords="아시아리그 하이라이트, 아이스하키 영상, 경기 하이라이트, 골 영상, ALIH 동영상"
+        title="아시아리그 하이라이트 - 경기 영상, 골 장면 모음 | 2025-26 시즌"
+        description="아시아리그 아이스하키 2025-26 시즌 하이라이트 영상 모음. 최신 경기 하이라이트, 골 장면, 베스트 세이브를 팀별로 확인하세요. HL안양, 홋카이도 레드이글스 등 모든 팀 영상 제공."
+        keywords="아시아리그 아이스하키 하이라이트, 아시아리그 하이라이트, 아이스하키 영상, 경기 하이라이트, 골 영상, 아시아리그 경기 영상, HL안양 하이라이트, 안양한라 영상, 홋카이도 레드이글스 하이라이트, 도호쿠 프리블레이즈 영상, 닛코 아이스벅스 영상, 요코하마 그리츠 영상, 스타즈 고베 영상, 베스트 골, 세이브 영상, 최신 경기 영상"
         path="/highlights"
+        structuredData={[highlightStructuredData, breadcrumbData]}
       />
       <PageHeader title="하이라이트" subtitle="최신 경기 영상" />
       

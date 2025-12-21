@@ -77,13 +77,45 @@ const Schedule = () => {
 
   const isLoading = teamsLoading || schedulesLoading;
 
+  // 경기 일정 페이지용 구조화 데이터
+  const scheduleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "아시아리그 아이스하키 경기 일정",
+    "description": "아시아리그 아이스하키 2025-26 시즌 전체 경기 일정과 결과",
+    "url": "https://alhockey.fans/schedule",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": filteredGames.slice(0, 10).map((game, index) => ({
+        "@type": "SportsEvent",
+        "position": index + 1,
+        "name": `${getTeamById(game.home_alih_team_id)?.name || 'TBD'} vs ${getTeamById(game.away_alih_team_id)?.name || 'TBD'}`,
+        "startDate": game.match_at,
+        "location": {
+          "@type": "Place",
+          "name": game.match_place || "TBD"
+        }
+      }))
+    }
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": "경기 일정", "item": "https://alhockey.fans/schedule" }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO 
-        title="아시아리그 경기 일정 - 2025-26 시즌"
-        description="아시아리그 아이스하키 2025-26 시즌 전체 경기 일정을 확인하세요. 월별 경기 일정, 팀별 일정, 하이라이트 영상을 제공합니다."
-        keywords="아시아리그 일정, 아이스하키 경기 일정, ALIH 스케줄, 경기 결과, 하이라이트"
+        title="아시아리그 경기 일정 - 2025-26 시즌 전체 일정 및 결과"
+        description="아시아리그 아이스하키 2025-26 시즌 전체 경기 일정, 월별 일정, 팀별 일정을 확인하세요. 실시간 경기 결과, 경기장 정보, 하이라이트 영상까지 한 번에. HL안양, 홋카이도 레드이글스 등 전 팀 경기 일정 제공."
+        keywords="아시아리그 아이스하키 일정, 아시아리그 일정, 아이스하키 경기 일정, 아시아리그 경기 일정, 2025-26 시즌 일정, HL안양 경기 일정, 안양한라 일정, 홋카이도 레드이글스 일정, 도호쿠 프리블레이즈 일정, 닛코 아이스벅스 일정, 요코하마 그리츠 일정, 스타즈 고베 일정, 경기 결과, 하이라이트, 경기장 정보, 월별 경기"
         path="/schedule"
+        structuredData={[scheduleStructuredData, breadcrumbData]}
       />
       <PageHeader title="경기 일정 / 결과" subtitle="2025-26 시즌 전체 경기" />
       
