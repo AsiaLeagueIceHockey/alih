@@ -415,30 +415,90 @@ const teamLogo = getTeamLogo(englishName, teams);
 
 ## 8. SEO 구현
 
-### 8.1 메타 태그 (SEO.tsx)
+### 8.1 공식 팀명 (SEO 키워드 기준)
+
+| 한글명 | 영문명 | 비고 |
+|--------|--------|------|
+| HL안양 | HL ANYANG | 안양한라(구 명칭) 포함 가능 |
+| 홋카이도 레드이글스 | RED EAGLES HOKKAIDO | |
+| 도호쿠 프리블레이즈 | TOHOKU FREE BLADES | |
+| 닛코 아이스벅스 | NIKKO ICEBUCKS | |
+| 요코하마 그리츠 | YOKOHAMA GRITS | |
+| 스타즈 고베 | STARS KOBE | |
+
+> **주의**: `ALIH`는 보충 설명으로만 사용 (keywords 맨 뒤에 배치)
+
+### 8.2 메타 태그 (SEO.tsx)
 
 ```typescript
+// src/components/SEO.tsx
 <SEO
-  title="경기 제목"
-  description="경기 설명"
-  keywords="아시아리그, 아이스하키"
-  ogImage="https://alhockey.fans/og-image.png"
-  canonical="https://alhockey.fans/schedule/48"
+  title="페이지 제목"                    // ex: "아시아리그 경기 일정 - 2025-26 시즌"
+  description="상세 설명"                // ex: "HL안양, 홋카이도 레드이글스 등 전 팀..."
+  keywords="아시아리그 아이스하키, ..."  // 정식 팀명 포함
+  path="/schedule"                       // canonical URL용
+  structuredData={schema}                // JSON-LD 객체 또는 배열
+  noindex={false}                        // 색인 제외 여부
+  article={{                             // 뉴스/경기 결과 등
+    publishedTime: "2025-12-21T00:00:00Z",
+    section: "Sports"
+  }}
 />
 ```
 
-### 8.2 JSON-LD 구조화 데이터
+**포함 메타 태그**:
+- `robots`, `googlebot`, `language`, `geo.region`
+- `og:site_name`, `og:locale`, `og:image:width/height`
+- `twitter:site`, `twitter:image:alt`
+- `hreflang`, `theme-color`, `apple-mobile-web-app-title`
+
+### 8.3 JSON-LD 구조화 데이터
+
+| 페이지 | 스키마 타입 |
+|--------|------------|
+| Home | `WebSite` + `BreadcrumbList` |
+| Schedule | `CollectionPage` + `SportsEvent[]` |
+| GameDetail | `SportsEvent` |
+| Highlights | `CollectionPage` + `VideoObject[]` |
+| Standings | `Table` |
+| News | `CollectionPage` + `NewsArticle[]` |
+| TeamDetail | `SportsTeam` + `BreadcrumbList` |
+| TeamRoster | `SportsTeam` + `Person[]` |
 
 ```typescript
-// 경기 상세 페이지에 SportsEvent 스키마 적용
+// 예시: 경기 상세 페이지 (GameDetail.tsx)
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SportsEvent",
-  "name": "안양 한라 vs 요코하마 그리츠",
+  "name": "HL안양 vs 홋카이도 레드이글스",
   "startDate": "2025-12-01T19:00:00+09:00",
-  // ...
+  "location": {
+    "@type": "Place",
+    "name": "안양 아이스 아레나"
+  },
+  "homeTeam": { "@type": "SportsTeam", "name": "HL안양" },
+  "awayTeam": { "@type": "SportsTeam", "name": "홋카이도 레드이글스" }
 };
 ```
+
+### 8.4 index.html 기본 SEO
+
+- **author**: `alhockey_fans`
+- **구조화 데이터**: `WebSite` 스키마 (SearchAction 포함)
+- **검색엔진 인증**:
+  - Google: `oPbwEPC3bqmphkARcL9srik2fuwGJvsSPjgslsR8zQI`
+  - Naver: `80f9275a181ed121975baf44113d434a89401b52`
+  - Bing: `A72866F9AD31F7BF367B76DC7B96B4BF`
+
+### 8.5 검색엔진 색인 요청
+
+**Google Search Console**:
+1. URL 검사 → 색인 생성 요청
+2. 사이트맵 제출: `https://alhockey.fans/sitemap.xml`
+
+**Naver Search Advisor**:
+1. 웹 페이지 수집 요청
+2. 사이트맵 제출
 
 ---
 
@@ -486,6 +546,7 @@ npm run build
 
 | 날짜 | 변경 내용 |
 |------|----------|
+| 2025-12-21 | SEO 전면 최적화 (메타 태그, 구조화 데이터, 정식 팀명 적용) |
 | 2025-12-14 | useSchedules 공통 훅 추가 (Home/Schedule/GameDetail 캐시 일관성) |
 | 2025-12-14 | InstagramPreview 페이지 추가 (시리즈 프리뷰 SNS 자동화) |
 | 2025-12-11 | OT/SO(연장/슛아웃) 피리어드 표시 지원 추가 |
@@ -496,4 +557,5 @@ npm run build
 
 ---
 
-*마지막 업데이트: 2025-12-14*
+*마지막 업데이트: 2025-12-21*
+
