@@ -83,6 +83,7 @@ src/
 │   ├── TeamRoster.tsx           # 팀 전체 로스터
 │   ├── InstagramScore.tsx       # SNS 자동화용 경기 결과 스크린샷
 │   ├── InstagramPreview.tsx     # SNS 자동화용 시리즈 프리뷰 ⭐
+│   ├── InstagramGoals.tsx       # SNS 자동화용 골/어시스트 정보 ⭐
 │   └── NotFound.tsx             # 404 페이지
 │
 ├── types/
@@ -529,6 +530,7 @@ npm run build
 | `/roster/:teamId` | TeamRoster | 팀 로스터 |
 | `/instagram/score` | InstagramScore | SNS 경기결과 스크린샷 |
 | `/instagram/preview` | InstagramPreview | SNS 시리즈 프리뷰 스크린샷 |
+| `/instagram/goals` | InstagramGoals | SNS 골/어시스트 정보 스크린샷 |
 
 ---
 
