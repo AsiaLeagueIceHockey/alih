@@ -627,7 +627,7 @@ const GameDetail = () => {
                               득점: {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
                             </p>
                             {(event.assist1 || event.assist2) && (
-                              <p className="text-xs text-muted-foreground truncate">
+                              <p className="text-xs text-muted-foreground">
                                 어시스트: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
                                 {event.assist2 && `, ${getLivePlayerName(event.team_id, event.assist2.number)} (#${event.assist2.number})`}
                               </p>
