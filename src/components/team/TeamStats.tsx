@@ -1,5 +1,13 @@
 import { Card } from "@/components/ui/card";
-import { Home, Car, TrendingUp, TrendingDown } from "lucide-react";
+import { Home, Car, TrendingUp, TrendingDown, Zap, Target } from "lucide-react";
+
+interface AdvancedStats {
+  ppGoals: number;
+  shGoals?: number;
+  totalGoals: number;
+  ppRate: number;
+  periodGoals: { p1: number; p2: number; p3: number; ot: number };
+}
 
 interface TeamStatsProps {
   homeRecord: { wins: number; losses: number };
@@ -8,6 +16,7 @@ interface TeamStatsProps {
   avgGoalsFor: number;
   avgGoalsAgainst: number;
   gamesPlayed: number;
+  advancedStats?: AdvancedStats;
 }
 
 const TeamStats = ({
@@ -17,12 +26,18 @@ const TeamStats = ({
   avgGoalsFor,
   avgGoalsAgainst,
   gamesPlayed,
+  advancedStats,
 }: TeamStatsProps) => {
   const homeTotal = homeRecord.wins + homeRecord.losses;
   const awayTotal = awayRecord.wins + awayRecord.losses;
   const homeWinRate = homeTotal > 0 ? Math.round((homeRecord.wins / homeTotal) * 100) : 0;
   const awayWinRate = awayTotal > 0 ? Math.round((awayRecord.wins / awayTotal) * 100) : 0;
   const goalDiff = avgGoalsFor - avgGoalsAgainst;
+
+  // 피리어드별 득점 분포 계산
+  const periodMax = advancedStats 
+    ? Math.max(advancedStats.periodGoals.p1, advancedStats.periodGoals.p2, advancedStats.periodGoals.p3, advancedStats.periodGoals.ot, 1)
+    : 1;
 
   return (
     <section className="mb-6">
@@ -100,12 +115,71 @@ const TeamStats = ({
             </div>
           </div>
           <div className="text-center">
-            <div className="text-sm text-muted-foreground mb-1">득실차</div>
+            <div className="text-sm text-muted-foreground mb-1">평균 득실차</div>
             <div className={`text-xl font-bold ${goalDiff >= 0 ? 'text-green-500' : 'text-red-500'}`}>
               {goalDiff >= 0 ? '+' : ''}{goalDiff.toFixed(1)}
             </div>
           </div>
         </div>
+
+        {/* 고급 통계 - 파워플레이/숏핸디드 & 피리어드별 득점 */}
+        {advancedStats && advancedStats.totalGoals > 0 && (
+          <>
+            {/* 특수 상황 득점 */}
+            <div className="pt-4 border-t border-border">
+              <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-yellow-500" />
+                특수 상황 득점
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-yellow-500/10 rounded-lg p-3 text-center">
+                  <div className="text-xs text-muted-foreground mb-1">파워플레이 골</div>
+                  <div className="text-2xl font-bold text-yellow-500">{advancedStats.ppGoals}</div>
+                  <div className="text-xs text-muted-foreground">
+                    전체 {advancedStats.totalGoals}골 중 {advancedStats.ppRate.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 text-center">
+                  <div className="text-xs text-muted-foreground mb-1">숏핸디드 골</div>
+                  <div className="text-2xl font-bold text-purple-500">{advancedStats.shGoals || 0}</div>
+                  <div className="text-xs text-muted-foreground">
+                    수적 열세 득점
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 피리어드별 득점 분포 */}
+            <div className="pt-4 border-t border-border">
+              <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                피리어드별 득점
+              </div>
+              <div className="space-y-3">
+                {[
+                  { label: '1P', value: advancedStats.periodGoals.p1, color: 'bg-blue-500' },
+                  { label: '2P', value: advancedStats.periodGoals.p2, color: 'bg-green-500' },
+                  { label: '3P', value: advancedStats.periodGoals.p3, color: 'bg-orange-500' },
+                  ...(advancedStats.periodGoals.ot > 0 
+                    ? [{ label: 'OT', value: advancedStats.periodGoals.ot, color: 'bg-red-500' }]
+                    : []
+                  ),
+                ].map((period) => (
+                  <div key={period.label} className="flex items-center gap-3">
+                    <span className="w-8 text-sm font-medium text-muted-foreground">{period.label}</span>
+                    <div className="flex-1 h-6 bg-secondary/50 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${period.color} rounded-full transition-all duration-500`}
+                        style={{ width: `${(period.value / periodMax) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-8 text-sm font-bold text-right">{period.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* 총 경기 수 */}
         <div className="text-center text-xs text-muted-foreground">
@@ -117,4 +191,3 @@ const TeamStats = ({
 };
 
 export default TeamStats;
-

@@ -114,6 +114,27 @@ const TeamDetail = () => {
     gcTime: 1000 * 60 * 60 * 24,
   });
 
+  // 팀의 경기 상세 데이터 조회 (골 통계용)
+  const { data: gameDetails } = useQuery({
+    queryKey: ['team-game-details', teamId],
+    queryFn: async () => {
+      // 팀의 완료된 경기 game_no 목록
+      const gameNos = allFinishedGames?.map(g => g.game_no) || [];
+      if (gameNos.length === 0) return [];
+
+      const { data, error } = await externalSupabase
+        .from('alih_game_details')
+        .select('game_no, goals')
+        .in('game_no', gameNos);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!allFinishedGames && allFinishedGames.length > 0,
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
+
   if (isLoadingTeam) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -158,6 +179,55 @@ const TeamDetail = () => {
   const gamesPlayed = currentStanding?.games_played || (homeGames.length + awayGames.length);
   const avgGoalsFor = gamesPlayed > 0 ? (currentStanding?.goals_for || 0) / gamesPlayed : 0;
   const avgGoalsAgainst = gamesPlayed > 0 ? (currentStanding?.goals_against || 0) / gamesPlayed : 0;
+
+  // 고급 통계 계산 (골 상세 데이터 기반)
+  interface Goal {
+    goal_no: number;
+    period: number;
+    time: string;
+    team_id: number;
+    situation: string;
+    assist1_no: number | null;
+    assist2_no: number | null;
+  }
+
+  const advancedStats = (() => {
+    if (!gameDetails || !allFinishedGames) {
+      return { ppGoals: 0, totalGoals: 0, ppRate: 0, periodGoals: { p1: 0, p2: 0, p3: 0, ot: 0 } };
+    }
+
+    let ppGoals = 0;
+    let shGoals = 0;
+    let totalGoals = 0;
+    const periodGoals = { p1: 0, p2: 0, p3: 0, ot: 0 };
+
+    gameDetails.forEach((detail) => {
+      const game = allFinishedGames.find(g => g.game_no === detail.game_no);
+      if (!game || !detail.goals) return;
+
+      const goals = detail.goals as Goal[];
+      goals.forEach((goal) => {
+        // 이 팀의 골만 카운트
+        if (goal.team_id === teamIdNum) {
+          totalGoals++;
+
+          // 파워플레이/숏핸디드 골
+          if (goal.situation === '+1') ppGoals++;
+          else if (goal.situation === '-1') shGoals++;
+
+          // 피리어드별 득점
+          if (goal.period === 1) periodGoals.p1++;
+          else if (goal.period === 2) periodGoals.p2++;
+          else if (goal.period === 3) periodGoals.p3++;
+          else periodGoals.ot++; // 연장/슛아웃
+        }
+      });
+    });
+
+    const ppRate = totalGoals > 0 ? (ppGoals / totalGoals) * 100 : 0;
+
+    return { ppGoals, shGoals, totalGoals, ppRate, periodGoals };
+  })();
 
   // 팀 상세 페이지용 구조화 데이터
   const teamStructuredData = {
@@ -242,6 +312,7 @@ const TeamDetail = () => {
               avgGoalsFor={avgGoalsFor}
               avgGoalsAgainst={avgGoalsAgainst}
               gamesPlayed={gamesPlayed}
+              advancedStats={advancedStats}
             />
           )}
 
