@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper, Coffee } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@supabase/supabase-js";
+import { externalSupabase } from "@/lib/supabase-external";
 import { useTeams } from "@/hooks/useTeams";
 import { useSchedules, ScheduleGame } from "@/hooks/useSchedules";
 import { Loader2 } from "lucide-react";
@@ -15,11 +15,6 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
 import type { CarouselApi } from "@/components/ui/carousel";
-
-const externalSupabase = createClient(
-  'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68'
-);
 
 
 
@@ -66,9 +61,9 @@ const Home = () => {
 
   useEffect(() => {
     if (!nextGamesApi) return;
-    
+
     setNextGamesIndex(nextGamesApi.selectedScrollSnap());
-    
+
     nextGamesApi.on("select", () => {
       setNextGamesIndex(nextGamesApi.selectedScrollSnap());
     });
@@ -76,9 +71,9 @@ const Home = () => {
 
   useEffect(() => {
     if (!recentGamesApi) return;
-    
+
     setRecentGamesIndex(recentGamesApi.selectedScrollSnap());
-    
+
     recentGamesApi.on("select", () => {
       setRecentGamesIndex(recentGamesApi.selectedScrollSnap());
     });
@@ -92,7 +87,7 @@ const Home = () => {
       const { data, error } = await externalSupabase
         .from('alih_teams')
         .select('english_name, name, logo');
-      
+
       if (error) throw error;
       return data as AlihTeam[];
     },
@@ -103,15 +98,15 @@ const Home = () => {
   });
 
   const { data: teamStandings } = useQuery({
-    queryKey: ['team-standings-home'],
+    queryKey: ['team-standings'],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, logo, english_name)')
         .order('rank', { ascending: true });
-      
+
       if (error) throw error;
-      
+
       return (data || []).map(standing => ({
         ...standing,
         team: standing.team as unknown as AlihTeam
@@ -130,7 +125,7 @@ const Home = () => {
         .from('alih_news')
         .select('*')
         .order('published_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as AlihNews[];
     },
@@ -160,13 +155,13 @@ const Home = () => {
   };
 
   const now = new Date();
-  
+
   // 진행 중인 경기: match_at <= now && game_status !== 'Game Finished'
   const inProgressGames = schedules?.filter(game => {
     const matchDate = new Date(game.match_at);
     return matchDate <= now && game.game_status !== 'Game Finished';
   }) || [];
-  
+
   // 다음 경기: 미래의 가장 가까운 날짜의 모든 경기
   const nextGame = schedules?.find(game => new Date(game.match_at) > now);
   const nextGames = schedules?.filter(game => {
@@ -177,10 +172,10 @@ const Home = () => {
   }) || [];
 
   // 최근 결과: game_status === 'Game Finished'인 경기 중 가장 최근 날짜
-  const completedGames = schedules?.filter(game => 
+  const completedGames = schedules?.filter(game =>
     game.game_status === 'Game Finished'
   ).reverse() || [];
-  
+
   const recentGame = completedGames[0];
   const recentGames = completedGames.filter(game => {
     if (!recentGame) return false;
@@ -188,8 +183,8 @@ const Home = () => {
     const recentGameDate = new Date(recentGame.match_at).toDateString();
     return gameDate === recentGameDate;
   });
-  
-  const latestHighlight = schedules?.filter(game => 
+
+  const latestHighlight = schedules?.filter(game =>
     game.highlight_url && game.highlight_url.trim() !== ''
   ).reverse()[0];
 
@@ -240,7 +235,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SEO 
+      <SEO
         title="아시아리그 아이스하키 - 경기 일정, 실시간 스코어, 하이라이트 | 2025-26 시즌"
         description="아시아리그 아이스하키 2025-26 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요. HL안양, 홋카이도 레드이글스, 도호쿠 프리블레이즈 등 전 팀 정보 제공."
         keywords="아시아리그 아이스하키, 아시아리그, 아이스하키, 2025-26 시즌, HL안양, 안양한라, 홋카이도 레드이글스, 도호쿠 프리블레이즈, 닛코 아이스벅스, 요코하마 그리츠, 스타즈 고베, HL ANYANG, RED EAGLES HOKKAIDO, TOHOKU FREE BLADES, NIKKO ICEBUCKS, YOKOHAMA GRITS, STARS KOBE, 경기 일정, 경기 결과, 실시간 스코어, 하이라이트 영상, 팀 순위, 승점, 선수 스탯, 득점 순위, 도움 순위, 아이스하키 뉴스, ALIH"
@@ -264,7 +259,7 @@ const Home = () => {
             </div>
             <div className="space-y-3">
               {inProgressGames.map((game) => (
-                <Card 
+                <Card
                   key={game.id}
                   className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => navigate(`/schedule/${game.game_no}`, {
@@ -286,8 +281,8 @@ const Home = () => {
                   <div className="flex items-center justify-between">
                     <div className="text-center flex-1">
                       {getTeamById(game.home_alih_team_id)?.logo ? (
-                        <img 
-                          src={getTeamById(game.home_alih_team_id)!.logo} 
+                        <img
+                          src={getTeamById(game.home_alih_team_id)!.logo}
                           alt={getTeamById(game.home_alih_team_id)!.name}
                           className="w-12 h-12 object-contain mx-auto mb-2"
                           loading="lazy"
@@ -307,8 +302,8 @@ const Home = () => {
                     </div>
                     <div className="text-center flex-1">
                       {getTeamById(game.away_alih_team_id)?.logo ? (
-                        <img 
-                          src={getTeamById(game.away_alih_team_id)!.logo} 
+                        <img
+                          src={getTeamById(game.away_alih_team_id)!.logo}
                           alt={getTeamById(game.away_alih_team_id)!.name}
                           className="w-12 h-12 object-contain mx-auto mb-2"
                           loading="lazy"
@@ -347,7 +342,7 @@ const Home = () => {
               <p className="text-sm text-muted-foreground text-center">예정된 경기가 없습니다</p>
             </Card>
           ) : nextGames.length === 1 ? (
-            <Card 
+            <Card
               className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => navigate(`/schedule/${nextGames[0].game_no}`, {
                 state: {
@@ -368,8 +363,8 @@ const Home = () => {
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
                   {getTeamById(nextGames[0].home_alih_team_id)?.logo ? (
-                    <img 
-                      src={getTeamById(nextGames[0].home_alih_team_id)!.logo} 
+                    <img
+                      src={getTeamById(nextGames[0].home_alih_team_id)!.logo}
                       alt={getTeamById(nextGames[0].home_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
@@ -389,8 +384,8 @@ const Home = () => {
                 </div>
                 <div className="text-center flex-1">
                   {getTeamById(nextGames[0].away_alih_team_id)?.logo ? (
-                    <img 
-                      src={getTeamById(nextGames[0].away_alih_team_id)!.logo} 
+                    <img
+                      src={getTeamById(nextGames[0].away_alih_team_id)!.logo}
                       alt={getTeamById(nextGames[0].away_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
@@ -413,7 +408,7 @@ const Home = () => {
               <CarouselContent>
                 {nextGames.map((game) => (
                   <CarouselItem key={game.id}>
-                    <Card 
+                    <Card
                       className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
                       onClick={() => navigate(`/schedule/${game.game_no}`, {
                         state: {
@@ -434,8 +429,8 @@ const Home = () => {
                       <div className="flex items-center justify-between">
                         <div className="text-center flex-1">
                           {getTeamById(game.home_alih_team_id)?.logo ? (
-                            <img 
-                              src={getTeamById(game.home_alih_team_id)!.logo} 
+                            <img
+                              src={getTeamById(game.home_alih_team_id)!.logo}
                               alt={getTeamById(game.home_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
@@ -455,8 +450,8 @@ const Home = () => {
                         </div>
                         <div className="text-center flex-1">
                           {getTeamById(game.away_alih_team_id)?.logo ? (
-                            <img 
-                              src={getTeamById(game.away_alih_team_id)!.logo} 
+                            <img
+                              src={getTeamById(game.away_alih_team_id)!.logo}
                               alt={getTeamById(game.away_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
@@ -479,11 +474,10 @@ const Home = () => {
               </CarouselContent>
               <div className="flex justify-center gap-1 mt-3">
                 {nextGames.map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                      index === nextGamesIndex ? 'bg-primary' : 'bg-muted'
-                    }`} 
+                  <div
+                    key={index}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${index === nextGamesIndex ? 'bg-primary' : 'bg-muted'
+                      }`}
                   />
                 ))}
               </div>
@@ -507,7 +501,7 @@ const Home = () => {
               <p className="text-sm text-muted-foreground text-center">최근 결과가 없습니다</p>
             </Card>
           ) : recentGames.length === 1 ? (
-            <Card 
+            <Card
               className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => navigate(`/schedule/${recentGames[0].game_no}`, {
                 state: {
@@ -526,8 +520,8 @@ const Home = () => {
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
                   {getTeamById(recentGames[0].home_alih_team_id)?.logo ? (
-                    <img 
-                      src={getTeamById(recentGames[0].home_alih_team_id)!.logo} 
+                    <img
+                      src={getTeamById(recentGames[0].home_alih_team_id)!.logo}
                       alt={getTeamById(recentGames[0].home_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
@@ -541,8 +535,8 @@ const Home = () => {
                 <div className="text-xl font-bold text-muted-foreground px-4">:</div>
                 <div className="text-center flex-1">
                   {getTeamById(recentGames[0].away_alih_team_id)?.logo ? (
-                    <img 
-                      src={getTeamById(recentGames[0].away_alih_team_id)!.logo} 
+                    <img
+                      src={getTeamById(recentGames[0].away_alih_team_id)!.logo}
                       alt={getTeamById(recentGames[0].away_alih_team_id)!.name}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
@@ -560,7 +554,7 @@ const Home = () => {
               <CarouselContent>
                 {recentGames.map((game) => (
                   <CarouselItem key={game.id}>
-                    <Card 
+                    <Card
                       className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
                       onClick={() => navigate(`/schedule/${game.game_no}`, {
                         state: {
@@ -579,8 +573,8 @@ const Home = () => {
                       <div className="flex items-center justify-between">
                         <div className="text-center flex-1">
                           {getTeamById(game.home_alih_team_id)?.logo ? (
-                            <img 
-                              src={getTeamById(game.home_alih_team_id)!.logo} 
+                            <img
+                              src={getTeamById(game.home_alih_team_id)!.logo}
                               alt={getTeamById(game.home_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
@@ -594,8 +588,8 @@ const Home = () => {
                         <div className="text-xl font-bold text-muted-foreground px-4">:</div>
                         <div className="text-center flex-1">
                           {getTeamById(game.away_alih_team_id)?.logo ? (
-                            <img 
-                              src={getTeamById(game.away_alih_team_id)!.logo} 
+                            <img
+                              src={getTeamById(game.away_alih_team_id)!.logo}
                               alt={getTeamById(game.away_alih_team_id)!.name}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
@@ -613,11 +607,10 @@ const Home = () => {
               </CarouselContent>
               <div className="flex justify-center gap-1 mt-3">
                 {recentGames.map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                      index === recentGamesIndex ? 'bg-primary' : 'bg-muted'
-                    }`} 
+                  <div
+                    key={index}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${index === recentGamesIndex ? 'bg-primary' : 'bg-muted'
+                      }`}
                   />
                 ))}
               </div>
@@ -626,7 +619,7 @@ const Home = () => {
         </section>
 
         {/* Support Banner */}
-        <button 
+        <button
           onClick={() => {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (isMobile) {
@@ -680,8 +673,8 @@ const Home = () => {
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           {standing.team?.logo && (
-                            <img 
-                              src={standing.team.logo} 
+                            <img
+                              src={standing.team.logo}
                               alt={standing.team.name}
                               className="w-5 h-5 object-contain"
                               loading="lazy"
@@ -720,8 +713,8 @@ const Home = () => {
           ) : (
             <div className="space-y-3">
               {latestNews.map((news) => (
-                <Card 
-                  key={news.id} 
+                <Card
+                  key={news.id}
                   className="p-3 border-border hover:border-primary/50 transition-colors cursor-pointer"
                   onClick={() => window.open(news.origin_url, '_blank')}
                 >
@@ -746,7 +739,7 @@ const Home = () => {
               <p className="text-sm text-muted-foreground text-center">하이라이트가 없습니다</p>
             </Card>
           ) : (
-            <Card 
+            <Card
               className="overflow-hidden border-border cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => {
                 if (latestHighlight.highlight_url) {
@@ -759,7 +752,7 @@ const Home = () => {
             >
               <div className="aspect-video bg-secondary/50 relative">
                 {latestHighlight.highlight_url && (
-                  <img 
+                  <img
                     src={`https://img.youtube.com/vi/${getYoutubeVideoId(latestHighlight.highlight_url)}/maxresdefault.jpg`}
                     alt={latestHighlight.highlight_title || "하이라이트"}
                     className="w-full h-full object-cover"

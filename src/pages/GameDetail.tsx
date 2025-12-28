@@ -1,7 +1,8 @@
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
-import { Loader2, ArrowLeft, Trophy, Users, Goal, Shield, Play } from "lucide-react";
+import { useState } from "react";
+import { Loader2, ArrowLeft, Trophy, Users, Goal, Shield, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -148,10 +149,14 @@ const GameDetail = () => {
   const { gameNo } = useParams<{ gameNo: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
+  // Collapsible roster state
+  const [homeRosterOpen, setHomeRosterOpen] = useState(false);
+  const [awayRosterOpen, setAwayRosterOpen] = useState(false);
+
   // location.state에서 팀 정보를 가져오되, 없으면 null로 처리
-  const stateData = location.state as { 
-    homeTeam?: AlihTeam; 
+  const stateData = location.state as {
+    homeTeam?: AlihTeam;
     awayTeam?: AlihTeam;
     matchDate?: string;
   } | null;
@@ -239,7 +244,7 @@ const GameDetail = () => {
   });
 
   // 로딩 상태
-  const isLoading = scheduleLoading || 
+  const isLoading = scheduleLoading ||
     (!stateData?.homeTeam && teamsLoading) ||
     (isCompleted && detailLoading);
 
@@ -260,7 +265,7 @@ const GameDetail = () => {
   const adjustGameTime = (period: number, time: string) => {
     const [minutes, seconds] = time.split(':').map(Number);
     let adjustedMinutes = minutes;
-    
+
     if (period === 2) {
       adjustedMinutes = minutes - 20;
     } else if (period === 3) {
@@ -272,7 +277,7 @@ const GameDetail = () => {
       // SO (shootout) - 별도 처리
       adjustedMinutes = minutes - 65; // 65분 이후로 가정
     }
-    
+
     return `${adjustedMinutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
@@ -388,11 +393,11 @@ const GameDetail = () => {
 
   // 미완료 경기 UI 또는 종료됐지만 gameDetail이 없는 경우 (live_data 기반)
   const showLiveDataUI = !isCompleted || (isCompleted && !gameDetail && scheduleData?.live_data);
-  
+
   if (showLiveDataUI) {
     const homePlayers = players?.filter(p => p.team_id === homeTeam.id) || [];
     const awayPlayers = players?.filter(p => p.team_id === awayTeam.id) || [];
-    
+
     // 공격 포인트(골+어시스트) 기준 상위 5명
     const homeTopPlayers = [...homePlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
     const awayTopPlayers = [...awayPlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
@@ -416,14 +421,14 @@ const GameDetail = () => {
 
     return (
       <div className="min-h-screen bg-background pb-20">
-        <SEO 
+        <SEO
           title={`${homeTeam?.name} vs ${awayTeam?.name} - ${isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'} | 아시아리그 아이스하키`}
           description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} ${isFinishedWithLiveData ? '경기 결과, 스코어, 득점 기록' : isInProgress ? '실시간 경기 상황, 라이브 스코어' : '경기 정보, 맞대결 전적, 스타플레이어'}을 확인하세요. ${scheduleData?.match_place || ''}`}
           keywords={`${homeTeam?.name} vs ${awayTeam?.name}, ${homeTeam?.name} 경기, ${awayTeam?.name} 경기, 아시아리그 경기 결과, 실시간 스코어, 라이브 경기, 맞대결 전적, ${scheduleData?.match_place || ''}`}
           path={`/schedule/${gameNo}`}
           structuredData={structuredData}
         />
-        
+
         {/* 헤더 */}
         <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
           <div className="container mx-auto px-4">
@@ -437,7 +442,7 @@ const GameDetail = () => {
           {/* 1. 팀 정보 및 스코어 */}
           <Card className="p-6 mb-6">
             <div className="flex items-center justify-between mb-6">
-              <Link 
+              <Link
                 to={`/team/${homeTeam.id}`}
                 className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
@@ -456,7 +461,7 @@ const GameDetail = () => {
                     {isFinishedWithLiveData ? (
                       <Badge variant="outline" className="mt-2">종료</Badge>
                     ) : (
-                      <Badge 
+                      <Badge
                         variant="default"
                         className="mt-2 bg-destructive animate-pulse"
                       >
@@ -467,7 +472,7 @@ const GameDetail = () => {
                 ) : (
                   <>
                     <span className="text-2xl font-bold text-muted-foreground">VS</span>
-                    <Badge 
+                    <Badge
                       variant="outline"
                       className="mt-2 bg-accent"
                     >
@@ -477,7 +482,7 @@ const GameDetail = () => {
                 )}
               </div>
 
-              <Link 
+              <Link
                 to={`/team/${awayTeam.id}`}
                 className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
@@ -504,7 +509,7 @@ const GameDetail = () => {
                 {isInProgress && <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />}
                 경기 현황
               </h3>
-              
+
               {/* 피리어드별 득점 */}
               <div className="mb-4">
                 <Table>
@@ -565,12 +570,12 @@ const GameDetail = () => {
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-32 h-3 bg-muted rounded-full overflow-hidden flex">
-                      <div 
-                        className="h-full bg-primary" 
+                      <div
+                        className="h-full bg-primary"
                         style={{ width: `${Math.round((liveData.shots.total.home / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100)}%` }}
                       />
-                      <div 
-                        className="h-full bg-destructive" 
+                      <div
+                        className="h-full bg-destructive"
                         style={{ width: `${Math.round((liveData.shots.total.away / (liveData.shots.total.home + liveData.shots.total.away || 1)) * 100)}%` }}
                       />
                     </div>
@@ -606,10 +611,10 @@ const GameDetail = () => {
                         adjustedMinutes = minutes - 20;
                       }
                       const adjustedTime = `${adjustedMinutes}:${event.time.split(':')[1]}`;
-                      
+
                       return (
-                        <div 
-                          key={index} 
+                        <div
+                          key={index}
                           className="flex items-start gap-3 p-3 border rounded-lg"
                         >
                           <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
@@ -657,7 +662,7 @@ const GameDetail = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
-                {isInProgress 
+                {isInProgress
                   ? "이 경기는 라이브 스트리밍이 제공되지 않습니다"
                   : "라이브 스트리밍 링크 업데이트 예정입니다"}
               </div>
@@ -683,10 +688,10 @@ const GameDetail = () => {
                   const awayScore = isHomeTeamHome ? game.away_alih_team_score : game.home_alih_team_score;
                   const homeWin = (homeScore || 0) > (awayScore || 0);
                   const awayWin = (awayScore || 0) > (homeScore || 0);
-                  
+
                   return (
-                    <div 
-                      key={game.id} 
+                    <div
+                      key={game.id}
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => navigate(`/schedule/${game.game_no}`)}
                     >
@@ -746,7 +751,7 @@ const GameDetail = () => {
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* 어웨이팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
@@ -795,7 +800,7 @@ const GameDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SEO 
+      <SEO
         title={`${homeTeam?.name} vs ${awayTeam?.name} - 경기 상세 기록, 스코어, 득점 | 아시아리그 아이스하키`}
         description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} 경기 상세 기록. 스코어, 피리어드별 득점, 슈팅, 득점자, 어시스트, 페널티, 로스터 정보까지 완벽 분석.`}
         keywords={`${homeTeam?.name} vs ${awayTeam?.name}, ${homeTeam?.name} 경기 결과, ${awayTeam?.name} 경기 결과, 아시아리그 경기 기록, 상세 스탯, 득점 기록, 어시스트, 슈팅 통계, 피리어드별 스코어`}
@@ -814,7 +819,7 @@ const GameDetail = () => {
         <Card className="p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             {/* 홈팀 */}
-            <Link 
+            <Link
               to={`/team/${homeTeam.id}`}
               className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
@@ -833,7 +838,7 @@ const GameDetail = () => {
             </div>
 
             {/* 어웨이팀 */}
-            <Link 
+            <Link
               to={`/team/${awayTeam.id}`}
               className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
@@ -871,173 +876,177 @@ const GameDetail = () => {
           </Card>
         )}
 
-        {/* 탭 인터페이스 */}
-        <Tabs defaultValue="summary" className="mb-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="summary">경기 요약</TabsTrigger>
-            <TabsTrigger value="goals">득점 & 페널티</TabsTrigger>
-            <TabsTrigger value="roster">선수 명단</TabsTrigger>
-          </TabsList>
+        {/* 경기 요약 카드 */}
+        <Card className="p-4 mb-6">
+          <h3 className="font-semibold mb-4">피리어드별 요약</h3>
+          <div className="overflow-x-auto scrollbar-hide">
+            <Table className="min-w-[400px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-14 whitespace-nowrap">구분</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">득점</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">유효 슈팅</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">페널티(분)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium whitespace-nowrap">1P</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_1.score}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_1.sog}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_1.pim}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium whitespace-nowrap">2P</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_2.score}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_2.sog}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_2.pim}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium whitespace-nowrap">3P</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_3.score}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_3.sog}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.period_3.pim}</TableCell>
+                </TableRow>
+                {gameDetail.game_summary.ovt && gameDetail.game_summary.ovt.score && (
+                  <TableRow>
+                    <TableCell className="font-medium whitespace-nowrap">OT</TableCell>
+                    <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.ovt.score}</TableCell>
+                    <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.ovt.sog}</TableCell>
+                    <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.ovt.pim}</TableCell>
+                  </TableRow>
+                )}
+                {gameDetail.game_summary.pss && gameDetail.game_summary.pss.score && (
+                  <TableRow>
+                    <TableCell className="font-medium whitespace-nowrap">SO</TableCell>
+                    <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.pss.score}</TableCell>
+                    <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.pss.sog}</TableCell>
+                    <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.pss.pim}</TableCell>
+                  </TableRow>
+                )}
+                <TableRow className="bg-muted/50 font-semibold">
+                  <TableCell className="whitespace-nowrap">Total</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.total.score}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.total.sog}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap">{gameDetail.game_summary.total.pim}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
 
-          {/* 탭 1: 경기 요약 */}
-          <TabsContent value="summary" className="space-y-6">
-            <Card className="p-4">
-              <h3 className="font-semibold mb-4">피리어드별 요약</h3>
-              <div className="overflow-x-auto">
-                <Table>
+        {/* 득점 기록 카드 */}
+        <Card className="p-4 mb-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Goal className="h-4 w-4" />
+            득점 기록
+          </h3>
+          {gameDetail.goals.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">득점 기록이 없습니다</p>
+          ) : (
+            <div className="space-y-3">
+              {[...gameDetail.goals]
+                .sort((a, b) => {
+                  if (a.period !== b.period) return a.period - b.period;
+                  const [aMin, aSec] = a.time.split(':').map(Number);
+                  const [bMin, bSec] = b.time.split(':').map(Number);
+                  return (aMin * 60 + aSec) - (bMin * 60 + bSec);
+                })
+                .map((goal, index) => {
+                  const scoringTeam = goal.team_id === homeTeam.id ? homeTeam : awayTeam;
+                  return (
+                    <div key={`goal-${index}`} className="flex items-start gap-3 p-3 border rounded-lg bg-primary/5">
+                      <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <Badge variant="outline" className="text-xs whitespace-nowrap">{getPeriodLabel(goal.period)} {adjustGameTime(goal.period, goal.time)}</Badge>
+                          <Badge className="text-xs whitespace-nowrap">{getSituationLabel(goal.situation)}</Badge>
+                        </div>
+                        <p className="font-medium text-sm">
+                          득점: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
+                        </p>
+                        {(goal.assist1_no || goal.assist2_no) && (
+                          <p className="text-xs text-muted-foreground">
+                            어시스트:
+                            {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
+                            {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </Card>
+
+        {/* 페널티 기록 카드 */}
+        <Card className="p-4 mb-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            페널티 기록
+          </h3>
+          {gameDetail.penalties.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">페널티 기록이 없습니다</p>
+          ) : (
+            <div className="space-y-3">
+              {[...gameDetail.penalties]
+                .sort((a, b) => {
+                  if (a.period !== b.period) return a.period - b.period;
+                  const [aMin, aSec] = a.time.split(':').map(Number);
+                  const [bMin, bSec] = b.time.split(':').map(Number);
+                  return (aMin * 60 + aSec) - (bMin * 60 + bSec);
+                })
+                .map((penalty, index) => {
+                  const penaltyTeam = penalty.team_id === homeTeam.id ? homeTeam : awayTeam;
+                  return (
+                    <div key={`penalty-${index}`} className="flex items-start gap-3 p-3 border rounded-lg">
+                      <img src={penaltyTeam.logo} alt={penaltyTeam.name} className="w-10 h-10 object-contain flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <Badge variant="outline" className="text-xs whitespace-nowrap">{getPeriodLabel(penalty.period)} {adjustGameTime(penalty.period, penalty.time)}</Badge>
+                          <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes}분</Badge>
+                        </div>
+                        <p className="font-medium text-sm">
+                          {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
+                        </p>
+                        <p className="text-xs text-muted-foreground">반칙: {penalty.offence}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </Card>
+
+        {/* 선수 명단 - 접힘/펼침 가능 */}
+        <Card className="p-4 mb-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            선수 명단
+          </h3>
+
+          {/* 홈팀 선수 명단 */}
+          <div className="mb-4">
+            <button
+              onClick={() => setHomeRosterOpen(!homeRosterOpen)}
+              className="w-full flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <img src={homeTeam.logo} alt={homeTeam.name} className="w-6 h-6 object-contain" />
+                <span className="font-medium">{homeTeam.name}</span>
+              </div>
+              {homeRosterOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </button>
+            {homeRosterOpen && (
+              <div className="overflow-x-auto scrollbar-hide mt-3">
+                <Table className="min-w-[350px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-20">구분</TableHead>
-                      <TableHead className="text-center">득점</TableHead>
-                      <TableHead className="text-center">유효 슈팅</TableHead>
-                      <TableHead className="text-center">페널티(분)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">1P</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_1.score}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_1.sog}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_1.pim}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">2P</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_2.score}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_2.sog}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_2.pim}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">3P</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_3.score}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_3.sog}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.period_3.pim}</TableCell>
-                    </TableRow>
-                    {gameDetail.game_summary.ovt && gameDetail.game_summary.ovt.score && (
-                      <TableRow>
-                        <TableCell className="font-medium">OT</TableCell>
-                        <TableCell className="text-center">{gameDetail.game_summary.ovt.score}</TableCell>
-                        <TableCell className="text-center">{gameDetail.game_summary.ovt.sog}</TableCell>
-                        <TableCell className="text-center">{gameDetail.game_summary.ovt.pim}</TableCell>
-                      </TableRow>
-                    )}
-                    {gameDetail.game_summary.pss && gameDetail.game_summary.pss.score && (
-                      <TableRow>
-                        <TableCell className="font-medium">SO</TableCell>
-                        <TableCell className="text-center">{gameDetail.game_summary.pss.score}</TableCell>
-                        <TableCell className="text-center">{gameDetail.game_summary.pss.sog}</TableCell>
-                        <TableCell className="text-center">{gameDetail.game_summary.pss.pim}</TableCell>
-                      </TableRow>
-                    )}
-                    <TableRow className="bg-muted/50 font-semibold">
-                      <TableCell>Total</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.total.score}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.total.sog}</TableCell>
-                      <TableCell className="text-center">{gameDetail.game_summary.total.pim}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-muted/30">
-              <h3 className="font-semibold mb-3">아이스하키 용어 설명</h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">SOG:</span> Shot on Goal (유효 슈팅. 골키퍼가 막아내거나 골로 연결된 슈팅)</p>
-                <p><span className="font-medium">PIM:</span> Penalties in Minutes (선수가 페널티로 인해 퇴장당한 총 시간(분))</p>
-                <p><span className="font-medium">PPG:</span> Power Play Goal (팀이 수적 우위(파워플레이) 상황에서 넣은 골)</p>
-                <p><span className="font-medium">SHG:</span> Short Handed Goal (팀이 수적 열세(숏핸디드) 상황에서 넣은 골)</p>
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* 탭 2: 득점 기록 & 페널티 */}
-          <TabsContent value="goals">
-            <Card className="p-4">
-              <h3 className="font-semibold mb-4">득점 기록 & 페널티</h3>
-              {gameDetail.goals.length === 0 && gameDetail.penalties.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">기록이 없습니다</p>
-              ) : (
-                <div className="space-y-3">
-                  {[
-                    ...gameDetail.goals.map(goal => ({ ...goal, type: 'goal' as const })),
-                    ...gameDetail.penalties.map(penalty => ({ ...penalty, type: 'penalty' as const }))
-                  ]
-                    .sort((a, b) => {
-                      // 피리어드 우선 정렬
-                      if (a.period !== b.period) return a.period - b.period;
-                      // 같은 피리어드 내에서는 시간으로 정렬
-                      const [aMin, aSec] = a.time.split(':').map(Number);
-                      const [bMin, bSec] = b.time.split(':').map(Number);
-                      const aTotal = aMin * 60 + aSec;
-                      const bTotal = bMin * 60 + bSec;
-                      return aTotal - bTotal;
-                    })
-                    .map((record, index) => {
-                      if (record.type === 'goal') {
-                        const goal = record as typeof record & { goal_no: number; situation: string; assist1_no: number | null; assist2_no: number | null; };
-                        const scoringTeam = goal.team_id === homeTeam.id ? homeTeam : awayTeam;
-                        return (
-                          <div key={`goal-${index}`} className="flex items-start gap-3 p-3 border rounded-lg bg-primary/5">
-                            <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="outline" className="text-xs">{getPeriodLabel(goal.period)} {adjustGameTime(goal.period, goal.time)}</Badge>
-                                <Badge className="text-xs">{getSituationLabel(goal.situation)}</Badge>
-                              </div>
-                              <p className="font-medium">
-                                득점: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
-                              </p>
-                              {(goal.assist1_no || goal.assist2_no) && (
-                                <p className="text-sm text-muted-foreground">
-                                  어시스트: 
-                                  {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
-                                  {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      } else {
-                        const penalty = record as typeof record & { player_no: number; offence: string; minutes: number; };
-                        const penaltyTeam = penalty.team_id === homeTeam.id ? homeTeam : awayTeam;
-                        return (
-                          <div key={`penalty-${index}`} className="flex items-start gap-3 p-3 border rounded-lg">
-                            <img src={penaltyTeam.logo} alt={penaltyTeam.name} className="w-10 h-10 object-contain" />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="outline" className="text-xs">{getPeriodLabel(penalty.period)} {adjustGameTime(penalty.period, penalty.time)}</Badge>
-                                <Badge variant="destructive" className="text-xs">{penalty.minutes}분</Badge>
-                              </div>
-                              <p className="font-medium">
-                                페널티: {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
-                              </p>
-                              <p className="text-sm text-muted-foreground">반칙: {penalty.offence}</p>
-                            </div>
-                          </div>
-                        );
-                      }
-                    })}
-                </div>
-              )}
-            </Card>
-          </TabsContent>
-
-          {/* 탭 3: 선수 명단 */}
-          <TabsContent value="roster" className="space-y-6">
-            {/* 홈팀 */}
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <img src={homeTeam.logo} alt={homeTeam.name} className="w-8 h-8 object-contain" />
-                <h3 className="font-semibold">{homeTeam.name}</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-16">번호</TableHead>
-                      <TableHead>이름</TableHead>
+                      <TableHead className="w-14 whitespace-nowrap">번호</TableHead>
+                      <TableHead className="whitespace-nowrap">이름</TableHead>
                       <TableHead className="text-center w-16 whitespace-nowrap">포지션</TableHead>
-                      <TableHead className="text-center w-16">SOG</TableHead>
+                      <TableHead className="text-center w-14 whitespace-nowrap">SOG</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1045,8 +1054,8 @@ const GameDetail = () => {
                       .filter(p => p.played)
                       .map((player) => (
                         <TableRow key={player.no}>
-                          <TableCell className="font-medium">#{player.no}</TableCell>
-                          <TableCell>
+                          <TableCell className="font-medium whitespace-nowrap">#{player.no}</TableCell>
+                          <TableCell className="whitespace-nowrap">
                             {player.name}
                             {player.captain_asst && (
                               <Badge variant="secondary" className="ml-2 text-xs">
@@ -1054,29 +1063,37 @@ const GameDetail = () => {
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-center">{player.pos}</TableCell>
-                          <TableCell className="text-center">{player.sog}</TableCell>
+                          <TableCell className="text-center whitespace-nowrap">{player.pos}</TableCell>
+                          <TableCell className="text-center whitespace-nowrap">{player.sog}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
                 </Table>
               </div>
-            </Card>
+            )}
+          </div>
 
-            {/* 어웨이팀 */}
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <img src={awayTeam.logo} alt={awayTeam.name} className="w-8 h-8 object-contain" />
-                <h3 className="font-semibold">{awayTeam.name}</h3>
+          {/* 어웨이팀 선수 명단 */}
+          <div>
+            <button
+              onClick={() => setAwayRosterOpen(!awayRosterOpen)}
+              className="w-full flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <img src={awayTeam.logo} alt={awayTeam.name} className="w-6 h-6 object-contain" />
+                <span className="font-medium">{awayTeam.name}</span>
               </div>
-              <div className="overflow-x-auto">
-                <Table>
+              {awayRosterOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </button>
+            {awayRosterOpen && (
+              <div className="overflow-x-auto scrollbar-hide mt-3">
+                <Table className="min-w-[350px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-16">번호</TableHead>
-                      <TableHead>이름</TableHead>
+                      <TableHead className="w-14 whitespace-nowrap">번호</TableHead>
+                      <TableHead className="whitespace-nowrap">이름</TableHead>
                       <TableHead className="text-center w-16 whitespace-nowrap">포지션</TableHead>
-                      <TableHead className="text-center w-16">SOG</TableHead>
+                      <TableHead className="text-center w-14 whitespace-nowrap">SOG</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1084,8 +1101,8 @@ const GameDetail = () => {
                       .filter(p => p.played)
                       .map((player) => (
                         <TableRow key={player.no}>
-                          <TableCell className="font-medium">#{player.no}</TableCell>
-                          <TableCell>
+                          <TableCell className="font-medium whitespace-nowrap">#{player.no}</TableCell>
+                          <TableCell className="whitespace-nowrap">
                             {player.name}
                             {player.captain_asst && (
                               <Badge variant="secondary" className="ml-2 text-xs">
@@ -1093,16 +1110,38 @@ const GameDetail = () => {
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-center">{player.pos}</TableCell>
-                          <TableCell className="text-center">{player.sog}</TableCell>
+                          <TableCell className="text-center whitespace-nowrap">{player.pos}</TableCell>
+                          <TableCell className="text-center whitespace-nowrap">{player.sog}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
                 </Table>
               </div>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-4 mb-6">
+          <h3 className="font-semibold mb-3">아이스하키 용어 설명</h3>
+          <div className="space-y-3 text-sm">
+            <div>
+              <p className="font-medium">SOG (Shot on Goal)</p>
+              <p className="text-xs text-muted-foreground">- 유효 슈팅 수</p>
+            </div>
+            <div>
+              <p className="font-medium">PIM (Penalties in Minutes)</p>
+              <p className="text-xs text-muted-foreground">- 페널티로 인해 퇴장당한 총 시간(분)</p>
+            </div>
+            <div>
+              <p className="font-medium">PPG (Power Play Goal)</p>
+              <p className="text-xs text-muted-foreground">- 팀이 수적 우위 상황에서 넣은 골</p>
+            </div>
+            <div>
+              <p className="font-medium">SHG (Short Handed Goal)</p>
+              <p className="text-xs text-muted-foreground">- 팀이 수적 열세 상황에서 넣은 골</p>
+            </div>
+          </div>
+        </Card>
 
         {/* 기타 정보 */}
         <Card className="p-4 mb-6">
