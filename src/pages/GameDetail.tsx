@@ -880,7 +880,7 @@ const GameDetail = () => {
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-4">피리어드별 요약</h3>
           <div className="overflow-x-auto scrollbar-hide">
-            <Table className="min-w-[400px]">
+            <Table className="min-w-[330px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-14 whitespace-nowrap">구분</TableHead>
@@ -1126,19 +1126,19 @@ const GameDetail = () => {
           <div className="space-y-3 text-sm">
             <div>
               <p className="font-medium">SOG (Shot on Goal)</p>
-              <p className="text-xs text-muted-foreground">- 유효 슈팅 수</p>
+              <p className="text-xs text-muted-foreground">유효 슈팅 수</p>
             </div>
             <div>
               <p className="font-medium">PIM (Penalties in Minutes)</p>
-              <p className="text-xs text-muted-foreground">- 페널티로 인해 퇴장당한 총 시간(분)</p>
+              <p className="text-xs text-muted-foreground">페널티로 인해 퇴장당한 총 시간(분)</p>
             </div>
             <div>
               <p className="font-medium">PPG (Power Play Goal)</p>
-              <p className="text-xs text-muted-foreground">- 팀이 수적 우위 상황에서 넣은 골</p>
+              <p className="text-xs text-muted-foreground">팀이 수적 우위 상황에서 넣은 골</p>
             </div>
             <div>
               <p className="font-medium">SHG (Short Handed Goal)</p>
-              <p className="text-xs text-muted-foreground">- 팀이 수적 열세 상황에서 넣은 골</p>
+              <p className="text-xs text-muted-foreground">팀이 수적 열세 상황에서 넣은 골</p>
             </div>
           </div>
         </Card>
