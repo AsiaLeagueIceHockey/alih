@@ -218,12 +218,57 @@ interface Player {
 // alih_game_details - 경기 상세 (완료된 경기만)
 interface GameDetail {
   game_no: number;
-  period_scores: {...};
-  goals: {...}[];
-  penalties: {...}[];
-  home_roster: {...}[];
-  away_roster: {...}[];
-  shots_on_goal: {...};
+  spectators: number;
+  game_info: {
+    venue: string;
+    coaches: {
+      home_coach: string;
+      away_coach: string;
+    };
+    game_time: {
+      start: string;
+      end: string;
+    };
+  };
+  game_summary: {
+    period_1: { score: string; sog: string; pim: string };
+    period_2: { score: string; sog: string; pim: string };
+    period_3: { score: string; sog: string; pim: string };
+    ovt?: { score: string; sog: string; pim: string };  // 연장
+    pss?: { score: string; sog: string; pim: string };  // 승부치기
+    total: { score: string; sog: string; pim: string };
+  };
+  goals: Array<{
+    goal_no: number;        // 득점자 등번호
+    period: number;         // 1, 2, 3, 4(OT), 5(SO)
+    time: string;           // "1:18" 형식
+    team_id: number;        // 득점 팀 ID
+    situation: string;      // "=" (EV), "+1" (PP), "-1" (SH)
+    assist1_no: number | null;  // 1st 어시스트 등번호
+    assist2_no: number | null;  // 2nd 어시스트 등번호
+  }>;
+  penalties: Array<{
+    player_no: number;
+    period: number;
+    time: string;
+    team_id: number;
+    offence: string;
+    minutes: number;
+  }>;
+  home_roster: Array<{
+    no: number;
+    name: string;
+    pos: string;            // "G" | "D" | "F"
+    sog: number;            // 슈팅 수
+    played: boolean;
+    captain_asst: string | null;  // "C" | "A" | null
+  }>;
+  away_roster: Array<{ /* 동일 구조 */ }>;
+  goalkeepers: {
+    home: Array<{ no: number; name: string; mip: string; ga: number; saves: number }>;
+    away: Array<{ /* 동일 구조 */ }>;
+  };
+  shots_on_goal: { /* 피리어드별 슈팅 */ };
 }
 
 // alih_news - 뉴스
@@ -267,9 +312,45 @@ const persister = createSyncStoragePersister({
 
 ---
 
-## 5. Edge Functions
+## 5. SNS 자동화 페이지 (Instagram)
 
-### 5.1 generate-sitemap
+### 5.1 공통 특성
+- **용도**: GitHub Actions에서 Playwright로 캡쳐 → Instagram 업로드
+- **뷰포트**: 1080x1350 (4:5 인스타그램 비율)
+- **디자인**: 다크 그라데이션 (`from-slate-900 via-slate-800 to-slate-900`)
+- **BottomNav 숨김**: `/instagram/*` 경로에서는 네비게이션 바 미표시
+
+### 5.2 InstagramScore (`/instagram/score`)
+경기 결과 스크린샷
+```
+?game_no=66
+```
+- 팀 로고, 최종 스코어, 피리어드별 점수 표시
+
+### 5.3 InstagramPreview (`/instagram/preview`)
+시리즈 프리뷰 스크린샷
+```
+?game_no=66
+```
+- 팀 순위, 경기 일정, 맞대결 전적 표시
+
+### 5.4 InstagramGoals (`/instagram/goals`) ⭐ NEW
+골/어시스트 정보 스크린샷 (선수 이름 강조)
+```
+?game_no=66           # 페이지 1 (기본)
+?game_no=66&page=2    # 페이지 2
+```
+- **페이지네이션**: 6골당 1페이지 (7골 이상 경기는 여러 페이지)
+- 득점자 이름 크게 강조
+- 어시스트, 피리어드, 시간, 득점 상황(EV/PP/SH) 표시
+- 팀별 컬러 구분 (홈팀 primary, 어웨이팀 blue)
+- 하단에 페이지 인디케이터 표시 (예: "1 / 2")
+
+---
+
+## 6. Edge Functions
+
+### 6.1 generate-sitemap
 동적 sitemap.xml 생성 (SEO용)
 
 ```typescript
@@ -285,9 +366,9 @@ const persister = createSyncStoragePersister({
 
 ---
 
-## 6. 개발 컨벤션
+## 7. 개발 컨벤션
 
-### 6.1 컴포넌트 작성 규칙
+### 7.1 컴포넌트 작성 규칙
 
 ```typescript
 // ✅ 도메인별 폴더 분리
@@ -309,7 +390,7 @@ const StarPlayers = ({ teamId, players }: StarPlayersProps) => {
 export default StarPlayers;
 ```
 
-### 6.2 데이터 페칭 패턴
+### 7.2 데이터 페칭 패턴
 
 ```typescript
 // ✅ React Query + 커스텀 훅
@@ -325,7 +406,7 @@ const { data, error } = await externalSupabase
   .single();
 ```
 
-### 6.3 스타일링 규칙
+### 7.3 스타일링 규칙
 
 ```typescript
 // ✅ Tailwind 유틸리티 클래스 사용
@@ -343,7 +424,7 @@ const { data, error } = await externalSupabase
 <div className="bg-[#1a1a1a]">         // 금지!
 ```
 
-### 6.4 모바일 최적화 필수 체크리스트
+### 7.4 모바일 최적화 필수 체크리스트
 
 ```typescript
 // ✅ 팀명 한 줄 표시 (필수!)
@@ -364,9 +445,9 @@ const { data, error } = await externalSupabase
 
 ---
 
-## 7. 주요 패턴 및 주의사항
+## 8. 주요 패턴 및 주의사항
 
-### 7.1 경기 상태 판단 로직
+### 8.1 경기 상태 판단 로직
 
 ```typescript
 const getGameStatus = (game: ScheduleGame) => {
@@ -383,7 +464,7 @@ const getGameStatus = (game: ScheduleGame) => {
 };
 ```
 
-### 7.2 진행 중 경기 자동 폴링
+### 8.2 진행 중 경기 자동 폴링
 
 ```typescript
 // useSchedules.ts - 공통 훅 사용
@@ -396,7 +477,7 @@ const { data: schedules } = useSchedules();
 const { data: scheduleData } = useScheduleByGameNo(gameNo);
 ```
 
-### 7.3 팀명 한국어 변환
+### 8.3 팀명 한국어 변환
 
 ```typescript
 // useTeams.tsx의 getTeamName, getTeamLogo 헬퍼 사용
@@ -404,7 +485,7 @@ const teamName = getTeamName(englishName, teams);
 const teamLogo = getTeamLogo(englishName, teams);
 ```
 
-### 7.4 ⚠️ 주의사항
+### 8.4 ⚠️ 주의사항
 
 ```
 ❌ .env                                  - 자동 생성, 직접 수정 금지
@@ -414,9 +495,9 @@ const teamLogo = getTeamLogo(englishName, teams);
 
 ---
 
-## 8. SEO 구현
+## 9. SEO 구현
 
-### 8.1 공식 팀명 (SEO 키워드 기준)
+### 9.1 공식 팀명 (SEO 키워드 기준)
 
 | 한글명 | 영문명 | 비고 |
 |--------|--------|------|
@@ -429,7 +510,7 @@ const teamLogo = getTeamLogo(englishName, teams);
 
 > **주의**: `ALIH`는 보충 설명으로만 사용 (keywords 맨 뒤에 배치)
 
-### 8.2 메타 태그 (SEO.tsx)
+### 9.2 메타 태그 (SEO.tsx)
 
 ```typescript
 // src/components/SEO.tsx
@@ -453,7 +534,7 @@ const teamLogo = getTeamLogo(englishName, teams);
 - `twitter:site`, `twitter:image:alt`
 - `hreflang`, `theme-color`, `apple-mobile-web-app-title`
 
-### 8.3 JSON-LD 구조화 데이터
+### 9.3 JSON-LD 구조화 데이터
 
 | 페이지 | 스키마 타입 |
 |--------|------------|
@@ -482,7 +563,7 @@ const structuredData = {
 };
 ```
 
-### 8.4 index.html 기본 SEO
+### 9.4 index.html 기본 SEO
 
 - **author**: `alhockey_fans`
 - **구조화 데이터**: `WebSite` 스키마 (SearchAction 포함)
@@ -491,7 +572,7 @@ const structuredData = {
   - Naver: `80f9275a181ed121975baf44113d434a89401b52`
   - Bing: `A72866F9AD31F7BF367B76DC7B96B4BF`
 
-### 8.5 검색엔진 색인 요청
+### 9.5 검색엔진 색인 요청
 
 **Google Search Console**:
 1. URL 검사 → 색인 생성 요청
@@ -503,7 +584,7 @@ const structuredData = {
 
 ---
 
-## 9. 빠른 시작 가이드
+## 10. 빠른 시작 가이드
 
 ```bash
 # 의존성 설치
@@ -534,7 +615,7 @@ npm run build
 
 ---
 
-## 10. 참고 링크
+## 11. 참고 링크
 
 - **shadcn/ui**: https://ui.shadcn.com
 - **TanStack Query**: https://tanstack.com/query
@@ -544,10 +625,11 @@ npm run build
 
 ---
 
-## 11. 변경 이력
+## 12. 변경 이력
 
 | 날짜 | 변경 내용 |
 |------|----------|
+| 2025-12-28 | InstagramGoals 페이지 추가 (골/어시스트 정보, 페이지네이션 지원) ⭐ |
 | 2025-12-21 | SEO 전면 최적화 (메타 태그, 구조화 데이터, 정식 팀명 적용) |
 | 2025-12-14 | useSchedules 공통 훅 추가 (Home/Schedule/GameDetail 캐시 일관성) |
 | 2025-12-14 | InstagramPreview 페이지 추가 (시리즈 프리뷰 SNS 자동화) |
@@ -559,5 +641,5 @@ npm run build
 
 ---
 
-*마지막 업데이트: 2025-12-21*
+*마지막 업데이트: 2025-12-28*
 

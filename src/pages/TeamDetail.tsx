@@ -9,6 +9,7 @@ import TeamInfoCard from "@/components/team/TeamInfoCard";
 import RecentGames from "@/components/team/RecentGames";
 import LeagueStandingsSection from "@/components/team/LeagueStandingsSection";
 import StarPlayers from "@/components/team/StarPlayers";
+import TeamStats from "@/components/team/TeamStats";
 import { Team, Player, TeamStanding } from "@/types/team";
 import { useTeams } from "@/hooks/useTeams";
 
@@ -94,6 +95,25 @@ const TeamDetail = () => {
     gcTime: 1000 * 60 * 60 * 24,
   });
 
+  // 홈/원정 전체 경기 조회 (통계용)
+  const { data: allFinishedGames } = useQuery({
+    queryKey: ['team-all-games', teamId],
+    queryFn: async () => {
+      const { data, error } = await externalSupabase
+        .from('alih_schedule')
+        .select('*')
+        .or(`home_alih_team_id.eq.${teamId},away_alih_team_id.eq.${teamId}`)
+        .eq('game_status', 'Game Finished')
+        .order('match_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!teamId,
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
+
   if (isLoadingTeam) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -109,6 +129,35 @@ const TeamDetail = () => {
       </div>
     );
   }
+
+  // 홈/원정 성적 계산
+  const teamIdNum = Number(teamId);
+  const homeGames = allFinishedGames?.filter(g => g.home_alih_team_id === teamIdNum) || [];
+  const awayGames = allFinishedGames?.filter(g => g.away_alih_team_id === teamIdNum) || [];
+
+  const homeRecord = {
+    wins: homeGames.filter(g => (g.home_alih_team_score ?? 0) > (g.away_alih_team_score ?? 0)).length,
+    losses: homeGames.filter(g => (g.home_alih_team_score ?? 0) < (g.away_alih_team_score ?? 0)).length,
+  };
+
+  const awayRecord = {
+    wins: awayGames.filter(g => (g.away_alih_team_score ?? 0) > (g.home_alih_team_score ?? 0)).length,
+    losses: awayGames.filter(g => (g.away_alih_team_score ?? 0) < (g.home_alih_team_score ?? 0)).length,
+  };
+
+  // 최근 5경기 폼 (W/L)
+  const recentForm: ('W' | 'L')[] = (recentGames || []).slice(0, 5).map(game => {
+    const isHome = game.home_alih_team_id === teamIdNum;
+    const teamScore = isHome ? game.home_alih_team_score : game.away_alih_team_score;
+    const opponentScore = isHome ? game.away_alih_team_score : game.home_alih_team_score;
+    return (teamScore ?? 0) > (opponentScore ?? 0) ? 'W' : 'L';
+  });
+
+  // 평균 득점/실점 (standings에서 가져오기)
+  const currentStanding = standings?.find(s => s.team_id === teamIdNum);
+  const gamesPlayed = currentStanding?.games_played || (homeGames.length + awayGames.length);
+  const avgGoalsFor = gamesPlayed > 0 ? (currentStanding?.goals_for || 0) / gamesPlayed : 0;
+  const avgGoalsAgainst = gamesPlayed > 0 ? (currentStanding?.goals_against || 0) / gamesPlayed : 0;
 
   // 팀 상세 페이지용 구조화 데이터
   const teamStructuredData = {
@@ -183,6 +232,18 @@ const TeamDetail = () => {
 
           {/* 최근 경기 */}
           <RecentGames games={recentGames || []} teams={teams} teamId={Number(teamId)} />
+
+          {/* 시즌 통계 */}
+          {allFinishedGames && allFinishedGames.length > 0 && (
+            <TeamStats
+              homeRecord={homeRecord}
+              awayRecord={awayRecord}
+              recentForm={recentForm}
+              avgGoalsFor={avgGoalsFor}
+              avgGoalsAgainst={avgGoalsAgainst}
+              gamesPlayed={gamesPlayed}
+            />
+          )}
 
           {/* 리그 순위 */}
           {standings && standings.length > 0 && (
