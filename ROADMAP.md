@@ -30,24 +30,19 @@
 
 ### 추가할 콘텐츠
 
-#### 1.1 Weekly Top Scorers (`/instagram/weekly-stats`)
-- [ ] 매주 월요일 생성용
-- [ ] 쿼리: 이번 주 득점/어시스트 Top 5
-- [ ] 표시: 선수명, 팀 로고, 골/어시스트 수
+#### 1.1 Weekly Top Scorers (`/instagram/weekly-stats`) ✅ 완료
+- [x] 매주 월요일 생성용
+- [x] 쿼리: 시즌 누적 득점/어시스트 Top 5
+- [x] 표시: 선수명, 팀 로고, 골/어시스트 수
 
-#### 1.2 Standings Update (`/instagram/standings`)
-- [ ] 경기 있는 날 저녁 생성용
-- [ ] 표시: 전체 순위표 + 변동 표시 (⬆️⬇️)
-- [ ] 이전 순위 대비 변동 계산 필요
+#### 1.2 Standings Update (`/instagram/standings`) ✅ 완료
+- [x] 경기 있는 날 저녁 생성용
+- [x] 표시: 전체 순위표 + 팀 로고/승패/득실/승점
 
-#### 1.3 Player Milestone Alert
-- [ ] 특정 기록 달성 시 자동 생성
-- [ ] 예: 시즌 10골, 20골, 100포인트 등
-- [ ] `alih_players` 테이블 모니터링 필요
+#### 1.3 Player Milestone Alert ⏸️ 스킵
+- 특정 기록 달성 시 자동 생성 (향후 구현)
 
-#### 1.4 Series Recap (`/instagram/series-recap`)
-- [ ] 2연전 종료 후 시리즈 전체 결과 요약
-- [ ] 양 팀 총 득점, 각 경기 스코어
+#### 1.4 Series Recap ❌ 제거됨
 
 ### 기술 참고
 - 기존 Instagram 페이지 패턴 참고: `src/pages/InstagramScore.tsx`
