@@ -60,6 +60,35 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Semantic Colors
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
+        // Period Colors
+        period: {
+          1: "hsl(var(--period-1))",
+          2: "hsl(var(--period-2))",
+          3: "hsl(var(--period-3))",
+          ot: "hsl(var(--period-ot))",
+        },
+        // Special Stats
+        powerplay: "hsl(var(--powerplay))",
+        shorthanded: "hsl(var(--shorthanded))",
+        // Medal Colors
+        medal: {
+          gold: "hsl(var(--medal-gold))",
+          silver: "hsl(var(--medal-silver))",
+          bronze: "hsl(var(--medal-bronze))",
+        },
       },
       backgroundImage: {
         'ice-gradient': 'var(--ice-gradient)',

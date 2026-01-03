@@ -1,6 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { externalSupabase } from "@/lib/supabase-external";
@@ -150,12 +151,13 @@ const News = () => {
 
             {hasMore && (
               <div className="flex justify-center mt-6">
-                <button
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => setCurrentPage(p => p + 1)}
-                  className="w-full py-3 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-sm font-medium"
                 >
                   더 보기 ▼
-                </button>
+                </Button>
               </div>
             )}
           </>

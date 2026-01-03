@@ -406,7 +406,69 @@ const { data, error } = await externalSupabase
   .single();
 ```
 
-### 7.3 스타일링 규칙
+### 7.3 스타일링 규칙 (⭐ 중요)
+
+#### shadcn/ui 컴포넌트 우선 사용
+
+```typescript
+// ✅ shadcn/ui 컴포넌트 사용 (필수!)
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+
+// ❌ 네이티브 HTML 직접 사용 금지 (특히 버튼!)
+<button onClick={...}>클릭</button>           // 금지!
+<div className="...button styles...">클릭</div> // 금지!
+
+// ✅ shadcn Button 사용
+<Button variant="default" onClick={...}>클릭</Button>
+<Button variant="outline">클릭</Button>
+<Button variant="link" size="sm">더보기</Button>
+```
+
+#### 시맨틱 색상 토큰 (필수!)
+
+```typescript
+// ✅ 시맨틱 토큰 사용 (index.css에 정의됨)
+className="bg-background text-foreground"      // 기본 배경/글자
+className="bg-card border-border"              // 카드 배경
+className="text-muted-foreground"              // 보조 텍스트
+className="text-primary"                       // 강조 색상
+className="bg-secondary/30"                    // 보조 배경
+
+// ✅ 상태 표시용 시맨틱 색상
+className="text-success"                       // 승리, 득점, 긍정적
+className="text-destructive"                   // 패배, 실점, 부정적
+className="text-info"                          // 원정, 정보성
+className="text-warning"                       // 주의, 경고
+
+// ✅ 통계/차트용 색상 (피리어드별)
+className="bg-period-1"                        // 1피리어드 (파랑)
+className="bg-period-2"                        // 2피리어드 (초록)
+className="bg-period-3"                        // 3피리어드 (주황)
+className="bg-period-ot"                       // 연장 (빨강)
+
+// ✅ 특수 상황용 색상
+className="text-powerplay"                     // 파워플레이 (노랑)
+className="text-shorthanded"                   // 숏핸디드 (보라)
+
+// ✅ 순위 메달 색상
+className="text-medal-gold"                    // 금메달 (노랑)
+className="text-medal-silver"                  // 은메달 (회색)
+className="text-medal-bronze"                  // 동메달 (주황)
+
+// ❌ 직접 색상 사용 금지!
+className="bg-green-500"        // 금지! → bg-success 사용
+className="text-red-500"        // 금지! → text-destructive 사용
+className="bg-[#1a1a1a]"        // 금지! → bg-card 사용
+className="text-blue-500"       // 금지! → text-info 또는 text-primary 사용
+className="text-yellow-500"     // 금지! → text-medal-gold 또는 text-warning 사용
+```
+
+#### Tailwind 유틸리티 규칙
 
 ```typescript
 // ✅ Tailwind 유틸리티 클래스 사용
@@ -414,14 +476,6 @@ const { data, error } = await externalSupabase
 
 // ✅ 반응형: 모바일 퍼스트
 <div className="grid grid-cols-1 md:grid-cols-2">
-
-// ✅ 시맨틱 토큰 사용 (index.css 변수)
-<div className="bg-background text-foreground">
-<div className="bg-card border-border">
-
-// ❌ 직접 색상 사용 금지
-<div className="bg-white text-black">  // 금지!
-<div className="bg-[#1a1a1a]">         // 금지!
 ```
 
 ### 7.4 모바일 최적화 필수 체크리스트
@@ -442,6 +496,23 @@ const { data, error } = await externalSupabase
 // ✅ 모바일 폰트 크기 조정
 <span className="text-sm md:text-base">
 ```
+
+### 7.5 색상 토큰 정의 (index.css)
+
+| 토큰 | HSL 값 | 용도 |
+|------|--------|------|
+| `--success` | 142 76% 36% | 승리, 득점, 긍정적 상태 |
+| `--warning` | 45 93% 47% | 경고, 주의 |
+| `--info` | 217 91% 60% | 정보성, 원정 |
+| `--period-1` | 217 91% 60% | 1피리어드 (파랑) |
+| `--period-2` | 142 76% 36% | 2피리어드 (초록) |
+| `--period-3` | 32 95% 44% | 3피리어드 (주황) |
+| `--period-ot` | 0 72% 51% | 연장전 (빨강) |
+| `--powerplay` | 45 93% 47% | 파워플레이 (노랑) |
+| `--shorthanded` | 280 68% 60% | 숏핸디드 (보라) |
+| `--medal-gold` | 45 93% 47% | 금메달 (노랑) |
+| `--medal-silver` | 0 0% 70% | 은메달 (회색) |
+| `--medal-bronze` | 30 75% 45% | 동메달 (주황) |
 
 ---
 
@@ -629,6 +700,7 @@ npm run build
 
 | 날짜 | 변경 내용 |
 |------|----------|
+| 2026-01-03 | UI 일관성 개선: 시맨틱 색상 토큰 추가 (success, warning, info, period-*, powerplay, shorthanded), TeamStats.tsx 리팩토링, 스타일링 가이드라인 문서화 ⭐ |
 | 2025-12-28 | InstagramGoals 페이지 추가 (골/어시스트 정보, 페이지네이션 지원) ⭐ |
 | 2025-12-21 | SEO 전면 최적화 (메타 태그, 구조화 데이터, 정식 팀명 적용) |
 | 2025-12-14 | useSchedules 공통 훅 추가 (Home/Schedule/GameDetail 캐시 일관성) |
@@ -641,5 +713,6 @@ npm run build
 
 ---
 
-*마지막 업데이트: 2025-12-28*
+*마지막 업데이트: 2026-01-03*
+
 

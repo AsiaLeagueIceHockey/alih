@@ -99,9 +99,9 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                       <span
                         className={`text-base font-bold ${
                           result === "win"
-                            ? "text-blue-500"
+                            ? "text-info"
                             : result === "lose"
-                            ? "text-red-500"
+                            ? "text-destructive"
                             : "text-muted-foreground"
                         }`}
                       >
@@ -123,9 +123,9 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                     <span
                       className={`text-sm font-bold ${
                         result === "win"
-                          ? "text-blue-500"
+                          ? "text-info"
                           : result === "lose"
-                          ? "text-red-500"
+                          ? "text-destructive"
                           : "text-muted-foreground"
                       }`}
                     >

@@ -38,6 +38,29 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
+    /* Semantic Colors for Stats & Status */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 0%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+
+    /* Period Colors (for charts/stats) */
+    --period-1: 217 91% 60%;
+    --period-2: 142 76% 36%;
+    --period-3: 32 95% 44%;
+    --period-ot: 0 72% 51%;
+
+    /* Special Stats Colors */
+    --powerplay: 45 93% 47%;
+    --shorthanded: 280 68% 60%;
+
+    /* Medal Colors (for rankings) */
+    --medal-gold: 45 93% 47%;
+    --medal-silver: 0 0% 70%;
+    --medal-bronze: 30 75% 45%;
+
     --ice-gradient: linear-gradient(135deg, hsl(195, 90%, 55%), hsl(185, 80%, 50%));
     --ice-glow: 0 0 30px hsl(195 90% 55% / 0.3);
     --card-glow: 0 4px 20px hsl(195 90% 55% / 0.1);

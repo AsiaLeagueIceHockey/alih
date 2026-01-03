@@ -1,6 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper, Coffee } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
@@ -619,7 +620,9 @@ const Home = () => {
         </section>
 
         {/* Support Banner */}
-        <button
+        <Button
+          variant="secondary"
+          className="w-full gap-2"
           onClick={() => {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (isMobile) {
@@ -628,11 +631,10 @@ const Home = () => {
               window.open('/images/kakaopay-qr.jpg', '_blank');
             }
           }}
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors w-full"
         >
-          <Coffee className="w-5 h-5 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">개발자에게 커피 한 잔 후원하기</span>
-        </button>
+          <Coffee className="w-5 h-5" />
+          개발자에게 커피 한 잔 후원하기
+        </Button>
 
         {/* League Standings Preview */}
         <section>

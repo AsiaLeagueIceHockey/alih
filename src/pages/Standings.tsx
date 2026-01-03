@@ -316,11 +316,11 @@ const Standings = () => {
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
                               {player.rank === 1 ? (
-                                <div className="text-xl font-bold text-yellow-500">🥇</div>
+                                <div className="text-xl font-bold text-medal-gold">🥇</div>
                               ) : player.rank === 2 ? (
-                                <div className="text-xl font-bold text-gray-400">🥈</div>
+                                <div className="text-xl font-bold text-medal-silver">🥈</div>
                               ) : player.rank === 3 ? (
-                                <div className="text-xl font-bold text-orange-600">🥉</div>
+                                <div className="text-xl font-bold text-medal-bronze">🥉</div>
                               ) : (
                                 <div className="text-sm font-semibold text-muted-foreground">
                                   {player.rank}
@@ -386,11 +386,11 @@ const Standings = () => {
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
                               {player.rank === 1 ? (
-                                <div className="text-xl font-bold text-yellow-500">🥇</div>
+                                <div className="text-xl font-bold text-medal-gold">🥇</div>
                               ) : player.rank === 2 ? (
-                                <div className="text-xl font-bold text-gray-400">🥈</div>
+                                <div className="text-xl font-bold text-medal-silver">🥈</div>
                               ) : player.rank === 3 ? (
-                                <div className="text-xl font-bold text-orange-600">🥉</div>
+                                <div className="text-xl font-bold text-medal-bronze">🥉</div>
                               ) : (
                                 <div className="text-sm font-semibold text-muted-foreground">
                                   {player.rank}
@@ -456,11 +456,11 @@ const Standings = () => {
                             {/* 순위 */}
                             <div className="flex-shrink-0 w-8 text-center">
                               {player.rank === 1 ? (
-                                <div className="text-xl font-bold text-yellow-500">🥇</div>
+                                <div className="text-xl font-bold text-medal-gold">🥇</div>
                               ) : player.rank === 2 ? (
-                                <div className="text-xl font-bold text-gray-400">🥈</div>
+                                <div className="text-xl font-bold text-medal-silver">🥈</div>
                               ) : player.rank === 3 ? (
-                                <div className="text-xl font-bold text-orange-600">🥉</div>
+                                <div className="text-xl font-bold text-medal-bronze">🥉</div>
                               ) : (
                                 <div className="text-sm font-semibold text-muted-foreground">
                                   {player.rank}

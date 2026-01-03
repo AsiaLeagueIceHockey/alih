@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MapPin, Home, Calendar, Trophy, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { TeamInfo } from "@/types/team";
 
 interface TeamInfoCardProps {
@@ -78,12 +79,14 @@ const TeamInfoCard = ({ teamInfo }: TeamInfoCardProps) => {
               {teamInfo.history_summary}
             </p>
             {teamInfo.history_summary.length > 150 && (
-              <button
+              <Button
+                variant="link"
+                size="sm"
+                className="mt-2 p-0 h-auto"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="mt-2 text-sm text-primary hover:underline focus:outline-none"
               >
                 {isExpanded ? "접기" : "더보기"}
-              </button>
+              </Button>
             )}
           </div>
         )}

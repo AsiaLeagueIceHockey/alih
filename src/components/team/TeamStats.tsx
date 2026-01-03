@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Home, Car, TrendingUp, TrendingDown, Zap, Target } from "lucide-react";
 
 interface AdvancedStats {
@@ -39,6 +40,17 @@ const TeamStats = ({
     ? Math.max(advancedStats.periodGoals.p1, advancedStats.periodGoals.p2, advancedStats.periodGoals.p3, advancedStats.periodGoals.ot, 1)
     : 1;
 
+  // 피리어드 데이터 (시맨틱 색상 사용)
+  const periodData = advancedStats ? [
+    { label: '1P', value: advancedStats.periodGoals.p1, colorClass: 'bg-period-1' },
+    { label: '2P', value: advancedStats.periodGoals.p2, colorClass: 'bg-period-2' },
+    { label: '3P', value: advancedStats.periodGoals.p3, colorClass: 'bg-period-3' },
+    ...(advancedStats.periodGoals.ot > 0 
+      ? [{ label: 'OT', value: advancedStats.periodGoals.ot, colorClass: 'bg-period-ot' }]
+      : []
+    ),
+  ] : [];
+
   return (
     <section className="mb-6">
       <h2 className="text-lg font-bold mb-4 px-1 flex items-center gap-2">
@@ -51,7 +63,7 @@ const TeamStats = ({
           {/* 홈 성적 */}
           <div className="bg-secondary/30 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Home className="h-4 w-4 text-green-500" />
+              <Home className="h-4 w-4 text-success" />
               <span className="text-sm text-muted-foreground">홈 성적</span>
             </div>
             <div className="text-2xl font-bold">
@@ -65,7 +77,7 @@ const TeamStats = ({
           {/* 원정 성적 */}
           <div className="bg-secondary/30 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Car className="h-4 w-4 text-blue-500" />
+              <Car className="h-4 w-4 text-info" />
               <span className="text-sm text-muted-foreground">원정 성적</span>
             </div>
             <div className="text-2xl font-bold">
@@ -87,8 +99,8 @@ const TeamStats = ({
                   key={index}
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
                     result === 'W'
-                      ? 'bg-green-500'
-                      : 'bg-red-500'
+                      ? 'bg-success'
+                      : 'bg-destructive'
                   }`}
                 >
                   {result}
@@ -102,21 +114,21 @@ const TeamStats = ({
         <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
           <div className="text-center">
             <div className="text-sm text-muted-foreground mb-1">평균 득점</div>
-            <div className="text-xl font-bold text-green-500 flex items-center justify-center gap-1">
+            <div className="text-xl font-bold text-success flex items-center justify-center gap-1">
               <TrendingUp className="h-4 w-4" />
               {avgGoalsFor.toFixed(1)}
             </div>
           </div>
           <div className="text-center">
             <div className="text-sm text-muted-foreground mb-1">평균 실점</div>
-            <div className="text-xl font-bold text-red-500 flex items-center justify-center gap-1">
+            <div className="text-xl font-bold text-destructive flex items-center justify-center gap-1">
               <TrendingDown className="h-4 w-4" />
               {avgGoalsAgainst.toFixed(1)}
             </div>
           </div>
           <div className="text-center">
             <div className="text-sm text-muted-foreground mb-1">평균 득실차</div>
-            <div className={`text-xl font-bold ${goalDiff >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            <div className={`text-xl font-bold ${goalDiff >= 0 ? 'text-success' : 'text-destructive'}`}>
               {goalDiff >= 0 ? '+' : ''}{goalDiff.toFixed(1)}
             </div>
           </div>
@@ -128,20 +140,20 @@ const TeamStats = ({
             {/* 특수 상황 득점 */}
             <div className="pt-4 border-t border-border">
               <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-yellow-500" />
+                <Zap className="h-4 w-4 text-powerplay" />
                 특수 상황 득점
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-yellow-500/10 rounded-lg p-3 text-center">
+                <div className="bg-powerplay/10 rounded-lg p-3 text-center">
                   <div className="text-xs text-muted-foreground mb-1">파워플레이 골</div>
-                  <div className="text-2xl font-bold text-yellow-500">{advancedStats.ppGoals}</div>
+                  <div className="text-2xl font-bold text-powerplay">{advancedStats.ppGoals}</div>
                   <div className="text-xs text-muted-foreground">
                     전체 {advancedStats.totalGoals}골 중 {advancedStats.ppRate.toFixed(1)}%
                   </div>
                 </div>
-                <div className="bg-purple-500/10 rounded-lg p-3 text-center">
+                <div className="bg-shorthanded/10 rounded-lg p-3 text-center">
                   <div className="text-xs text-muted-foreground mb-1">숏핸디드 골</div>
-                  <div className="text-2xl font-bold text-purple-500">{advancedStats.shGoals || 0}</div>
+                  <div className="text-2xl font-bold text-shorthanded">{advancedStats.shGoals || 0}</div>
                   <div className="text-xs text-muted-foreground">
                     수적 열세 득점
                   </div>
@@ -156,20 +168,12 @@ const TeamStats = ({
                 피리어드별 득점
               </div>
               <div className="space-y-3">
-                {[
-                  { label: '1P', value: advancedStats.periodGoals.p1, color: 'bg-blue-500' },
-                  { label: '2P', value: advancedStats.periodGoals.p2, color: 'bg-green-500' },
-                  { label: '3P', value: advancedStats.periodGoals.p3, color: 'bg-orange-500' },
-                  ...(advancedStats.periodGoals.ot > 0 
-                    ? [{ label: 'OT', value: advancedStats.periodGoals.ot, color: 'bg-red-500' }]
-                    : []
-                  ),
-                ].map((period) => (
+                {periodData.map((period) => (
                   <div key={period.label} className="flex items-center gap-3">
                     <span className="w-8 text-sm font-medium text-muted-foreground">{period.label}</span>
                     <div className="flex-1 h-6 bg-secondary/50 rounded-full overflow-hidden">
                       <div 
-                        className={`h-full ${period.color} rounded-full transition-all duration-500`}
+                        className={`h-full ${period.colorClass} rounded-full transition-all duration-500`}
                         style={{ width: `${(period.value / periodMax) * 100}%` }}
                       />
                     </div>
