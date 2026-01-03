@@ -2,7 +2,7 @@ import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper, Coffee } from "lucide-react";
+import { Calendar, TrendingUp, PlayCircle, Trophy, Newspaper, Coffee, Instagram, Heart } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
 import { externalSupabase } from "@/lib/supabase-external";
@@ -619,22 +619,40 @@ const Home = () => {
           )}
         </section>
 
-        {/* Support Banner */}
-        <Button
-          variant="secondary"
-          className="w-full gap-2"
-          onClick={() => {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (isMobile) {
-              window.open('https://qr.kakaopay.com/FQqvZxoia9c405515', '_blank');
-            } else {
-              window.open('/images/kakaopay-qr.jpg', '_blank');
-            }
-          }}
-        >
-          <Coffee className="w-5 h-5" />
-          개발자에게 커피 한 잔 후원하기
-        </Button>
+        {/* Official Channel Card */}
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <Heart className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold">함께하기</h2>
+          </div>
+          <Card className="p-4 border-border">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                className="gap-2 h-auto py-3 flex-col"
+                onClick={() => window.open('https://www.instagram.com/alhockey_fans', '_blank')}
+              >
+                <Instagram className="w-5 h-5 text-pink-500" />
+                <span className="text-xs">@alhockey_fans</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="gap-2 h-auto py-3 flex-col"
+                onClick={() => {
+                  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                  if (isMobile) {
+                    window.open('https://qr.kakaopay.com/FQqvZxoia9c405515', '_blank');
+                  } else {
+                    window.open('/images/kakaopay-qr.jpg', '_blank');
+                  }
+                }}
+              >
+                <Coffee className="w-5 h-5 text-amber-600" />
+                <span className="text-xs">커피 한 잔 후원하기</span>
+              </Button>
+            </div>
+          </Card>
+        </section>
 
         {/* League Standings Preview */}
         <section>
