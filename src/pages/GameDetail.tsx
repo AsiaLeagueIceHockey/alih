@@ -2,7 +2,7 @@ import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { useState } from "react";
-import { Loader2, ArrowLeft, Trophy, Users, Goal, Shield, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, ArrowLeft, Trophy, Users, Goal, Shield, Play, ChevronDown, ChevronUp, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlihTeam } from "@/hooks/useTeams";
 import { useScheduleByGameNo, ScheduleGame } from "@/hooks/useSchedules";
 import SEO from "@/components/SEO";
+import CheerBattle from "@/components/game/CheerBattle";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -432,9 +433,38 @@ const GameDetail = () => {
         {/* 헤더 */}
         <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
           <div className="container mx-auto px-4">
-            <h1 className="text-2xl font-bold text-center mb-6">
-              {isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'}
-            </h1>
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-10" /> {/* Spacer */}
+              <h1 className="text-2xl font-bold text-center">
+                {isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'}
+              </h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-10 h-10"
+                onClick={async () => {
+                  const shareData = {
+                    title: `${homeTeam.name} vs ${awayTeam.name} - 아시아리그 아이스하키`,
+                    text: `${matchDateObj.toLocaleDateString('ko-KR')} ${scheduleData.match_place}에서 열리는 경기`,
+                    url: window.location.href,
+                  };
+                  
+                  if (navigator.share) {
+                    try {
+                      await navigator.share(shareData);
+                    } catch (err) {
+                      // 사용자가 취소한 경우 무시
+                    }
+                  } else {
+                    // 클립보드 복사 (Web Share API 미지원 브라우저)
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('링크가 클립보드에 복사되었습니다!');
+                  }
+                }}
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -501,6 +531,14 @@ const GameDetail = () => {
               <p>{scheduleData.match_place}</p>
             </div>
           </Card>
+
+          {/* 응원 배틀 */}
+          <CheerBattle
+            gameNo={gameNo || ''}
+            homeTeam={{ id: homeTeam.id, name: homeTeam.name, logo: homeTeam.logo }}
+            awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
+            isLive={isInProgress}
+          />
 
           {/* 2. 경기 현황 (live_data가 있을 때만) */}
           {liveData && (
@@ -810,7 +848,35 @@ const GameDetail = () => {
       {/* 헤더 */}
       <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold text-center mb-6">경기 상세 기록</h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="w-10" /> {/* Spacer */}
+            <h1 className="text-2xl font-bold text-center">경기 상세 기록</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10"
+              onClick={async () => {
+                const shareData = {
+                  title: `${homeTeam.name} vs ${awayTeam.name} - 아시아리그 아이스하키`,
+                  text: `${matchDateObj.toLocaleDateString('ko-KR')} ${gameDetail.game_info.venue}에서 열린 경기 상세 기록`,
+                  url: window.location.href,
+                };
+                
+                if (navigator.share) {
+                  try {
+                    await navigator.share(shareData);
+                  } catch (err) {
+                    // 사용자가 취소한 경우 무시
+                  }
+                } else {
+                  await navigator.clipboard.writeText(window.location.href);
+                  alert('링크가 클립보드에 복사되었습니다!');
+                }
+              }}
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -856,6 +922,14 @@ const GameDetail = () => {
             <p>관중: {gameDetail.spectators.toLocaleString()}명</p>
           </div>
         </Card>
+
+        {/* 응원 배틀 */}
+        <CheerBattle
+          gameNo={gameNo || ''}
+          homeTeam={{ id: homeTeam.id, name: homeTeam.name, logo: homeTeam.logo }}
+          awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
+          isLive={false}
+        />
 
         {/* 경기 하이라이트 */}
         {scheduleData?.highlight_url && (
