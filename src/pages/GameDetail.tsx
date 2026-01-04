@@ -532,6 +532,33 @@ const GameDetail = () => {
             </div>
           </Card>
 
+          {/* 라이브 스트리밍 */}
+          <Card className="p-4 mb-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <span className="text-destructive">●</span> 라이브 스트리밍
+            </h3>
+            {scheduleData.live_url ? (
+              <div className="aspect-video w-full rounded-lg overflow-hidden">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${getYoutubeVideoId(scheduleData.live_url)}`}
+                  title="라이브 스트리밍"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                {isInProgress
+                  ? "이 경기는 라이브 스트리밍이 제공되지 않습니다"
+                  : "라이브 스트리밍 링크 업데이트 예정입니다"}
+              </div>
+            )}
+          </Card>
+
           {/* 응원 배틀 */}
           <CheerBattle
             gameNo={gameNo || ''}
@@ -540,7 +567,7 @@ const GameDetail = () => {
             isLive={isInProgress}
           />
 
-          {/* 2. 경기 현황 (live_data가 있을 때만) */}
+          {/* 경기 현황 (live_data가 있을 때만) */}
           {liveData && (
             <Card className="p-4 mb-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -680,34 +707,7 @@ const GameDetail = () => {
             </Card>
           )}
 
-          {/* 2. 라이브 스트리밍 */}
-          <Card className="p-4 mb-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <span className="text-destructive">●</span> 라이브 스트리밍
-            </h3>
-            {scheduleData.live_url ? (
-              <div className="aspect-video w-full rounded-lg overflow-hidden">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${getYoutubeVideoId(scheduleData.live_url)}`}
-                  title="라이브 스트리밍"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
-                {isInProgress
-                  ? "이 경기는 라이브 스트리밍이 제공되지 않습니다"
-                  : "라이브 스트리밍 링크 업데이트 예정입니다"}
-              </div>
-            )}
-          </Card>
-
-          {/* 3. 맞대결 전적 */}
+          {/* 맞대결 전적 */}
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Trophy className="h-4 w-4" />
