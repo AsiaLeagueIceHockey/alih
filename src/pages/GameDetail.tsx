@@ -477,7 +477,7 @@ const GameDetail = () => {
                 className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
                 <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" loading="lazy" />
-                <p className="text-sm font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
               </Link>
 
               <div className="px-6 flex flex-col items-center">
@@ -517,7 +517,7 @@ const GameDetail = () => {
                 className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
                 <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" loading="lazy" />
-                <p className="text-sm font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
               </Link>
             </div>
 
@@ -890,7 +890,7 @@ const GameDetail = () => {
               className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
               <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-sm font-medium text-center hover:text-primary transition-colors">{homeTeam.name}</p>
+              <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
             </Link>
 
             {/* 스코어 */}
@@ -909,7 +909,7 @@ const GameDetail = () => {
               className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
               <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-sm font-medium text-center hover:text-primary transition-colors">{awayTeam.name}</p>
+              <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
             </Link>
           </div>
 
