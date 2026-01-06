@@ -1,15 +1,18 @@
 import { NavLink } from "./NavLink";
-import { Home, Calendar, Video, Trophy, Users, Newspaper } from "lucide-react";
+import { Home, Calendar, Video, Trophy, Newspaper } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const BottomNav = () => {
   const location = useLocation();
+  const { t } = useTranslation();
+
   const navItems = [
-    { to: "/", icon: Home, label: "홈" },
-    { to: "/schedule", icon: Calendar, label: "일정" },
-    { to: "/highlights", icon: Video, label: "영상" },
-    { to: "/standings", icon: Trophy, label: "순위" },
-    { to: "/news", icon: Newspaper, label: "뉴스" },
+    { to: "/", icon: Home, labelKey: "nav.home" },
+    { to: "/schedule", icon: Calendar, labelKey: "nav.schedule" },
+    { to: "/highlights", icon: Video, labelKey: "nav.highlights" },
+    { to: "/standings", icon: Trophy, labelKey: "nav.standings" },
+    { to: "/news", icon: Newspaper, labelKey: "nav.news" },
   ];
 
   const handleNavClick = (to: string) => {
@@ -21,7 +24,7 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border backdrop-blur-lg bg-opacity-95 pb-safe">
       <div className="flex justify-around items-center h-16 max-w-screen-xl mx-auto px-2">
-        {navItems.map(({ to, icon: Icon, label }) => (
+        {navItems.map(({ to, icon: Icon, labelKey }) => (
           <NavLink
             key={to}
             to={to}
@@ -30,7 +33,7 @@ const BottomNav = () => {
             activeClassName="text-primary"
           >
             <Icon className="w-5 h-5 mb-1" />
-            <span className="text-xs font-medium">{label}</span>
+            <span className="text-xs font-medium">{t(labelKey)}</span>
           </NavLink>
         ))}
       </div>
@@ -39,3 +42,4 @@ const BottomNav = () => {
 };
 
 export default BottomNav;
+

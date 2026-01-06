@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react";
 import { externalSupabase } from "@/lib/supabase-external";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 interface TeamStanding {
   rank: number;
@@ -35,17 +37,20 @@ interface PlayerStats {
 
 interface AlihTeam {
   english_name: string;
+  japanese_name?: string;
   name: string;
   logo: string;
 }
 
 const Standings = () => {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const { data: teamStandings, isLoading: isLoadingTeams } = useQuery({
     queryKey: ['team-standings'],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
-        .select('*, team:alih_teams(name, logo)')
+        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
         .order('rank', { ascending: true });
       
       if (error) throw error;
@@ -179,8 +184,8 @@ const Standings = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
-      { "@type": "ListItem", "position": 2, "name": "순위", "item": "https://alhockey.fans/standings" }
+      { "@type": "ListItem", "position": 1, "name": t('nav.home'), "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": t('nav.standings'), "item": "https://alhockey.fans/standings" }
     ]
   };
 
@@ -194,13 +199,13 @@ const Standings = () => {
         path="/standings"
         structuredData={[standingsStructuredData, breadcrumbData]}
       />
-      <PageHeader title="순위" subtitle="2025-26 시즌 기록" />
+      <PageHeader title={t('page.standings.title')} subtitle={t('page.standings.subtitle')} />
       
       <div className="container mx-auto px-4">
         <Tabs defaultValue="teams" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="teams">팀 순위</TabsTrigger>
-            <TabsTrigger value="players">개인 기록</TabsTrigger>
+            <TabsTrigger value="teams">{t('standings.teamRank')}</TabsTrigger>
+            <TabsTrigger value="players">{t('standings.playerStats')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="teams">
@@ -213,17 +218,17 @@ const Standings = () => {
                 <table className="w-full text-sm min-w-[600px]">
                   <thead className="border-b border-border">
                     <tr className="text-left">
-                      <th className="p-2 md:p-3 font-semibold text-primary">#</th>
-                      <th className="p-2 md:p-3 font-semibold text-primary whitespace-nowrap">팀</th>
-                      <th className="p-2 md:p-3 font-semibold text-primary text-center whitespace-nowrap">경기</th>
-                      <th className="p-2 md:p-3 font-semibold text-primary text-center whitespace-nowrap">승점</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">정규승</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">연장승</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">승부승</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">정규패</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">연장패</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">승부패</th>
-                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">골득실</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary">{t('standings.headers.rank')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary whitespace-nowrap">{t('standings.headers.team')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary text-center whitespace-nowrap">{t('standings.headers.gamesPlayed')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-primary text-center whitespace-nowrap">{t('standings.headers.points')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.regWin')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.otWin')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.pssWin')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.regLoss')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.otLoss')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.pssLoss')}</th>
+                      <th className="p-2 md:p-3 font-semibold text-muted-foreground text-center whitespace-nowrap">{t('standings.headers.goalDiff')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -231,7 +236,7 @@ const Standings = () => {
                       <tr 
                         key={standing.rank} 
                         className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${
-                          standing.team?.name === "안양 한라" ? "bg-primary/5" : ""
+                          standing.team_id === 1 ? "bg-primary/5" : ""
                         }`}
                       >
                         <td className="p-2 md:p-3 font-bold text-primary">{standing.rank}</td>
@@ -242,11 +247,11 @@ const Standings = () => {
                           >
                             <img 
                               src={standing.team?.logo || ''} 
-                              alt={standing.team?.name || ''}
+                              alt={getLocalizedTeamName(standing.team, currentLang)}
                               className="w-6 h-6 object-contain flex-shrink-0"
                               loading="lazy"
                             />
-                            <span className="font-medium hover:underline">{standing.team?.name}</span>
+                            <span className="font-medium hover:underline">{getLocalizedTeamName(standing.team, currentLang)}</span>
                           </Link>
                         </td>
                         <td className="p-2 md:p-3 text-center">{standing.games_played}</td>
@@ -268,10 +273,10 @@ const Standings = () => {
             </Card>
             <div className="mt-4 text-xs text-muted-foreground space-y-2 px-2">
               <div className="space-y-1">
-                <p className="font-semibold text-foreground">📊 용어 설명</p>
-                <p>• <span className="font-medium">OT (Overtime)</span>: 연장전. 정규 시간 60분 동안 승부가 나지 않으면 진행합니다.</p>
-                <p>• <span className="font-medium">PSS (Penalty Shootout)</span>: 승부샷. 연장전에서도 승부가 나지 않을 경우 진행하는 승부치기입니다.</p>
-                <p>• <span className="font-medium">승점 방식</span>: 정규 60분 승(3점), 연장/승부샷 승(2점), 연장/승부샷 패(1점), 정규 60분 패(0점)</p>
+                <p className="font-semibold text-foreground">{t('standings.explanation.title')}</p>
+                <p>• <span className="font-medium">OT (Overtime)</span>: {t('standings.explanation.ot')}</p>
+                <p>• <span className="font-medium">PSS (Penalty Shootout)</span>: {t('standings.explanation.pss')}</p>
+                <p>• <span className="font-medium">{currentLang === 'ko' ? '승점 방식' : currentLang === 'ja' ? '勝点方式' : 'Points'}</span>: {t('standings.explanation.pointsRule')}</p>
               </div>
             </div>
           </TabsContent>
@@ -279,23 +284,23 @@ const Standings = () => {
           <TabsContent value="players">
             <Tabs defaultValue="goals" className="w-full">
               <TabsList className="w-full h-auto bg-transparent p-0 border-b border-border mb-4">
-                <TabsTrigger 
+              <TabsTrigger 
                   value="goals" 
                   className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none bg-transparent"
                 >
-                  득점 순위
+                  {t('playerRanks.goals')}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="assists"
                   className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none bg-transparent"
                 >
-                  도움 순위
+                  {t('playerRanks.assists')}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="points"
                   className="flex-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none bg-transparent"
                 >
-                  포인트 순위
+                  {t('playerRanks.points')}
                 </TabsTrigger>
               </TabsList>
 
@@ -354,7 +359,7 @@ const Standings = () => {
                                 <div className="text-xl md:text-2xl font-bold text-primary">
                                   {player.goals}
                                 </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">골</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">{t('standings.playerLabels.goal')}</div>
                               </div>
                               <div className="text-right opacity-50">
                                 <div className="text-xs md:text-sm text-muted-foreground">
@@ -424,7 +429,7 @@ const Standings = () => {
                                 <div className="text-xl md:text-2xl font-bold text-primary">
                                   {player.assists}
                                 </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">도움</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">{t('standings.playerLabels.assist')}</div>
                               </div>
                               <div className="text-right opacity-50">
                                 <div className="text-xs md:text-sm text-muted-foreground">
@@ -494,7 +499,7 @@ const Standings = () => {
                                 <div className="text-xl md:text-2xl font-bold text-primary">
                                   {player.points}
                                 </div>
-                                <div className="text-[10px] md:text-xs text-muted-foreground">포인트</div>
+                                <div className="text-[10px] md:text-xs text-muted-foreground">{t('standings.playerLabels.point')}</div>
                               </div>
                               <div className="text-right opacity-50">
                                 <div className="text-xs md:text-sm text-muted-foreground">

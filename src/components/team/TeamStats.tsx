@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Home, Car, TrendingUp, TrendingDown, Zap, Target } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AdvancedStats {
   ppGoals: number;
@@ -29,6 +30,7 @@ const TeamStats = ({
   gamesPlayed,
   advancedStats,
 }: TeamStatsProps) => {
+  const { t } = useTranslation();
   const homeTotal = homeRecord.wins + homeRecord.losses;
   const awayTotal = awayRecord.wins + awayRecord.losses;
   const homeWinRate = homeTotal > 0 ? Math.round((homeRecord.wins / homeTotal) * 100) : 0;
@@ -54,7 +56,7 @@ const TeamStats = ({
   return (
     <section className="mb-6">
       <h2 className="text-lg font-bold mb-4 px-1 flex items-center gap-2">
-        시즌 통계
+        {t('section.seasonStats')}
       </h2>
       
       <Card className="p-4 space-y-6">
@@ -64,13 +66,13 @@ const TeamStats = ({
           <div className="bg-secondary/30 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Home className="h-4 w-4 text-success" />
-              <span className="text-sm text-muted-foreground">홈 성적</span>
+              <span className="text-sm text-muted-foreground">{t('stats.homeRecord')}</span>
             </div>
             <div className="text-2xl font-bold">
-              {homeRecord.wins}승 {homeRecord.losses}패
+              {homeRecord.wins}{t('stats.win')} {homeRecord.losses}{t('stats.loss')}
             </div>
             <div className="text-sm text-muted-foreground">
-              승률 {homeWinRate}%
+              {t('stats.winRate')} {homeWinRate}%
             </div>
           </div>
 
@@ -78,13 +80,13 @@ const TeamStats = ({
           <div className="bg-secondary/30 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Car className="h-4 w-4 text-info" />
-              <span className="text-sm text-muted-foreground">원정 성적</span>
+              <span className="text-sm text-muted-foreground">{t('stats.awayRecord')}</span>
             </div>
             <div className="text-2xl font-bold">
-              {awayRecord.wins}승 {awayRecord.losses}패
+              {awayRecord.wins}{t('stats.win')} {awayRecord.losses}{t('stats.loss')}
             </div>
             <div className="text-sm text-muted-foreground">
-              승률 {awayWinRate}%
+              {t('stats.winRate')} {awayWinRate}%
             </div>
           </div>
         </div>
@@ -92,7 +94,7 @@ const TeamStats = ({
         {/* 최근 5경기 폼 */}
         {recentForm.length > 0 && (
           <div>
-            <div className="text-sm text-muted-foreground mb-3">최근 {recentForm.length}경기</div>
+            <div className="text-sm text-muted-foreground mb-3">{t('stats.recentGames', { count: recentForm.length })}</div>
             <div className="flex gap-2 justify-center">
               {recentForm.map((result, index) => (
                 <div
@@ -113,21 +115,21 @@ const TeamStats = ({
         {/* 경기당 평균 */}
         <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
           <div className="text-center">
-            <div className="text-sm text-muted-foreground mb-1">평균 득점</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('stats.avgGoalsFor')}</div>
             <div className="text-xl font-bold text-success flex items-center justify-center gap-1">
               <TrendingUp className="h-4 w-4" />
               {avgGoalsFor.toFixed(1)}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-sm text-muted-foreground mb-1">평균 실점</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('stats.avgGoalsAgainst')}</div>
             <div className="text-xl font-bold text-destructive flex items-center justify-center gap-1">
               <TrendingDown className="h-4 w-4" />
               {avgGoalsAgainst.toFixed(1)}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-sm text-muted-foreground mb-1">평균 득실차</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('stats.avgGoalDiff')}</div>
             <div className={`text-xl font-bold ${goalDiff >= 0 ? 'text-success' : 'text-destructive'}`}>
               {goalDiff >= 0 ? '+' : ''}{goalDiff.toFixed(1)}
             </div>
@@ -141,21 +143,21 @@ const TeamStats = ({
             <div className="pt-4 border-t border-border">
               <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
                 <Zap className="h-4 w-4 text-powerplay" />
-                특수 상황 득점
+                {t('stats.specialSituation')}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-powerplay/10 rounded-lg p-3 text-center">
-                  <div className="text-xs text-muted-foreground mb-1">파워플레이 골</div>
+                  <div className="text-xs text-muted-foreground mb-1">{t('stats.powerPlayGoal')}</div>
                   <div className="text-2xl font-bold text-powerplay">{advancedStats.ppGoals}</div>
                   <div className="text-xs text-muted-foreground">
-                    전체 {advancedStats.totalGoals}골 중 {advancedStats.ppRate.toFixed(1)}%
+                    {t('stats.powerPlayRate', { totalGoals: advancedStats.totalGoals, ppRate: advancedStats.ppRate.toFixed(1) })}
                   </div>
                 </div>
                 <div className="bg-shorthanded/10 rounded-lg p-3 text-center">
-                  <div className="text-xs text-muted-foreground mb-1">숏핸디드 골</div>
+                  <div className="text-xs text-muted-foreground mb-1">{t('stats.shortHandedGoal')}</div>
                   <div className="text-2xl font-bold text-shorthanded">{advancedStats.shGoals || 0}</div>
                   <div className="text-xs text-muted-foreground">
-                    수적 열세 득점
+                    {t('stats.shortHandedDesc')}
                   </div>
                 </div>
               </div>
@@ -165,7 +167,7 @@ const TeamStats = ({
             <div className="pt-4 border-t border-border">
               <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
                 <Target className="h-4 w-4 text-primary" />
-                피리어드별 득점
+                {t('stats.periodGoals')}
               </div>
               <div className="space-y-3">
                 {periodData.map((period) => (
@@ -187,7 +189,7 @@ const TeamStats = ({
 
         {/* 총 경기 수 */}
         <div className="text-center text-xs text-muted-foreground">
-          총 {gamesPlayed}경기 기준
+          {t('stats.totalGames', { count: gamesPlayed })}
         </div>
       </Card>
     </section>

@@ -11,13 +11,13 @@ import { useSchedules, ScheduleGame } from "@/hooks/useSchedules";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, ja, enUS } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
 import type { CarouselApi } from "@/components/ui/carousel";
-
-
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 interface TeamStanding {
   rank: number;
@@ -37,6 +37,7 @@ interface TeamStanding {
 
 interface AlihTeam {
   english_name: string;
+  japanese_name?: string;
   name: string;
   logo: string;
 }
@@ -54,6 +55,18 @@ interface AlihNews {
 const Home = () => {
   const navigate = useNavigate();
   const { data: teams } = useTeams();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
+  
+  // Date locale helper
+  const getDateLocale = () => {
+    switch (currentLang) {
+      case 'ja': return ja;
+      case 'en': return enUS;
+      default: return ko;
+    }
+  };
+  
   const [selectedHighlight, setSelectedHighlight] = useState<{ url: string; title: string } | null>(null);
   const [nextGamesApi, setNextGamesApi] = useState<CarouselApi>();
   const [recentGamesApi, setRecentGamesApi] = useState<CarouselApi>();
@@ -87,7 +100,7 @@ const Home = () => {
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_teams')
-        .select('english_name, name, logo');
+        .select('english_name, japanese_name, name, logo');
 
       if (error) throw error;
       return data as AlihTeam[];
@@ -148,11 +161,11 @@ const Home = () => {
   };
 
   const getGameStatus = (game: ScheduleGame) => {
-    if (game.game_status === 'Game Finished') return "종료";
+    if (game.game_status === 'Game Finished') return t('game.status.finished');
     const matchDateObj = new Date(game.match_at);
     const now = new Date();
-    if (matchDateObj <= now) return "진행 중";
-    return "예정";
+    if (matchDateObj <= now) return t('game.status.inProgress');
+    return t('game.status.scheduled');
   };
 
   const now = new Date();
@@ -243,7 +256,7 @@ const Home = () => {
         path="/"
         structuredData={combinedStructuredData}
       />
-      <PageHeader title="아시아리그 아이스하키" subtitle="2025-26 시즌" />
+      <PageHeader title={t('page.home.title')} subtitle={t('page.home.subtitle')} />
 
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* In Progress Games */}
@@ -251,10 +264,10 @@ const Home = () => {
           <section>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-              <h2 className="text-lg font-bold">진행 중인 경기</h2>
+              <h2 className="text-lg font-bold">{t('section.inProgress')}</h2>
               {inProgressGames.length > 1 && (
                 <Badge variant="outline" className="text-xs ml-auto">
-                  {inProgressGames.length}경기
+                  {inProgressGames.length}{t('game.games')}
                 </Badge>
               )}
             </div>
@@ -331,16 +344,16 @@ const Home = () => {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">다음 경기</h2>
+            <h2 className="text-lg font-bold">{t('section.nextGame')}</h2>
             {nextGames.length > 1 && (
               <Badge variant="outline" className="text-xs ml-auto">
-                {nextGames.length}경기
+                {nextGames.length}{t('game.games')}
               </Badge>
             )}
           </div>
           {nextGames.length === 0 ? (
             <Card className="p-4 border-border">
-              <p className="text-sm text-muted-foreground text-center">예정된 경기가 없습니다</p>
+              <p className="text-sm text-muted-foreground text-center">{t('game.noGames')}</p>
             </Card>
           ) : nextGames.length === 1 ? (
             <Card
@@ -355,9 +368,9 @@ const Home = () => {
             >
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
-                  {new Date(nextGames[0].match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(nextGames[0].match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                  {format(new Date(nextGames[0].match_at), 'PPP p', { locale: getDateLocale() })}
                 </Badge>
-                <Badge className={`text-xs ${getGameStatus(nextGames[0]) === "진행 중" ? "bg-destructive animate-pulse" : "bg-accent"}`}>
+                <Badge className={`text-xs ${getGameStatus(nextGames[0]) === t('game.status.inProgress') ? "bg-destructive animate-pulse" : "bg-accent"}`}>
                   {getGameStatus(nextGames[0])}
                 </Badge>
               </div>
@@ -366,16 +379,16 @@ const Home = () => {
                   {getTeamById(nextGames[0].home_alih_team_id)?.logo ? (
                     <img
                       src={getTeamById(nextGames[0].home_alih_team_id)!.logo}
-                      alt={getTeamById(nextGames[0].home_alih_team_id)!.name}
+                      alt={getLocalizedTeamName(getTeamById(nextGames[0].home_alih_team_id), currentLang)}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(nextGames[0].home_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(nextGames[0].home_alih_team_id), currentLang) || t('game.pending')}</p>
                   {nextGames[0].home_alih_team_score !== null && (
-                    <p className={`text-2xl font-bold mt-1 ${getGameStatus(nextGames[0]) === "진행 중" ? "text-destructive" : ""}`}>
+                    <p className={`text-2xl font-bold mt-1 ${getGameStatus(nextGames[0]) === t('game.status.inProgress') ? "text-destructive" : ""}`}>
                       {nextGames[0].home_alih_team_score}
                     </p>
                   )}
@@ -387,16 +400,16 @@ const Home = () => {
                   {getTeamById(nextGames[0].away_alih_team_id)?.logo ? (
                     <img
                       src={getTeamById(nextGames[0].away_alih_team_id)!.logo}
-                      alt={getTeamById(nextGames[0].away_alih_team_id)!.name}
+                      alt={getLocalizedTeamName(getTeamById(nextGames[0].away_alih_team_id), currentLang)}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(nextGames[0].away_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(nextGames[0].away_alih_team_id), currentLang) || t('game.pending')}</p>
                   {nextGames[0].away_alih_team_score !== null && (
-                    <p className={`text-2xl font-bold mt-1 ${getGameStatus(nextGames[0]) === "진행 중" ? "text-destructive" : ""}`}>
+                    <p className={`text-2xl font-bold mt-1 ${getGameStatus(nextGames[0]) === t('game.status.inProgress') ? "text-destructive" : ""}`}>
                       {nextGames[0].away_alih_team_score}
                     </p>
                   )}
@@ -421,9 +434,9 @@ const Home = () => {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="text-xs">
-                          {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                          {format(new Date(game.match_at), 'PPP p', { locale: getDateLocale() })}
                         </Badge>
-                        <Badge className={`text-xs ${getGameStatus(game) === "진행 중" ? "bg-destructive animate-pulse" : "bg-accent"}`}>
+                        <Badge className={`text-xs ${getGameStatus(game) === t('game.status.inProgress') ? "bg-destructive animate-pulse" : "bg-accent"}`}>
                           {getGameStatus(game)}
                         </Badge>
                       </div>
@@ -432,16 +445,16 @@ const Home = () => {
                           {getTeamById(game.home_alih_team_id)?.logo ? (
                             <img
                               src={getTeamById(game.home_alih_team_id)!.logo}
-                              alt={getTeamById(game.home_alih_team_id)!.name}
+                              alt={getLocalizedTeamName(getTeamById(game.home_alih_team_id), currentLang)}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                           )}
-                          <p className="text-sm font-bold">{getTeamById(game.home_alih_team_id)?.name || '미정'}</p>
+                          <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(game.home_alih_team_id), currentLang) || t('game.pending')}</p>
                           {game.home_alih_team_score !== null && (
-                            <p className={`text-2xl font-bold mt-1 ${getGameStatus(game) === "진행 중" ? "text-destructive" : ""}`}>
+                            <p className={`text-2xl font-bold mt-1 ${getGameStatus(game) === t('game.status.inProgress') ? "text-destructive" : ""}`}>
                               {game.home_alih_team_score}
                             </p>
                           )}
@@ -453,16 +466,16 @@ const Home = () => {
                           {getTeamById(game.away_alih_team_id)?.logo ? (
                             <img
                               src={getTeamById(game.away_alih_team_id)!.logo}
-                              alt={getTeamById(game.away_alih_team_id)!.name}
+                              alt={getLocalizedTeamName(getTeamById(game.away_alih_team_id), currentLang)}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                           )}
-                          <p className="text-sm font-bold">{getTeamById(game.away_alih_team_id)?.name || '미정'}</p>
+                          <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(game.away_alih_team_id), currentLang) || t('game.pending')}</p>
                           {game.away_alih_team_score !== null && (
-                            <p className={`text-2xl font-bold mt-1 ${getGameStatus(game) === "진행 중" ? "text-destructive" : ""}`}>
+                            <p className={`text-2xl font-bold mt-1 ${getGameStatus(game) === t('game.status.inProgress') ? "text-destructive" : ""}`}>
                               {game.away_alih_team_score}
                             </p>
                           )}
@@ -490,16 +503,16 @@ const Home = () => {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Trophy className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">최근 결과</h2>
+            <h2 className="text-lg font-bold">{t('section.recentResults')}</h2>
             {recentGames.length > 1 && (
               <Badge variant="outline" className="text-xs ml-auto">
-                {recentGames.length}경기
+                {recentGames.length}{t('game.games')}
               </Badge>
             )}
           </div>
           {recentGames.length === 0 ? (
             <Card className="p-4 border-border">
-              <p className="text-sm text-muted-foreground text-center">최근 결과가 없습니다</p>
+              <p className="text-sm text-muted-foreground text-center">{t('game.noResults')}</p>
             </Card>
           ) : recentGames.length === 1 ? (
             <Card
@@ -514,23 +527,23 @@ const Home = () => {
             >
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
-                  {new Date(recentGames[0].match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                  {format(new Date(recentGames[0].match_at), 'M/d', { locale: getDateLocale() })}
                 </Badge>
-                <Badge variant="outline" className="text-xs">종료</Badge>
+                <Badge variant="outline" className="text-xs">{t('game.status.finished')}</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
                   {getTeamById(recentGames[0].home_alih_team_id)?.logo ? (
                     <img
                       src={getTeamById(recentGames[0].home_alih_team_id)!.logo}
-                      alt={getTeamById(recentGames[0].home_alih_team_id)!.name}
+                      alt={getLocalizedTeamName(getTeamById(recentGames[0].home_alih_team_id), currentLang)}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(recentGames[0].home_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(recentGames[0].home_alih_team_id), currentLang) || t('game.pending')}</p>
                   <p className="text-2xl font-bold text-primary mt-1">{recentGames[0].home_alih_team_score}</p>
                 </div>
                 <div className="text-xl font-bold text-muted-foreground px-4">:</div>
@@ -538,14 +551,14 @@ const Home = () => {
                   {getTeamById(recentGames[0].away_alih_team_id)?.logo ? (
                     <img
                       src={getTeamById(recentGames[0].away_alih_team_id)!.logo}
-                      alt={getTeamById(recentGames[0].away_alih_team_id)!.name}
+                      alt={getLocalizedTeamName(getTeamById(recentGames[0].away_alih_team_id), currentLang)}
                       className="w-12 h-12 object-contain mx-auto mb-2"
                       loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                   )}
-                  <p className="text-sm font-bold">{getTeamById(recentGames[0].away_alih_team_id)?.name || '미정'}</p>
+                  <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(recentGames[0].away_alih_team_id), currentLang) || t('game.pending')}</p>
                   <p className="text-2xl font-bold mt-1">{recentGames[0].away_alih_team_score}</p>
                 </div>
               </div>
@@ -567,23 +580,23 @@ const Home = () => {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="text-xs">
-                          {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                          {format(new Date(game.match_at), 'M/d', { locale: getDateLocale() })}
                         </Badge>
-                        <Badge variant="outline" className="text-xs">종료</Badge>
+                        <Badge variant="outline" className="text-xs">{t('game.status.finished')}</Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-center flex-1">
                           {getTeamById(game.home_alih_team_id)?.logo ? (
                             <img
                               src={getTeamById(game.home_alih_team_id)!.logo}
-                              alt={getTeamById(game.home_alih_team_id)!.name}
+                              alt={getLocalizedTeamName(getTeamById(game.home_alih_team_id), currentLang)}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                           )}
-                          <p className="text-sm font-bold">{getTeamById(game.home_alih_team_id)?.name || '미정'}</p>
+                          <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(game.home_alih_team_id), currentLang) || t('game.pending')}</p>
                           <p className="text-2xl font-bold text-primary mt-1">{game.home_alih_team_score}</p>
                         </div>
                         <div className="text-xl font-bold text-muted-foreground px-4">:</div>
@@ -591,14 +604,14 @@ const Home = () => {
                           {getTeamById(game.away_alih_team_id)?.logo ? (
                             <img
                               src={getTeamById(game.away_alih_team_id)!.logo}
-                              alt={getTeamById(game.away_alih_team_id)!.name}
+                              alt={getLocalizedTeamName(getTeamById(game.away_alih_team_id), currentLang)}
                               className="w-12 h-12 object-contain mx-auto mb-2"
                               loading="lazy"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-secondary rounded-full mx-auto mb-2" />
                           )}
-                          <p className="text-sm font-bold">{getTeamById(game.away_alih_team_id)?.name || '미정'}</p>
+                          <p className="text-sm font-bold">{getLocalizedTeamName(getTeamById(game.away_alih_team_id), currentLang) || t('game.pending')}</p>
                           <p className="text-2xl font-bold mt-1">{game.away_alih_team_score}</p>
                         </div>
                       </div>
@@ -623,7 +636,7 @@ const Home = () => {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Heart className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">함께하기</h2>
+            <h2 className="text-lg font-bold">{t('section.joinUs')}</h2>
           </div>
           <Card className="p-4 border-border">
             <div className="grid grid-cols-2 gap-3">
@@ -648,7 +661,7 @@ const Home = () => {
                 }}
               >
                 <Coffee className="w-5 h-5 text-amber-600" />
-                <span className="text-xs">커피 한 잔 후원하기</span>
+                <span className="text-xs">{t('button.donate')}</span>
               </Button>
             </div>
           </Card>
@@ -659,10 +672,10 @@ const Home = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold">리그 순위</h2>
+              <h2 className="text-lg font-bold">{t('section.leagueStandings')}</h2>
             </div>
-            <a href="/standings" className="text-xs text-primary hover:underline" aria-label="리그 순위 전체 보기">
-              전체 순위 보기
+            <a href="/standings" className="text-xs text-primary hover:underline">
+              {t('button.viewAllStandings')}
             </a>
           </div>
           {!topThreeStandings ? (
@@ -677,9 +690,9 @@ const Home = () => {
                 <thead className="border-b border-border bg-muted/30">
                   <tr>
                     <th className="p-3 text-left font-semibold">#</th>
-                    <th className="p-3 text-left font-semibold">팀</th>
-                    <th className="p-3 text-center font-semibold">경기</th>
-                    <th className="p-3 text-center font-semibold">승점</th>
+                    <th className="p-3 text-left font-semibold">{t('standings.headers.team')}</th>
+                    <th className="p-3 text-center font-semibold">{t('standings.headers.gamesPlayed')}</th>
+                    <th className="p-3 text-center font-semibold">{t('standings.headers.points')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -695,12 +708,12 @@ const Home = () => {
                           {standing.team?.logo && (
                             <img
                               src={standing.team.logo}
-                              alt={standing.team.name}
+                              alt={getLocalizedTeamName(standing.team, currentLang)}
                               className="w-5 h-5 object-contain"
                               loading="lazy"
                             />
                           )}
-                          <span className="font-medium hover:text-primary transition-colors">{standing.team?.name}</span>
+                          <span className="font-medium hover:text-primary transition-colors">{getLocalizedTeamName(standing.team, currentLang)}</span>
                         </div>
                       </td>
                       <td className="p-3 text-center">{standing.games_played}</td>
@@ -718,10 +731,10 @@ const Home = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Newspaper className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold">최신 뉴스</h2>
+              <h2 className="text-lg font-bold">{t('section.latestNews')}</h2>
             </div>
-            <a href="/news" className="text-xs text-primary hover:underline" aria-label="뉴스 전체 보기">
-              전체 뉴스 보기
+            <a href="/news" className="text-xs text-primary hover:underline">
+              {t('button.viewAllNews')}
             </a>
           </div>
           {!latestNews ? (
@@ -752,11 +765,11 @@ const Home = () => {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <PlayCircle className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold">최신 하이라이트</h2>
+            <h2 className="text-lg font-bold">{t('section.latestHighlight')}</h2>
           </div>
           {!latestHighlight ? (
             <Card className="p-4 border-border">
-              <p className="text-sm text-muted-foreground text-center">하이라이트가 없습니다</p>
+              <p className="text-sm text-muted-foreground text-center">{t('game.noHighlights')}</p>
             </Card>
           ) : (
             <Card

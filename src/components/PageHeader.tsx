@@ -1,3 +1,5 @@
+import LanguageSwitcher from './LanguageSwitcher';
+
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
@@ -5,14 +7,17 @@ interface PageHeaderProps {
 
 const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border mb-4">
-      <div className="container mx-auto px-4 py-4">
-        <h1 className="text-2xl font-bold bg-ice-gradient bg-clip-text text-transparent">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-        )}
+    <header className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{title}</h1>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+            )}
+          </div>
+          <LanguageSwitcher />
+        </div>
       </div>
     </header>
   );

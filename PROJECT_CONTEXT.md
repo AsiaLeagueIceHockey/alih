@@ -38,10 +38,17 @@
 | 기술 | 버전 | 용도 |
 |------|------|------|
 | react-helmet-async | 2.0.5 | 메타 태그 관리 |
-| date-fns | 3.6 | 날짜 처리 (한국어 로케일) |
+| date-fns | 3.6 | 날짜 처리 (ko/ja/en 로케일) |
 | lucide-react | 0.462 | 아이콘 |
 
----
+### i18n (다국어 지원)
+| 기술 | 버전 | 용도 |
+|------|------|------|
+| react-i18next | 16.5 | React i18n 통합 |
+| i18next | 25.7 | i18n 프레임워크 |
+| i18next-browser-languagedetector | 8.2 | 브라우저 언어 자동 감지 |
+
+> **Note**: 한국어(ko), 일본어(ja), 영어(en) 3개 국어 지원. `/instagram/*` 경로는 SNS 자동화용이므로 한국어 고정.
 
 ## 3. 프로젝트 구조
 
@@ -67,6 +74,13 @@ src/
 │   ├── useSchedules.ts          # 스케줄 데이터 공통 훅 (캐시 일관성 보장) ⭐
 │   ├── use-mobile.tsx           # 모바일 감지 훅
 │   └── use-toast.ts             # 토스트 알림 훅
+│
+├── i18n/                        # 다국어 지원 ⭐
+│   ├── index.ts                 # i18n 설정 (언어 감지, fallback)
+│   └── locales/
+│       ├── ko.json              # 한국어 (~150개 키)
+│       ├── ja.json              # 일본어
+│       └── en.json              # 영어
 │
 ├── lib/
 │   ├── supabase-external.ts     # Supabase 싱글톤 클라이언트 ⭐

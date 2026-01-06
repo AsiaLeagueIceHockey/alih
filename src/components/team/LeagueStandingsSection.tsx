@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TeamStanding } from "@/types/team";
+import { useTranslation } from "react-i18next";
 
 interface LeagueStandingsSectionProps {
   standings: TeamStanding[];
@@ -10,18 +11,19 @@ interface LeagueStandingsSectionProps {
 }
 
 const LeagueStandingsSection = ({ standings, currentTeamId }: LeagueStandingsSectionProps) => {
+  const { t } = useTranslation();
   return (
     <section className="mb-6">
-      <h2 className="text-lg font-bold mb-4 px-1">순위</h2>
+      <h2 className="text-lg font-bold mb-4 px-1">{t('nav.standings')}</h2>
       
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-muted/30">
             <tr>
-              <th className="p-3 text-left font-semibold">#</th>
-              <th className="p-3 text-left font-semibold">팀</th>
-              <th className="p-3 text-center font-semibold">경기</th>
-              <th className="p-3 text-center font-semibold">승점</th>
+              <th className="p-3 text-left font-semibold">{t('standings.headers.rank')}</th>
+              <th className="p-3 text-left font-semibold">{t('standings.headers.team')}</th>
+              <th className="p-3 text-center font-semibold">{t('standings.headers.gamesPlayed')}</th>
+              <th className="p-3 text-center font-semibold">{t('standings.headers.points')}</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +62,7 @@ const LeagueStandingsSection = ({ standings, currentTeamId }: LeagueStandingsSec
       <div className="mt-3 flex justify-center">
         <Button variant="outline" asChild>
           <Link to="/standings" className="flex items-center gap-1">
-            전체 순위 보기
+            {t('button.viewAllStandings')}
             <ChevronRight className="h-4 w-4" />
           </Link>
         </Button>

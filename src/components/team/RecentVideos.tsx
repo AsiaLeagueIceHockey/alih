@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, ja, enUS } from "date-fns/locale";
 import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RecentVideo } from "@/types/team";
+import { useTranslation } from "react-i18next";
 
 interface RecentVideosProps {
   videos: RecentVideo[];
@@ -13,6 +14,15 @@ interface RecentVideosProps {
 const RecentVideos = ({ videos }: RecentVideosProps) => {
   const [selectedVideo, setSelectedVideo] = useState<RecentVideo | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { t, i18n } = useTranslation();
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'ja': return ja;
+      case 'en': return enUS;
+      default: return ko;
+    }
+  };
 
   if (!videos || videos.length === 0) return null;
 
@@ -29,7 +39,7 @@ const RecentVideos = ({ videos }: RecentVideosProps) => {
   return (
     <section className="mb-6">
       <div className="flex items-center justify-between mb-4 px-1">
-        <h2 className="text-lg font-bold">최신 영상</h2>
+        <h2 className="text-lg font-bold">{t('section.latestVideos')}</h2>
         <div className="flex gap-1">
           <Button
             variant="ghost"
@@ -83,7 +93,7 @@ const RecentVideos = ({ videos }: RecentVideosProps) => {
               {video.title}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {format(new Date(video.publishedAt), "yyyy년 M월 d일", { locale: ko })}
+              {format(new Date(video.publishedAt), "PPP", { locale: getDateLocale() })}
             </p>
           </button>
         ))}
@@ -92,7 +102,7 @@ const RecentVideos = ({ videos }: RecentVideosProps) => {
       {/* 영상 재생 모달 */}
       <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black">
-          <DialogTitle className="sr-only">{selectedVideo?.title || "영상 재생"}</DialogTitle>
+          <DialogTitle className="sr-only">{selectedVideo?.title || t('section.latestVideos')}</DialogTitle>
           <div className="aspect-video">
             {selectedVideo && (
               <iframe

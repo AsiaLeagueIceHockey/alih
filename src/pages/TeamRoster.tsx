@@ -8,9 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import SEO from "@/components/SEO";
 import TeamHeader from "@/components/team/TeamHeader";
 import { Team, Player, TeamStanding } from "@/types/team";
+import { useTranslation } from "react-i18next";
 
 const TeamRoster = () => {
   const { teamId } = useParams<{ teamId: string }>();
+  const { t } = useTranslation();
 
   const { data: team, isLoading: isLoadingTeam } = useQuery({
     queryKey: ['team-detail', teamId],
@@ -79,7 +81,7 @@ const TeamRoster = () => {
   if (!team) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-muted-foreground">팀 정보를 찾을 수 없습니다.</p>
+        <p className="text-muted-foreground">{t('error.teamNotFound')}</p>
       </div>
     );
   }
@@ -108,9 +110,9 @@ const TeamRoster = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 1, "name": t('nav.home'), "item": "https://alhockey.fans" },
       { "@type": "ListItem", "position": 2, "name": team.name, "item": `https://alhockey.fans/team/${teamId}` },
-      { "@type": "ListItem", "position": 3, "name": "선수단", "item": `https://alhockey.fans/roster/${teamId}` }
+      { "@type": "ListItem", "position": 3, "name": t('team.roster'), "item": `https://alhockey.fans/roster/${teamId}` }
     ]
   };
 
@@ -135,13 +137,13 @@ const TeamRoster = () => {
           <Button variant="ghost" asChild className="mb-4">
             <Link to={`/team/${teamId}`} className="flex items-center gap-1">
               <ChevronLeft className="h-4 w-4" />
-              팀 페이지로
+              {t('button.back')}
             </Link>
           </Button>
 
           {/* 선수 명단 */}
           <Card className="p-4 md:p-6">
-            <h2 className="text-lg font-bold mb-4">선수 명단</h2>
+            <h2 className="text-lg font-bold mb-4">{t('team.roster')}</h2>
 
             {isLoadingPlayers ? (
               <div className="flex items-center justify-center p-8">
@@ -152,14 +154,14 @@ const TeamRoster = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-center">등번호</TableHead>
-                      <TableHead>이름</TableHead>
-                      <TableHead className="text-center">포지션</TableHead>
-                      <TableHead className="text-center">경기</TableHead>
-                      <TableHead className="text-center">골</TableHead>
-                      <TableHead className="text-center">도움</TableHead>
-                      <TableHead className="text-center font-semibold">포인트</TableHead>
-                      <TableHead className="text-center">페널티</TableHead>
+                      <TableHead className="text-center">{t('roster.jerseyNumber')}</TableHead>
+                      <TableHead>{t('roster.name')}</TableHead>
+                      <TableHead className="text-center">{t('roster.position')}</TableHead>
+                      <TableHead className="text-center">{t('standings.headers.gamesPlayed')}</TableHead>
+                      <TableHead className="text-center">{t('standings.playerLabels.goal')}</TableHead>
+                      <TableHead className="text-center">{t('section.assists')}</TableHead>
+                      <TableHead className="text-center font-semibold">{t('standings.playerLabels.point')}</TableHead>
+                      <TableHead className="text-center">{t('roster.penalty')}</TableHead>
                       <TableHead className="text-center">+/-</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -196,7 +198,7 @@ const TeamRoster = () => {
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">
-                등록된 선수가 없습니다.
+                {t('roster.noPlayers')}
               </p>
             )}
 
@@ -204,7 +206,7 @@ const TeamRoster = () => {
             {players && players.length > 0 && (
               <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">+/−</span> : 선수가 얼음 위에 있는 동안, 5대5(또는 균등 인원 상황)에서 팀이 득점한 골과 실점한 골의 차이를 나타냅니다.
+                  <span className="font-semibold text-foreground">+/−</span> : {t('roster.plusMinusDesc')}
                 </p>
               </div>
             )}

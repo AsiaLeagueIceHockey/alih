@@ -12,10 +12,14 @@ import StarPlayers from "@/components/team/StarPlayers";
 import TeamStats from "@/components/team/TeamStats";
 import { Team, Player, TeamStanding } from "@/types/team";
 import { useTeams } from "@/hooks/useTeams";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 const TeamDetail = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const { data: teams = [] } = useTeams();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
 
   // 팀 정보 조회
   const { data: team, isLoading: isLoadingTeam } = useQuery({
@@ -146,7 +150,7 @@ const TeamDetail = () => {
   if (!team) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-muted-foreground">팀 정보를 찾을 수 없습니다.</p>
+        <p className="text-muted-foreground">{t('error.teamNotFound')}</p>
       </div>
     );
   }
@@ -263,7 +267,7 @@ const TeamDetail = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 1, "name": t('nav.home'), "item": "https://alhockey.fans" },
       { "@type": "ListItem", "position": 2, "name": team.name, "item": `https://alhockey.fans/team/${teamId}` }
     ]
   };
@@ -278,9 +282,9 @@ const TeamDetail = () => {
   return (
     <>
       <SEO
-        title={`${team.name} - 팀 정보, 선수단, 경기 결과 | 아시아리그 아이스하키`}
-        description={`${team.name}(${team.english_name})의 팀 정보, 최신 영상, 경기 결과, 주요 선수, 리그 순위를 확인하세요.${team.team_info ? ` 홈구장: ${homeStadiumName}, 연고지: ${team.team_info.hometown}` : ''}`}
-        keywords={`${team.name}, ${team.english_name}, 아시아리그, 아이스하키, ${team.name} 선수, ${team.name} 경기 일정, ${team.name} 순위, ${team.name} 하이라이트, ${team.team_info?.hometown || ''} 아이스하키`}
+        title={`${getLocalizedTeamName(team, currentLang)} | ${t('seo.leagueName')}`}
+        description={`${getLocalizedTeamName(team, currentLang)} (${team.english_name}) ${team.team_info ? `@ ${homeStadiumName}` : ''}`}
+        keywords={`${getLocalizedTeamName(team, currentLang)}, ${team.english_name}, ${t('seo.leagueName')}, ${team.team_info?.hometown || ''}`}
         path={`/team/${teamId}`}
         structuredData={[teamStructuredData, breadcrumbData]}
       />

@@ -10,6 +10,7 @@ import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import BottomNav from "./components/BottomNav";
 import ScrollToTop from "./components/ScrollToTop";
+import './i18n'; // i18n initialization
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));

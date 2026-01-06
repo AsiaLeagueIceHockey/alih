@@ -1,6 +1,7 @@
 import { Instagram, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Team } from "@/types/team";
+import { useTranslation } from "react-i18next";
 
 interface TeamHeaderProps {
   team: Team;
@@ -8,6 +9,7 @@ interface TeamHeaderProps {
 }
 
 const TeamHeader = ({ team, rank }: TeamHeaderProps) => {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4 py-4 px-4">
       {/* 팀 로고 */}
@@ -26,7 +28,7 @@ const TeamHeader = ({ team, rank }: TeamHeaderProps) => {
         {/* 순위 뱃지 */}
         {rank && (
           <Badge variant="secondary" className="text-xs px-3 py-0.5">
-            현재 순위: {rank}위
+            {t('team.currentRank', { rank })}
           </Badge>
         )}
       </div>
@@ -50,7 +52,7 @@ const TeamHeader = ({ team, rank }: TeamHeaderProps) => {
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors"
-            aria-label="공식 홈페이지"
+            aria-label={t('team.officialWebsite')}
           >
             <Globe className="h-5 w-5 text-primary" />
           </a>

@@ -9,7 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SEO from "@/components/SEO";
 import { useState } from "react";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, ja, enUS } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 interface AlihNews {
   id: number;
@@ -22,6 +23,7 @@ interface AlihNews {
 }
 
 const News = () => {
+  const { t, i18n } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const itemsPerPage = 10;
@@ -55,11 +57,14 @@ const News = () => {
   };
 
   const getLanguageLabel = (lang: string) => {
-    switch (lang) {
-      case 'ko': return '한국어';
-      case 'ja': return '일본어';
-      case 'en': return '영어';
-      default: return lang;
+    return t(`news.language.${lang}`);
+  };
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'ja': return ja;
+      case 'en': return enUS;
+      default: return ko;
     }
   };
 
@@ -88,8 +93,8 @@ const News = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
-      { "@type": "ListItem", "position": 2, "name": "뉴스", "item": "https://alhockey.fans/news" }
+      { "@type": "ListItem", "position": 1, "name": t('nav.home'), "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": t('nav.news'), "item": "https://alhockey.fans/news" }
     ]
   };
 
@@ -102,22 +107,22 @@ const News = () => {
         path="/news"
         structuredData={[newsStructuredData, breadcrumbData]}
       />
-      <PageHeader title="아시아리그 뉴스" subtitle="2025-26 소식" />
+      <PageHeader title={t('page.news.title')} subtitle={t('page.news.subtitle')} />
       
       <div className="container mx-auto px-4">
         <Tabs value={selectedLanguage} onValueChange={handleLanguageChange} className="mb-4">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">전체</TabsTrigger>
-            <TabsTrigger value="ko">한국어 뉴스</TabsTrigger>
-            <TabsTrigger value="ja">일본어 뉴스</TabsTrigger>
-            <TabsTrigger value="en">영어 뉴스</TabsTrigger>
+            <TabsTrigger value="all">{t('filter.all')}</TabsTrigger>
+            <TabsTrigger value="ko">{t('filter.koreanNews')}</TabsTrigger>
+            <TabsTrigger value="ja">{t('filter.japaneseNews')}</TabsTrigger>
+            <TabsTrigger value="en">{t('filter.englishNews')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">로딩 중...</div>
+          <div className="text-center py-8 text-muted-foreground">{t('game.loading')}</div>
         ) : paginatedNews.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">뉴스가 없습니다</div>
+          <div className="text-center py-8 text-muted-foreground">{t('game.noNews')}</div>
         ) : (
           <>
             <div className="space-y-3 mb-6">
@@ -143,7 +148,7 @@ const News = () => {
                   </p>
                   
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{format(new Date(item.published_at), 'PPP', { locale: ko })}</span>
+                    <span>{format(new Date(item.published_at), 'PPP', { locale: getDateLocale() })}</span>
                   </div>
                 </Card>
               ))}
@@ -156,7 +161,7 @@ const News = () => {
                   className="w-full"
                   onClick={() => setCurrentPage(p => p + 1)}
                 >
-                  더 보기 ▼
+                  {t('button.loadMore')}
                 </Button>
               </div>
             )}
