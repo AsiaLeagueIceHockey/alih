@@ -486,16 +486,16 @@ const GameDetail = () => {
         <div className="container mx-auto px-4 -mt-4">
           {/* 1. 팀 정보 및 스코어 */}
           <Card className="p-6 mb-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-start justify-between mb-6">
               <Link
                 to={`/team/${homeTeam.id}`}
-                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
+                className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-16 h-16 object-contain mb-2" loading="lazy" />
-                <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{getLocalizedTeamName(homeTeam, currentLang)}</p>
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(homeTeam, currentLang)}</p>
               </Link>
 
-              <div className="px-6 flex flex-col items-center">
+              <div className="w-[120px] flex-shrink-0 flex flex-col items-center">
                 {(isInProgress || isFinishedWithLiveData) && liveData ? (
                   <>
                     <div className="flex items-center gap-4">
@@ -529,10 +529,10 @@ const GameDetail = () => {
 
               <Link
                 to={`/team/${awayTeam.id}`}
-                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
+                className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-16 h-16 object-contain mb-2" loading="lazy" />
-                <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{getLocalizedTeamName(awayTeam, currentLang)}</p>
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(awayTeam, currentLang)}</p>
               </Link>
             </div>
 
@@ -788,10 +788,10 @@ const GameDetail = () => {
                   {/* 홈팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">{homeTeam.name}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{getLocalizedTeamName(homeTeam, currentLang)}</span>
                       <div className="flex gap-4 text-xs text-muted-foreground">
-                        <span>득점</span>
-                        <span>도움</span>
+                        <span>{t('gameDetail.goals')}</span>
+                        <span>{t('gameDetail.assistLabel')}</span>
                       </div>
                     </div>
                     {homeTopPlayers.map((player, idx) => (
@@ -808,10 +808,10 @@ const GameDetail = () => {
                   {/* 어웨이팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">{awayTeam.name}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{getLocalizedTeamName(awayTeam, currentLang)}</span>
                       <div className="flex gap-4 text-xs text-muted-foreground">
-                        <span>득점</span>
-                        <span>도움</span>
+                        <span>{t('gameDetail.goals')}</span>
+                        <span>{t('gameDetail.assistLabel')}</span>
                       </div>
                     </div>
                     {awayTopPlayers.map((player, idx) => (
@@ -826,7 +826,7 @@ const GameDetail = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground text-center mt-4">
-                  스타플레이어는 팀 내 공격 포인트가 가장 많은 선수 기준입니다.
+                  {t('gameDetail.starPlayerDesc')}
                 </p>
               </>
             )}
@@ -898,33 +898,33 @@ const GameDetail = () => {
       {/* 메인 스코어보드 */}
       <div className="container mx-auto px-4 -mt-4">
         <Card className="p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-start justify-between mb-6">
             {/* 홈팀 */}
             <Link
               to={`/team/${homeTeam.id}`}
-              className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
+              <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
+              <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(homeTeam, currentLang)}</p>
             </Link>
 
             {/* 스코어 */}
-            <div className="px-6 flex flex-col items-center">
+            <div className="w-[120px] flex-shrink-0 flex flex-col items-center">
               <div className="flex items-center gap-4">
                 <span className="text-4xl font-bold">{homeScore}</span>
                 <span className="text-2xl text-muted-foreground">:</span>
                 <span className="text-4xl font-bold">{awayScore}</span>
               </div>
-              <Badge variant="outline" className="mt-2">최종</Badge>
+              <Badge variant="outline" className="mt-2">{t('gameDetail.final')}</Badge>
             </div>
 
             {/* 어웨이팀 */}
             <Link
               to={`/team/${awayTeam.id}`}
-              className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
+              <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
+              <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(awayTeam, currentLang)}</p>
             </Link>
           </div>
 
@@ -1052,11 +1052,11 @@ const GameDetail = () => {
                           <Badge className="text-xs whitespace-nowrap">{getSituationLabel(goal.situation)}</Badge>
                         </div>
                         <p className="font-medium text-sm">
-                          득점: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
+                          {t('gameDetail.scorer')}: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
                         </p>
                         {(goal.assist1_no || goal.assist2_no) && (
                           <p className="text-xs text-muted-foreground">
-                            어시스트:
+                            {t('gameDetail.assist')}:
                             {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
                             {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
                           </p>
@@ -1132,9 +1132,9 @@ const GameDetail = () => {
                 <Table className="min-w-[350px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-14 whitespace-nowrap">번호</TableHead>
-                      <TableHead className="whitespace-nowrap">이름</TableHead>
-                      <TableHead className="text-center w-16 whitespace-nowrap">포지션</TableHead>
+                      <TableHead className="w-14 whitespace-nowrap">{t('gameDetail.rosterNumber')}</TableHead>
+                      <TableHead className="whitespace-nowrap">{t('gameDetail.rosterName')}</TableHead>
+                      <TableHead className="text-center w-16 whitespace-nowrap">{t('gameDetail.rosterPosition')}</TableHead>
                       <TableHead className="text-center w-14 whitespace-nowrap">SOG</TableHead>
                     </TableRow>
                   </TableHeader>

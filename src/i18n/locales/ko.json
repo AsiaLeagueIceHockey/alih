@@ -196,7 +196,13 @@
         "offence": "반칙",
         "roster": "선수 명단",
         "glossary": "아이스하키 용어 설명",
-        "gameInfo": "경기 정보"
+        "gameInfo": "경기 정보",
+        "starPlayerDesc": "스타플레이어는 팀 내 공격 포인트가 가장 많은 선수 기준입니다.",
+        "final": "최종",
+        "rosterNumber": "번호",
+        "rosterName": "이름",
+        "rosterPosition": "포지션",
+        "assistLabel": "도움"
     },
     "cheerBattle": {
         "title": "응원하기",
@@ -240,8 +246,5 @@
         "korean": "한국어",
         "japanese": "日本語",
         "english": "English"
-    },
-    "cheerBattle": {
-        "title": "응원 배틀"
     }
 }

@@ -9,10 +9,12 @@ import SEO from "@/components/SEO";
 import TeamHeader from "@/components/team/TeamHeader";
 import { Team, Player, TeamStanding } from "@/types/team";
 import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 const TeamRoster = () => {
   const { teamId } = useParams<{ teamId: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
 
   const { data: team, isLoading: isLoadingTeam } = useQuery({
     queryKey: ['team-detail', teamId],
@@ -111,7 +113,7 @@ const TeamRoster = () => {
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": t('nav.home'), "item": "https://alhockey.fans" },
-      { "@type": "ListItem", "position": 2, "name": team.name, "item": `https://alhockey.fans/team/${teamId}` },
+      { "@type": "ListItem", "position": 2, "name": getLocalizedTeamName(team, currentLang), "item": `https://alhockey.fans/team/${teamId}` },
       { "@type": "ListItem", "position": 3, "name": t('team.roster'), "item": `https://alhockey.fans/roster/${teamId}` }
     ]
   };
@@ -119,9 +121,9 @@ const TeamRoster = () => {
   return (
     <>
       <SEO
-        title={`${team.name} 선수단 - 선수 명단, 시즌 통계 | 아시아리그 아이스하키`}
-        description={`${team.name}(${team.english_name}) 전체 선수 명단과 2025-26 시즌 통계 확인. 득점, 도움, 포인트, +/-, 페널티 등 선수별 상세 기록 제공.`}
-        keywords={`${team.name} 선수, ${team.name} 선수 명단, ${team.english_name} roster, 아시아리그 선수, ${team.name} 득점왕, ${team.name} 스탯, 아이스하키 선수 통계`}
+        title={`${getLocalizedTeamName(team, currentLang)} ${t('team.roster')} | ${t('seo.leagueName')}`}
+        description={`${getLocalizedTeamName(team, currentLang)} (${team.english_name})`}
+        keywords={`${getLocalizedTeamName(team, currentLang)}, ${team.english_name}, ${t('seo.leagueName')}`}
         path={`/roster/${teamId}`}
         structuredData={[rosterStructuredData, breadcrumbData]}
       />

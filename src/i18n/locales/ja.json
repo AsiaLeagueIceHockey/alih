@@ -157,7 +157,9 @@
         "back": "戻る",
         "share": "共有",
         "video": "動画",
-        "donate": "コーヒー1杯の寄付"
+        "donate": "コーヒー1杯の寄付",
+        "collapse": "閉じる",
+        "expand": "もっと見る"
     },
     "error": {
         "loadFailed": "読み込みに失敗しました",
@@ -194,7 +196,13 @@
         "offence": "反則",
         "roster": "選手名簿",
         "glossary": "アイスホッケー用語解説",
-        "gameInfo": "試合情報"
+        "gameInfo": "試合情報",
+        "starPlayerDesc": "スタープレイヤーはチーム内で最も攻撃ポイントが多い選手です。",
+        "final": "最終",
+        "rosterNumber": "番号",
+        "rosterName": "名前",
+        "rosterPosition": "ポジション",
+        "assistLabel": "アシスト"
     },
     "team": {
         "roster": "選手団",

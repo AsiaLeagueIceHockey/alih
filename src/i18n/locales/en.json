@@ -157,7 +157,9 @@
         "back": "Back",
         "share": "Share",
         "video": "Video",
-        "donate": "Buy Me a Coffee"
+        "donate": "Buy Me a Coffee",
+        "collapse": "Collapse",
+        "expand": "Expand"
     },
     "error": {
         "loadFailed": "Failed to load",
@@ -194,7 +196,13 @@
         "offence": "Offence",
         "roster": "Roster",
         "glossary": "Ice Hockey Terms",
-        "gameInfo": "Game Info"
+        "gameInfo": "Game Info",
+        "starPlayerDesc": "Star players are selected based on highest points within the team.",
+        "final": "Final",
+        "rosterNumber": "No.",
+        "rosterName": "Name",
+        "rosterPosition": "Pos",
+        "assistLabel": "Assists"
     },
     "team": {
         "roster": "Roster",

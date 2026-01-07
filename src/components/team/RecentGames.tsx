@@ -3,6 +3,7 @@ import { ko, ja, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 interface TeamBasic {
   id: number;
@@ -30,6 +31,7 @@ interface RecentGamesProps {
 const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
 
   const getTeamById = (id: number) => teams.find(t => t.id === id);
 
@@ -95,11 +97,11 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                   <span className="text-xs text-muted-foreground flex-shrink-0">vs</span>
                   <img
                     src={opponentTeam?.logo || ""}
-                    alt={opponentTeam?.name || ""}
+                    alt={getLocalizedTeamName(opponentTeam, currentLang)}
                     className="w-5 h-5 object-contain flex-shrink-0"
                     loading="lazy"
                   />
-                  <span className="text-sm truncate">{opponentTeam?.name}</span>
+                  <span className="text-sm truncate">{getLocalizedTeamName(opponentTeam, currentLang)}</span>
                 </div>
 
                 {/* 스코어 (우리팀:상대팀) */}

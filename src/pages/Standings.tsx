@@ -71,7 +71,7 @@ const Standings = () => {
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
-        .select('*, team:alih_teams(name, logo)')
+        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
         .order('goals', { ascending: false })
         .order('assists', { ascending: false })
         .order('points', { ascending: false });
@@ -100,7 +100,7 @@ const Standings = () => {
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
-        .select('*, team:alih_teams(name, logo)')
+        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
         .order('assists', { ascending: false })
         .order('goals', { ascending: false })
         .order('points', { ascending: false });
@@ -129,7 +129,7 @@ const Standings = () => {
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
-        .select('*, team:alih_teams(name, logo)')
+        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
         .order('points', { ascending: false })
         .order('goals', { ascending: false })
         .order('assists', { ascending: false });

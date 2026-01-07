@@ -189,7 +189,7 @@ const Schedule = () => {
                   variant={selectedTeam === team.english_name ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedTeam(team.english_name)}
-                  className="whitespace-nowrap flex items-center gap-2"
+                  className={`flex items-center gap-2 ${currentLang === 'ko' ? 'whitespace-nowrap' : ''}`}
                 >
                   {team.logo && (
                     <img src={team.logo} alt={getLocalizedTeamName(team, currentLang)} className="w-4 h-4 object-contain" />
@@ -284,8 +284,8 @@ const Schedule = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 flex flex-col items-center">
+                  <div className="flex items-start justify-between">
+                    <div className="w-[calc(50%-24px)] flex flex-col items-center text-center">
                       {homeTeam?.logo && (
                         <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-12 h-12 object-contain mb-2" />
                       )}
@@ -295,7 +295,7 @@ const Schedule = () => {
                       )}
                     </div>
 
-                    <div className="px-4">
+                    <div className="w-12 flex items-center justify-center flex-shrink-0">
                       {!hasScore ? (
                         <span className="text-lg font-bold text-muted-foreground">VS</span>
                       ) : (
@@ -303,7 +303,7 @@ const Schedule = () => {
                       )}
                     </div>
 
-                    <div className="flex-1 flex flex-col items-center">
+                    <div className="w-[calc(50%-24px)] flex flex-col items-center text-center">
                       {awayTeam?.logo && (
                         <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-12 h-12 object-contain mb-2" />
                       )}
