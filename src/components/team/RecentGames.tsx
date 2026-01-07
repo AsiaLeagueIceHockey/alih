@@ -1,7 +1,9 @@
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, ja, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 interface TeamBasic {
   id: number;
@@ -28,15 +30,25 @@ interface RecentGamesProps {
 
 const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
 
   const getTeamById = (id: number) => teams.find(t => t.id === id);
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'ja': return ja;
+      case 'en': return enUS;
+      default: return ko;
+    }
+  };
 
   if (!games || games.length === 0) {
     return (
       <section className="mb-6">
-        <h2 className="text-lg font-bold mb-4 px-1">최근 경기</h2>
+        <h2 className="text-lg font-bold mb-4 px-1">{t('section.recentGames')}</h2>
         <Card className="p-6 text-center text-muted-foreground">
-          최근 경기 기록이 없습니다.
+          {t('error.noRecentGames')}
         </Card>
       </section>
     );
@@ -44,7 +56,7 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
 
   return (
     <section className="mb-6">
-      <h2 className="text-lg font-bold mb-4 px-1">최근 경기</h2>
+      <h2 className="text-lg font-bold mb-4 px-1">{t('section.recentGames')}</h2>
       
       <Card className="p-3">
         <div className="divide-y divide-border">
@@ -76,7 +88,7 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                 {/* 날짜 */}
                 <div className="text-center w-14 flex-shrink-0">
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(game.match_at), "M/d (EEE)", { locale: ko })}
+                    {format(new Date(game.match_at), "M/d (EEE)", { locale: getDateLocale() })}
                   </p>
                 </div>
 
@@ -85,11 +97,11 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                   <span className="text-xs text-muted-foreground flex-shrink-0">vs</span>
                   <img
                     src={opponentTeam?.logo || ""}
-                    alt={opponentTeam?.name || ""}
+                    alt={getLocalizedTeamName(opponentTeam, currentLang)}
                     className="w-5 h-5 object-contain flex-shrink-0"
                     loading="lazy"
                   />
-                  <span className="text-sm truncate">{opponentTeam?.name}</span>
+                  <span className="text-sm truncate">{getLocalizedTeamName(opponentTeam, currentLang)}</span>
                 </div>
 
                 {/* 스코어 (우리팀:상대팀) */}
@@ -113,7 +125,7 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                       </span>
                     </>
                   ) : (
-                    <span className="text-sm text-muted-foreground">예정</span>
+                    <span className="text-sm text-muted-foreground">{t('game.status.scheduled')}</span>
                   )}
                 </div>
 
@@ -129,7 +141,7 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
                           : "text-muted-foreground"
                       }`}
                     >
-                      {result === "win" ? "승" : result === "lose" ? "패" : "무"}
+                      {result === "win" ? t('stats.win') : result === "lose" ? t('stats.loss') : t('stats.draw')}
                     </span>
                   )}
                 </div>

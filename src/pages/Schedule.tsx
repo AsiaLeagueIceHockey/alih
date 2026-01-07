@@ -8,28 +8,58 @@ import { useSchedules, ScheduleGame } from "@/hooks/useSchedules";
 import { Loader2, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { format } from "date-fns";
+import { ko, ja, enUS } from "date-fns/locale";
 
-
-
-const MONTHS = [
-  { value: 9, label: "9월", year: 2025 },
-  { value: 10, label: "10월", year: 2025 },
-  { value: 11, label: "11월", year: 2025 },
-  { value: 12, label: "12월", year: 2025 },
-  { value: 1, label: "1월", year: 2026 },
-  { value: 2, label: "2월", year: 2026 },
-  { value: 3, label: "3월", year: 2026 },
-  { value: 4, label: "4월", year: 2026 },
+// Month data (raw values only, labels come from translations)
+const MONTHS_DATA = [
+  { value: 9, year: 2025 },
+  { value: 10, year: 2025 },
+  { value: 11, year: 2025 },
+  { value: 12, year: 2025 },
+  { value: 1, year: 2026 },
+  { value: 2, year: 2026 },
+  { value: 3, year: 2026 },
+  { value: 4, year: 2026 },
 ];
 
 const Schedule = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
+
+  // Date locale helper
+  const getDateLocale = () => {
+    switch (currentLang) {
+      case 'ja': return ja;
+      case 'en': return enUS;
+      default: return ko;
+    }
+  };
+
+  // Locale code for toLocaleDateString
+  const getLocaleCode = () => {
+    switch (currentLang) {
+      case 'ja': return 'ja-JP';
+      case 'en': return 'en-US';
+      default: return 'ko-KR';
+    }
+  };
+
+  // Dynamic month labels
+  const getMonthLabel = (month: number) => {
+    const date = new Date(2025, month - 1, 1);
+    return format(date, 'LLL', { locale: getDateLocale() });
+  };
+
   const now = new Date();
   const currentMonth = now.getMonth() + 1; // 1-12
   const currentYear = now.getFullYear();
   
-  // 현재 월에 해당하는 MONTHS 인덱스 찾기
-  const currentMonthIndex = MONTHS.findIndex(
+  // 현재 월에 해당하는 MONTHS_DATA 인덱스 찾기
+  const currentMonthIndex = MONTHS_DATA.findIndex(
     m => m.value === currentMonth && m.year === currentYear
   );
   const defaultMonth = currentMonthIndex >= 0 ? currentMonthIndex : 0;
@@ -60,7 +90,7 @@ const Schedule = () => {
       const gameMonth = gameDate.getMonth() + 1;
       const gameYear = gameDate.getFullYear();
       
-      const monthFilter = MONTHS[selectedMonth];
+      const monthFilter = MONTHS_DATA[selectedMonth];
       const monthMatch = gameMonth === monthFilter.value && gameYear === monthFilter.year;
       
       if (!monthMatch) return false;
@@ -103,8 +133,8 @@ const Schedule = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://alhockey.fans" },
-      { "@type": "ListItem", "position": 2, "name": "경기 일정", "item": "https://alhockey.fans/schedule" }
+      { "@type": "ListItem", "position": 1, "name": t('nav.home'), "item": "https://alhockey.fans" },
+      { "@type": "ListItem", "position": 2, "name": t('nav.schedule'), "item": "https://alhockey.fans/schedule" }
     ]
   };
 
@@ -117,13 +147,13 @@ const Schedule = () => {
         path="/schedule"
         structuredData={[scheduleStructuredData, breadcrumbData]}
       />
-      <PageHeader title="경기 일정 / 결과" subtitle="2025-26 시즌 전체 경기" />
+      <PageHeader title={t('page.schedule.title')} subtitle={t('page.schedule.subtitle')} />
       
       <div className="container mx-auto px-4">
         {/* 월별 필터 */}
         <div className="mb-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {MONTHS.map((month, index) => (
+            {MONTHS_DATA.map((month, index) => (
               <Button
                 key={index}
                 variant={selectedMonth === index ? "default" : "outline"}
@@ -131,7 +161,7 @@ const Schedule = () => {
                 onClick={() => setSelectedMonth(index)}
                 className="whitespace-nowrap"
               >
-                {month.label}
+                {getMonthLabel(month.value)}
               </Button>
             ))}
           </div>
@@ -151,7 +181,7 @@ const Schedule = () => {
                 onClick={() => setSelectedTeam(null)}
                 className="whitespace-nowrap"
               >
-                팀 전체
+                {t('filter.allTeams')}
               </Button>
               {teams?.map((team) => (
                 <Button
@@ -159,12 +189,12 @@ const Schedule = () => {
                   variant={selectedTeam === team.english_name ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedTeam(team.english_name)}
-                  className="whitespace-nowrap flex items-center gap-2"
+                  className={`flex items-center gap-2 ${currentLang === 'ko' ? 'whitespace-nowrap' : ''}`}
                 >
                   {team.logo && (
-                    <img src={team.logo} alt={team.name} className="w-4 h-4 object-contain" />
+                    <img src={team.logo} alt={getLocalizedTeamName(team, currentLang)} className="w-4 h-4 object-contain" />
                   )}
-                  {team.name}
+                  {getLocalizedTeamName(team, currentLang)}
                 </Button>
               ))}
             </div>
@@ -175,16 +205,16 @@ const Schedule = () => {
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2 text-muted-foreground">일정 로딩 중...</span>
+            <span className="ml-2 text-muted-foreground">{t('loading.schedule')}</span>
           </div>
         ) : error ? (
           <div className="text-center text-destructive py-12">
-            <p className="font-semibold">일정을 불러오는데 실패했습니다</p>
-            <p className="text-sm text-muted-foreground mt-2">콘솔을 확인해주세요</p>
+            <p className="font-semibold">{t('error.loadFailed')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('error.checkConsole')}</p>
           </div>
         ) : filteredGames.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">해당 조건의 경기가 없습니다</p>
+            <p className="text-muted-foreground">{t('error.noData')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -199,9 +229,9 @@ const Schedule = () => {
               
               // 게임 상태 계산
               const getGameStatus = () => {
-                if (game.game_status === 'Game Finished') return "종료";
-                if (matchDate <= now) return "진행 중";
-                return "예정";
+                if (game.game_status === 'Game Finished') return t('game.status.finished');
+                if (matchDate <= now) return t('game.status.inProgress');
+                return t('game.status.scheduled');
               };
               const gameStatus = getGameStatus();
               
@@ -232,12 +262,12 @@ const Schedule = () => {
                         }}
                       >
                         <Video className={`h-3.5 w-3.5 mr-1.5 ${isExpanded ? 'text-primary' : ''}`} />
-                        영상
+                        {t('button.video')}
                       </Button>
                     )}
                     <Badge 
-                      variant={gameStatus === "예정" ? "default" : "outline"}
-                      className={gameStatus === "예정" ? "bg-accent" : gameStatus === "진행 중" ? "bg-destructive text-destructive-foreground animate-pulse" : ""}
+                      variant={gameStatus === t('game.status.scheduled') ? "default" : "outline"}
+                      className={gameStatus === t('game.status.scheduled') ? "bg-accent" : gameStatus === t('game.status.inProgress') ? "bg-destructive text-destructive-foreground animate-pulse" : ""}
                     >
                       {gameStatus}
                     </Badge>
@@ -246,26 +276,26 @@ const Schedule = () => {
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm">
                       <span className="font-medium">
-                        {matchDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                        {format(matchDate, 'PPP', { locale: getDateLocale() })}
                       </span>
                       <span className="text-muted-foreground ml-2">
-                        {matchDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        {format(matchDate, 'HH:mm', { locale: getDateLocale() })}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 flex flex-col items-center">
+                  <div className="flex items-start justify-between">
+                    <div className="w-[calc(50%-24px)] flex flex-col items-center text-center">
                       {homeTeam?.logo && (
-                        <img src={homeTeam.logo} alt={homeTeam.name} className="w-12 h-12 object-contain mb-2" />
+                        <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-12 h-12 object-contain mb-2" />
                       )}
-                      <p className="text-sm font-medium mb-1">{homeTeam?.name || '미정'}</p>
+                      <p className="text-sm font-medium mb-1">{getLocalizedTeamName(homeTeam, currentLang) || t('game.pending')}</p>
                       {hasScore && (
-                        <p className={`text-2xl font-bold ${gameStatus === "진행 중" ? "text-destructive" : ""}`}>{game.home_alih_team_score}</p>
+                        <p className={`text-2xl font-bold ${gameStatus === t('game.status.inProgress') ? "text-destructive" : ""}`}>{game.home_alih_team_score}</p>
                       )}
                     </div>
 
-                    <div className="px-4">
+                    <div className="w-12 flex items-center justify-center flex-shrink-0">
                       {!hasScore ? (
                         <span className="text-lg font-bold text-muted-foreground">VS</span>
                       ) : (
@@ -273,13 +303,13 @@ const Schedule = () => {
                       )}
                     </div>
 
-                    <div className="flex-1 flex flex-col items-center">
+                    <div className="w-[calc(50%-24px)] flex flex-col items-center text-center">
                       {awayTeam?.logo && (
-                        <img src={awayTeam.logo} alt={awayTeam.name} className="w-12 h-12 object-contain mb-2" />
+                        <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-12 h-12 object-contain mb-2" />
                       )}
-                      <p className="text-sm font-medium mb-1">{awayTeam?.name || '미정'}</p>
+                      <p className="text-sm font-medium mb-1">{getLocalizedTeamName(awayTeam, currentLang) || t('game.pending')}</p>
                       {hasScore && (
-                        <p className={`text-2xl font-bold ${gameStatus === "진행 중" ? "text-destructive" : ""}`}>{game.away_alih_team_score}</p>
+                        <p className={`text-2xl font-bold ${gameStatus === t('game.status.inProgress') ? "text-destructive" : ""}`}>{game.away_alih_team_score}</p>
                       )}
                     </div>
                   </div>
@@ -293,7 +323,7 @@ const Schedule = () => {
                           width="100%"
                           height="100%"
                           src={`https://www.youtube.com/embed/${getYoutubeVideoId(game.highlight_url)}`}
-                          title={game.highlight_title || "경기 하이라이트"}
+                          title={game.highlight_title || t('section.highlights')}
                           frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                           allowFullScreen

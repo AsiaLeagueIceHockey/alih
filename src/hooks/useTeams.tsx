@@ -5,6 +5,7 @@ export interface AlihTeam {
   id: number;
   name: string;
   english_name: string;
+  japanese_name?: string;
   logo: string;
 }
 

@@ -7,6 +7,8 @@ import { externalSupabase } from "@/lib/supabase-external";
 import { useTeams } from "@/hooks/useTeams";
 import { Loader2, Play } from "lucide-react";
 import SEO from "@/components/SEO";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 interface ScheduleGame {
   id: number;
@@ -21,6 +23,8 @@ interface ScheduleGame {
 }
 
 const Highlights = () => {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const playerRef = useRef<HTMLDivElement>(null);
@@ -113,7 +117,7 @@ const Highlights = () => {
         path="/highlights"
         structuredData={[highlightStructuredData, breadcrumbData]}
       />
-      <PageHeader title="하이라이트" subtitle="최신 경기 영상" />
+      <PageHeader title={t('page.highlights.title')} subtitle={t('page.highlights.subtitle')} />
       
       <div className="container mx-auto px-4">
         {/* 팀별 필터 */}
@@ -130,7 +134,7 @@ const Highlights = () => {
                 onClick={() => setSelectedTeam(null)}
                 className="whitespace-nowrap"
               >
-                팀 전체
+                {t('filter.allTeams')}
               </Button>
               {teams?.map((team) => (
                 <Button
@@ -141,9 +145,9 @@ const Highlights = () => {
                   className="whitespace-nowrap flex items-center gap-2"
                 >
                   {team.logo && (
-                    <img src={team.logo} alt={team.name} className="w-4 h-4 object-contain" />
+                    <img src={team.logo} alt={getLocalizedTeamName(team, currentLang)} className="w-4 h-4 object-contain" />
                   )}
-                  {team.name}
+                  {getLocalizedTeamName(team, currentLang)}
                 </Button>
               ))}
             </div>
@@ -170,12 +174,12 @@ const Highlights = () => {
         {isLoading ? (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2 text-muted-foreground">영상 로딩 중...</span>
+            <span className="ml-2 text-muted-foreground">{t('loading.videos')}</span>
           </div>
         ) : error ? (
           <div className="text-center text-destructive py-12">
-            <p className="font-semibold">영상을 불러오는데 실패했습니다</p>
-            <p className="text-sm text-muted-foreground mt-2">콘솔을 확인해주세요</p>
+            <p className="font-semibold">{t('error.loadFailed')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('error.checkConsole')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -238,7 +242,7 @@ const Highlights = () => {
 
         {!isLoading && (!filteredGames || filteredGames.length === 0) && (
           <div className="text-center text-muted-foreground py-12">
-            <p>해당 조건의 하이라이트가 없습니다</p>
+            <p>{t('error.noHighlights')}</p>
           </div>
         )}
       </div>

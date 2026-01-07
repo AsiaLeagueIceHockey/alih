@@ -3,17 +3,23 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCheers } from '@/hooks/useCheers';
 import { Flame } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { getLocalizedTeamName } from '@/hooks/useLocalizedTeamName';
 
 interface CheerBattleProps {
   gameNo: number | string;
   homeTeam: {
     id: number;
     name: string;
+    english_name?: string;
+    japanese_name?: string;
     logo: string;
   };
   awayTeam: {
     id: number;
     name: string;
+    english_name?: string;
+    japanese_name?: string;
     logo: string;
   };
   isLive?: boolean; // 경기 진행 중 여부
@@ -29,6 +35,8 @@ interface Particle {
 const CheerBattle = ({ gameNo, homeTeam, awayTeam, isLive = false }: CheerBattleProps) => {
   const { homeCheers, awayCheers, homePercentage, awayPercentage, addCheer } = useCheers(gameNo);
   const [particles, setParticles] = useState<Particle[]>([]);
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
 
   // 파티클 생성
   const createParticle = useCallback((team: 'home' | 'away') => {
@@ -61,7 +69,7 @@ const CheerBattle = ({ gameNo, homeTeam, awayTeam, isLive = false }: CheerBattle
     <Card className="p-4 mb-6 overflow-hidden relative">
       <h3 className="font-semibold mb-4 text-center flex items-center justify-center gap-2">
         <Flame className="h-4 w-4 text-destructive" />
-        {isLive ? '실시간 응원' : '응원하기'}
+        {isLive ? t('cheerBattle.liveCheer') : t('cheerBattle.title')}
         <Flame className="h-4 w-4 text-destructive" />
       </h3>
 
@@ -89,12 +97,12 @@ const CheerBattle = ({ gameNo, homeTeam, awayTeam, isLive = false }: CheerBattle
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <img src={homeTeam.logo} alt={homeTeam.name} className="w-6 h-6 object-contain" />
+            <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-6 h-6 object-contain" />
             <span className="text-sm font-medium">{homePercentage}%</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{awayPercentage}%</span>
-            <img src={awayTeam.logo} alt={awayTeam.name} className="w-6 h-6 object-contain" />
+            <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-6 h-6 object-contain" />
           </div>
         </div>
         
@@ -132,7 +140,7 @@ const CheerBattle = ({ gameNo, homeTeam, awayTeam, isLive = false }: CheerBattle
       </div>
 
       <p className="text-xs text-muted-foreground text-center mt-3">
-        버튼을 눌러 응원하세요! 실시간으로 반영됩니다.
+        {t('cheerBattle.description')}
       </p>
     </Card>
   );

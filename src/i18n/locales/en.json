@@ -1,0 +1,250 @@
+{
+    "nav": {
+        "home": "Home",
+        "schedule": "Schedule",
+        "highlights": "Videos",
+        "standings": "Standings",
+        "news": "News"
+    },
+    "seo": {
+        "leagueName": "Asia League Ice Hockey"
+    },
+    "page": {
+        "home": {
+            "title": "Asia League Ice Hockey",
+            "subtitle": "2025-26 Season"
+        },
+        "schedule": {
+            "title": "Game Schedule & Results",
+            "subtitle": "2025-26 Season All Games"
+        },
+        "standings": {
+            "title": "Standings",
+            "subtitle": "2025-26 Season Stats"
+        },
+        "highlights": {
+            "title": "Highlights",
+            "subtitle": "Latest Game Videos"
+        },
+        "news": {
+            "title": "Asia League News",
+            "subtitle": "2025-26 Season"
+        },
+        "gameDetail": {
+            "liveGame": "Live Game",
+            "gameInfo": "Game Info",
+            "gameResult": "Game Result"
+        }
+    },
+    "game": {
+        "status": {
+            "finished": "Final",
+            "scheduled": "Scheduled",
+            "inProgress": "In Progress"
+        },
+        "vs": "VS",
+        "games": "games",
+        "noGames": "No scheduled games",
+        "noResults": "No recent results",
+        "noHighlights": "No highlights available",
+        "noNews": "No news available",
+        "loadError": "Failed to load",
+        "loading": "Loading...",
+        "pending": "TBD"
+    },
+    "section": {
+        "inProgress": "Games in Progress",
+        "nextGame": "Next Game",
+        "recentResults": "Recent Results",
+        "leagueStandings": "League Standings",
+        "latestNews": "Latest News",
+        "latestHighlight": "Latest Highlight",
+        "joinUs": "Join Us",
+        "liveStreaming": "Live Streaming",
+        "gameStatus": "Game Status",
+        "headToHead": "Head to Head",
+        "starPlayers": "Star Players",
+        "goals": "Goals",
+        "assists": "Assists",
+        "recentGames": "Recent Games",
+        "seasonStats": "Season Stats",
+        "keyPlayers": "Key Players",
+        "latestVideos": "Latest Videos"
+    },
+    "standings": {
+        "teamRank": "Team Standings",
+        "playerStats": "Player Stats",
+        "goalsRank": "Goals Leaders",
+        "assistsRank": "Assists Leaders",
+        "pointsRank": "Points Leaders",
+        "headers": {
+            "rank": "#",
+            "team": "Team",
+            "gamesPlayed": "GP",
+            "points": "PTS",
+            "regWin": "RW",
+            "otWin": "OTW",
+            "pssWin": "SOW",
+            "regLoss": "RL",
+            "otLoss": "OTL",
+            "pssLoss": "SOL",
+            "goalDiff": "GD"
+        },
+        "explanation": {
+            "title": "📊 Glossary",
+            "ot": "OT (Overtime): Extra period played when the game is tied after 60 minutes.",
+            "pss": "PSS (Penalty Shootout): Shootout held when overtime doesn't produce a winner.",
+            "pointsRule": "Points: Regulation Win (3pts), OT/SO Win (2pts), OT/SO Loss (1pt), Regulation Loss (0pts)"
+        },
+        "playerLabels": {
+            "goal": "G",
+            "assist": "A",
+            "point": "PTS"
+        }
+    },
+    "playerRanks": {
+        "goals": "Goal Leaders",
+        "assists": "Assist Leaders",
+        "points": "Points Leaders"
+    },
+    "stats": {
+        "homeRecord": "Home Record",
+        "awayRecord": "Away Record",
+        "win": "W",
+        "loss": "L",
+        "draw": "D",
+        "winRate": "Win %",
+        "recentGames": "Last {{count}} Games",
+        "avgGoalsFor": "Avg Goals For",
+        "avgGoalsAgainst": "Avg Goals Against",
+        "avgGoalDiff": "Avg Goal Diff",
+        "totalGames": "Based on {{count}} games",
+        "specialSituation": "Special Teams Scoring",
+        "powerPlayGoal": "Power Play Goals",
+        "powerPlayRate": "{{ppRate}}% of {{totalGoals}} total goals",
+        "shortHandedGoal": "Short Handed Goals",
+        "shortHandedDesc": "Scored while shorthanded",
+        "totalGoals": "{{rate}}% of {{count}} total goals",
+        "periodGoals": "Goals by Period",
+        "situation": {
+            "ppg": "PPG (Power Play)",
+            "shg": "SHG (Short Handed)",
+            "ev": "EV (Even Strength)"
+        }
+    },
+    "filter": {
+        "allTeams": "All Teams",
+        "all": "All",
+        "koreanNews": "Korean",
+        "japaneseNews": "Japanese",
+        "englishNews": "English"
+    },
+    "month": {
+        "1": "Jan",
+        "2": "Feb",
+        "3": "Mar",
+        "4": "Apr",
+        "9": "Sep",
+        "10": "Oct",
+        "11": "Nov",
+        "12": "Dec"
+    },
+    "button": {
+        "viewAllStandings": "View All Standings",
+        "viewAllNews": "View All News",
+        "viewAllPlayers": "View Full Roster",
+        "loadMore": "Load More ▼",
+        "back": "Back",
+        "share": "Share",
+        "video": "Video",
+        "donate": "Buy Me a Coffee",
+        "collapse": "Collapse",
+        "expand": "Expand"
+    },
+    "error": {
+        "loadFailed": "Failed to load",
+        "checkConsole": "Please check the console",
+        "noData": "No games match the criteria",
+        "noHighlights": "No highlights match the criteria",
+        "gameNotFound": "Unable to load game information",
+        "teamNotFound": "Team information not found",
+        "noRecentGames": "No recent game records",
+        "noHeadToHead": "No head-to-head records"
+    },
+    "loading": {
+        "schedule": "Loading schedule...",
+        "videos": "Loading videos..."
+    },
+    "gameDetail": {
+        "scoringRecord": "Scoring",
+        "scorer": "Goal",
+        "assist": "Assist",
+        "sog": "Shots on Goal (SOG)",
+        "noLiveStream": "Live streaming is not available for this game",
+        "liveStreamPending": "Live streaming link will be updated",
+        "linkCopied": "Link copied to clipboard!",
+        "noH2HRecord": "No head-to-head record",
+        "spectators": "Attendance",
+        "gameHighlight": "Game Highlights",
+        "periodSummary": "Period Summary",
+        "category": "Period",
+        "goals": "Goals",
+        "shotsOnGoal": "Shots on Goal",
+        "penaltyMin": "Penalty (min)",
+        "penalty": "Penalty Record",
+        "noPenalty": "No penalty record",
+        "offence": "Offence",
+        "roster": "Roster",
+        "glossary": "Ice Hockey Terms",
+        "gameInfo": "Game Info",
+        "starPlayerDesc": "Star players are selected based on highest points within the team.",
+        "final": "Final",
+        "rosterNumber": "No.",
+        "rosterName": "Name",
+        "rosterPosition": "Pos",
+        "assistLabel": "Assists"
+    },
+    "team": {
+        "roster": "Roster",
+        "info": {
+            "hometown": "Hometown",
+            "homeStadium": "Home Arena",
+            "founded": "Founded",
+            "year": "",
+            "championships": "Championships",
+            "times": "",
+            "alihChampionship": "Asia League Championship",
+            "intro": "Team Introduction"
+        },
+        "goalRanking": "Goal Leaders",
+        "assistRanking": "Assist Leaders",
+        "teamInfo": "Team Info",
+        "currentRank": "Current Rank: #{{rank}}",
+        "officialWebsite": "Official Website"
+    },
+    "roster": {
+        "jerseyNumber": "#",
+        "name": "Name",
+        "position": "Pos",
+        "penalty": "PIM",
+        "noPlayers": "No registered players.",
+        "plusMinusDesc": "The difference between goals scored by the team and goals scored against, while the player is on the ice during even-strength situations."
+    },
+    "news": {
+        "language": {
+            "ko": "Korean",
+            "ja": "Japanese",
+            "en": "English"
+        }
+    },
+    "language": {
+        "korean": "한국어",
+        "japanese": "日本語",
+        "english": "English"
+    },
+    "cheerBattle": {
+        "title": "Cheer",
+        "liveCheer": "Live Cheer",
+        "description": "Press the button to cheer! It's reflected in real-time."
+    }
+}

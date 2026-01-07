@@ -12,6 +12,10 @@ import { AlihTeam } from "@/hooks/useTeams";
 import { useScheduleByGameNo, ScheduleGame } from "@/hooks/useSchedules";
 import SEO from "@/components/SEO";
 import CheerBattle from "@/components/game/CheerBattle";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { format } from "date-fns";
+import { ko, ja, enUS } from "date-fns/locale";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -150,6 +154,17 @@ const GameDetail = () => {
   const { gameNo } = useParams<{ gameNo: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
+  
+  // Date locale helper
+  const getDateLocale = () => {
+    switch (currentLang) {
+      case 'ja': return ja;
+      case 'en': return enUS;
+      default: return ko;
+    }
+  };
 
   // Collapsible roster state
   const [homeRosterOpen, setHomeRosterOpen] = useState(false);
@@ -257,9 +272,9 @@ const GameDetail = () => {
   };
 
   const getSituationLabel = (situation: string) => {
-    if (situation === "+1") return "PPG (파워플레이)";
-    if (situation === "-1") return "SHG (숏핸디드)";
-    return "EV (이븐)";
+    if (situation === "+1") return t('stats.situation.ppg');
+    if (situation === "-1") return t('stats.situation.shg');
+    return t('stats.situation.ev');
   };
 
   // 피리어드별 시간 조정 함수 (2P는 -20분, 3P는 -40분, OT는 -60분)
@@ -296,11 +311,11 @@ const GameDetail = () => {
 
   // 게임 상태 계산
   const getGameStatus = () => {
-    if (scheduleData?.game_status === 'Game Finished') return "종료";
+    if (scheduleData?.game_status === 'Game Finished') return t('game.status.finished');
     const matchDateObj = new Date(matchDate);
     const now = new Date();
-    if (matchDateObj <= now) return "진행 중";
-    return "예정";
+    if (matchDateObj <= now) return t('game.status.inProgress');
+    return t('game.status.scheduled');
   };
 
   if (isLoading) {
@@ -314,10 +329,10 @@ const GameDetail = () => {
   if (!scheduleData || !homeTeam || !awayTeam) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <p className="text-destructive mb-4">경기 정보를 불러올 수 없습니다</p>
+        <p className="text-destructive mb-4">{t('error.gameNotFound')}</p>
         <Button onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          돌아가기
+          {t('button.back')}
         </Button>
       </div>
     );
@@ -338,8 +353,8 @@ const GameDetail = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
-    "name": `${awayTeam?.name} vs ${homeTeam?.name} - 아시아리그 아이스하키`,
-    "description": `${matchDateObj.toLocaleDateString('ko-KR')} ${scheduleData.match_place}에서 열리는 ${homeTeam?.name}과 ${awayTeam?.name}의 아시아리그 아이스하키 경기`,
+    "name": `${getLocalizedTeamName(awayTeam, currentLang)} vs ${getLocalizedTeamName(homeTeam, currentLang)} - ${t('seo.leagueName')}`,
+    "description": `${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${scheduleData.match_place} - ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)}`,
     "sport": "Ice Hockey",
     "startDate": matchDate,
     "endDate": matchDate,
@@ -350,7 +365,7 @@ const GameDetail = () => {
       "name": scheduleData.match_place,
       "address": {
         "@type": "PostalAddress",
-        "addressCountry": scheduleData.match_place.includes("안양") ? "KR" : "JP"
+        "addressCountry": scheduleData.match_place.includes("안양") || scheduleData.match_place.includes("Anyang") ? "KR" : "JP"
       }
     },
     "homeTeam": {
@@ -367,7 +382,7 @@ const GameDetail = () => {
     },
     "organizer": {
       "@type": "SportsOrganization",
-      "name": "아시아리그 아이스하키",
+      "name": t('seo.leagueName'),
       "url": "https://alhockey.fans"
     },
     ...(isCompleted && scheduleData.home_alih_team_score !== null && {
@@ -404,7 +419,7 @@ const GameDetail = () => {
     const awayTopPlayers = [...awayPlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
 
     const liveData = scheduleData.live_data;
-    const isInProgress = gameStatus === "진행 중";
+    const isInProgress = gameStatus === t('game.status.inProgress');
     const isFinishedWithLiveData = isCompleted && !gameDetail && liveData;
 
     // live_data events에서 선수 이름 가져오기 (alih_players에서 team_id와 jersey_number로 매칭)
@@ -423,9 +438,9 @@ const GameDetail = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <SEO
-          title={`${homeTeam?.name} vs ${awayTeam?.name} - ${isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'} | 아시아리그 아이스하키`}
-          description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} ${isFinishedWithLiveData ? '경기 결과, 스코어, 득점 기록' : isInProgress ? '실시간 경기 상황, 라이브 스코어' : '경기 정보, 맞대결 전적, 스타플레이어'}을 확인하세요. ${scheduleData?.match_place || ''}`}
-          keywords={`${homeTeam?.name} vs ${awayTeam?.name}, ${homeTeam?.name} 경기, ${awayTeam?.name} 경기, 아시아리그 경기 결과, 실시간 스코어, 라이브 경기, 맞대결 전적, ${scheduleData?.match_place || ''}`}
+          title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${isFinishedWithLiveData ? t('page.gameDetail.gameResult') : isInProgress ? t('page.gameDetail.liveGame') : t('page.gameDetail.gameInfo')} | ${t('seo.leagueName')}`}
+          description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
+          keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData?.match_place || ''}`}
           path={`/schedule/${gameNo}`}
           structuredData={structuredData}
         />
@@ -436,7 +451,7 @@ const GameDetail = () => {
             <div className="flex items-center justify-between mb-6">
               <div className="w-10" /> {/* Spacer */}
               <h1 className="text-2xl font-bold text-center">
-                {isFinishedWithLiveData ? '경기 결과' : isInProgress ? '실시간 경기' : '경기 정보'}
+                {isFinishedWithLiveData ? t('page.gameDetail.gameResult') : isInProgress ? t('page.gameDetail.liveGame') : t('page.gameDetail.gameInfo')}
               </h1>
               <Button
                 variant="ghost"
@@ -444,8 +459,8 @@ const GameDetail = () => {
                 className="w-10 h-10"
                 onClick={async () => {
                   const shareData = {
-                    title: `${homeTeam.name} vs ${awayTeam.name} - 아시아리그 아이스하키`,
-                    text: `${matchDateObj.toLocaleDateString('ko-KR')} ${scheduleData.match_place}에서 열리는 경기`,
+                    title: `${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)}`,
+                    text: `${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${scheduleData.match_place}`,
                     url: window.location.href,
                   };
                   
@@ -458,7 +473,7 @@ const GameDetail = () => {
                   } else {
                     // 클립보드 복사 (Web Share API 미지원 브라우저)
                     await navigator.clipboard.writeText(window.location.href);
-                    alert('링크가 클립보드에 복사되었습니다!');
+                    alert(t('gameDetail.linkCopied'));
                   }
                 }}
               >
@@ -471,16 +486,16 @@ const GameDetail = () => {
         <div className="container mx-auto px-4 -mt-4">
           {/* 1. 팀 정보 및 스코어 */}
           <Card className="p-6 mb-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-start justify-between mb-6">
               <Link
                 to={`/team/${homeTeam.id}`}
-                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
+                className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
               >
-                <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" loading="lazy" />
-                <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
+                <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-16 h-16 object-contain mb-2" loading="lazy" />
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(homeTeam, currentLang)}</p>
               </Link>
 
-              <div className="px-6 flex flex-col items-center">
+              <div className="w-[120px] flex-shrink-0 flex flex-col items-center">
                 {(isInProgress || isFinishedWithLiveData) && liveData ? (
                   <>
                     <div className="flex items-center gap-4">
@@ -489,13 +504,13 @@ const GameDetail = () => {
                       <span className={`text-4xl font-bold ${isInProgress ? 'text-destructive' : ''}`}>{scheduleData.away_alih_team_score ?? 0}</span>
                     </div>
                     {isFinishedWithLiveData ? (
-                      <Badge variant="outline" className="mt-2">종료</Badge>
+                      <Badge variant="outline" className="mt-2">{t('game.status.finished')}</Badge>
                     ) : (
                       <Badge
                         variant="default"
                         className="mt-2 bg-destructive animate-pulse"
                       >
-                        {scheduleData.game_status || "진행 중"}
+                        {t('game.status.inProgress')}
                       </Badge>
                     )}
                   </>
@@ -514,19 +529,19 @@ const GameDetail = () => {
 
               <Link
                 to={`/team/${awayTeam.id}`}
-                className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer min-w-0"
+                className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
               >
-                <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" loading="lazy" />
-                <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
+                <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-16 h-16 object-contain mb-2" loading="lazy" />
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(awayTeam, currentLang)}</p>
               </Link>
             </div>
 
             <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
               <p className="font-medium">
-                {matchDateObj.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {format(matchDateObj, 'PPP', { locale: getDateLocale() })}
               </p>
               <p>
-                {matchDateObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                {format(matchDateObj, 'p', { locale: getDateLocale() })}
               </p>
               <p>{scheduleData.match_place}</p>
             </div>
@@ -535,7 +550,7 @@ const GameDetail = () => {
           {/* 라이브 스트리밍 */}
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <span className="text-destructive">●</span> 라이브 스트리밍
+              <span className="text-destructive">●</span> {t('section.liveStreaming')}
             </h3>
             {scheduleData.live_url ? (
               <div className="aspect-video w-full rounded-lg overflow-hidden">
@@ -553,8 +568,8 @@ const GameDetail = () => {
             ) : (
               <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
                 {isInProgress
-                  ? "이 경기는 라이브 스트리밍이 제공되지 않습니다"
-                  : "라이브 스트리밍 링크 업데이트 예정입니다"}
+                  ? t('gameDetail.noLiveStream')
+                  : t('gameDetail.liveStreamPending')}
               </div>
             )}
           </Card>
@@ -572,7 +587,7 @@ const GameDetail = () => {
             <Card className="p-4 mb-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 {isInProgress && <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />}
-                경기 현황
+                {t('section.gameStatus')}
               </h3>
 
               {/* 피리어드별 득점 */}
@@ -597,8 +612,8 @@ const GameDetail = () => {
                     <TableRow>
                       <TableCell className="font-medium min-w-[90px]">
                         <div className="flex items-center gap-1.5">
-                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
-                          <span className="text-xs whitespace-nowrap">{homeTeam.name}</span>
+                          <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-5 h-5 object-contain flex-shrink-0" />
+                          <span className="text-xs whitespace-nowrap">{getLocalizedTeamName(homeTeam, currentLang)}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center px-1">{liveData.scores_by_period['1p'].home ?? '-'}</TableCell>
@@ -611,8 +626,8 @@ const GameDetail = () => {
                     <TableRow>
                       <TableCell className="font-medium min-w-[90px]">
                         <div className="flex items-center gap-1.5">
-                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
-                          <span className="text-xs whitespace-nowrap">{awayTeam.name}</span>
+                          <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-5 h-5 object-contain flex-shrink-0" />
+                          <span className="text-xs whitespace-nowrap">{getLocalizedTeamName(awayTeam, currentLang)}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center px-1">{liveData.scores_by_period['1p'].away ?? '-'}</TableCell>
@@ -628,7 +643,7 @@ const GameDetail = () => {
 
               {/* 슛 통계 */}
               <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-                <h4 className="text-sm font-medium mb-2 text-center">유효 슈팅 (SOG)</h4>
+                <h4 className="text-sm font-medium mb-2 text-center">{t('gameDetail.sog')}</h4>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 text-right">
                     <span className="text-2xl font-bold">{liveData.shots.total.home}</span>
@@ -659,7 +674,7 @@ const GameDetail = () => {
                 <div>
                   <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                     <Goal className="h-4 w-4" />
-                    득점 기록
+                    {t('gameDetail.scoringRecord')}
                   </h4>
                   <div className="space-y-2">
                     {liveData.events.map((event, index) => {
@@ -682,18 +697,18 @@ const GameDetail = () => {
                           key={index}
                           className="flex items-start gap-3 p-3 border rounded-lg"
                         >
-                          <img src={scoringTeam.logo} alt={scoringTeam.name} className="w-10 h-10 object-contain" />
+                          <img src={scoringTeam.logo} alt={getLocalizedTeamName(scoringTeam, currentLang)} className="w-10 h-10 object-contain" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="outline" className="text-xs">{period}P {adjustedTime}</Badge>
                               <Badge className="text-xs">{getGoalTypeLabel(event.goal_type)}</Badge>
                             </div>
                             <p className="font-medium text-sm truncate">
-                              득점: {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
+                              {t('gameDetail.scorer')}: {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
                             </p>
                             {(event.assist1 || event.assist2) && (
                               <p className="text-xs text-muted-foreground">
-                                어시스트: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
+                                {t('gameDetail.assist')}: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
                                 {event.assist2 && `, ${getLivePlayerName(event.team_id, event.assist2.number)} (#${event.assist2.number})`}
                               </p>
                             )}
@@ -711,7 +726,7 @@ const GameDetail = () => {
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Trophy className="h-4 w-4" />
-              맞대결 전적
+              {t('section.headToHead')}
             </h3>
             {h2hLoading ? (
               <div className="flex justify-center py-8">
@@ -734,17 +749,17 @@ const GameDetail = () => {
                       onClick={() => navigate(`/schedule/${game.game_no}`)}
                     >
                       <div className="text-sm text-muted-foreground">
-                        {gameDate.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                        {format(gameDate, 'M/d', { locale: getDateLocale() })}
                       </div>
                       <div className="flex items-center gap-3">
                         <div className={`flex items-center gap-2 ${homeWin ? 'font-bold' : ''}`}>
-                          <img src={homeTeam.logo} alt={homeTeam.name} className="w-6 h-6 object-contain" />
+                          <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-6 h-6 object-contain" />
                           <span>{homeScore}</span>
                         </div>
                         <span className="text-muted-foreground">:</span>
                         <div className={`flex items-center gap-2 ${awayWin ? 'font-bold' : ''}`}>
                           <span>{awayScore}</span>
-                          <img src={awayTeam.logo} alt={awayTeam.name} className="w-6 h-6 object-contain" />
+                          <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-6 h-6 object-contain" />
                         </div>
                       </div>
                     </div>
@@ -752,7 +767,7 @@ const GameDetail = () => {
                 })}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">맞대결 기록이 없습니다</p>
+              <p className="text-center text-muted-foreground py-8">{t('gameDetail.noH2HRecord')}</p>
             )}
           </Card>
 
@@ -760,7 +775,7 @@ const GameDetail = () => {
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Users className="h-4 w-4" />
-              스타 플레이어
+              {t('section.starPlayers')}
             </h3>
             {playersLoading ? (
               <div className="flex justify-center py-8">
@@ -773,10 +788,10 @@ const GameDetail = () => {
                   {/* 홈팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">{homeTeam.name}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{getLocalizedTeamName(homeTeam, currentLang)}</span>
                       <div className="flex gap-4 text-xs text-muted-foreground">
-                        <span>득점</span>
-                        <span>도움</span>
+                        <span>{t('gameDetail.goals')}</span>
+                        <span>{t('gameDetail.assistLabel')}</span>
                       </div>
                     </div>
                     {homeTopPlayers.map((player, idx) => (
@@ -793,10 +808,10 @@ const GameDetail = () => {
                   {/* 어웨이팀 */}
                   <div>
                     <div className="flex justify-between items-center py-2 px-2 border-b bg-muted/30">
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">{awayTeam.name}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{getLocalizedTeamName(awayTeam, currentLang)}</span>
                       <div className="flex gap-4 text-xs text-muted-foreground">
-                        <span>득점</span>
-                        <span>도움</span>
+                        <span>{t('gameDetail.goals')}</span>
+                        <span>{t('gameDetail.assistLabel')}</span>
                       </div>
                     </div>
                     {awayTopPlayers.map((player, idx) => (
@@ -811,7 +826,7 @@ const GameDetail = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground text-center mt-4">
-                  스타플레이어는 팀 내 공격 포인트가 가장 많은 선수 기준입니다.
+                  {t('gameDetail.starPlayerDesc')}
                 </p>
               </>
             )}
@@ -839,9 +854,9 @@ const GameDetail = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO
-        title={`${homeTeam?.name} vs ${awayTeam?.name} - 경기 상세 기록, 스코어, 득점 | 아시아리그 아이스하키`}
-        description={`${matchDateObj.toLocaleDateString('ko-KR')} ${homeTeam?.name} vs ${awayTeam?.name} 경기 상세 기록. 스코어, 피리어드별 득점, 슈팅, 득점자, 어시스트, 페널티, 로스터 정보까지 완벽 분석.`}
-        keywords={`${homeTeam?.name} vs ${awayTeam?.name}, ${homeTeam?.name} 경기 결과, ${awayTeam?.name} 경기 결과, 아시아리그 경기 기록, 상세 스탯, 득점 기록, 어시스트, 슈팅 통계, 피리어드별 스코어`}
+        title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${t('page.gameDetail.gameResult')} | ${t('seo.leagueName')}`}
+        description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
+        keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData?.match_place || ''}`}
         path={`/schedule/${gameNo}`}
         structuredData={structuredData}
       />
@@ -850,7 +865,7 @@ const GameDetail = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
             <div className="w-10" /> {/* Spacer */}
-            <h1 className="text-2xl font-bold text-center">경기 상세 기록</h1>
+            <h1 className="text-2xl font-bold text-center">{t('page.gameDetail.gameResult')}</h1>
             <Button
               variant="ghost"
               size="icon"
@@ -883,43 +898,43 @@ const GameDetail = () => {
       {/* 메인 스코어보드 */}
       <div className="container mx-auto px-4 -mt-4">
         <Card className="p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-start justify-between mb-6">
             {/* 홈팀 */}
             <Link
               to={`/team/${homeTeam.id}`}
-              className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <img src={homeTeam.logo} alt={homeTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{homeTeam.name}</p>
+              <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
+              <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(homeTeam, currentLang)}</p>
             </Link>
 
             {/* 스코어 */}
-            <div className="px-6 flex flex-col items-center">
+            <div className="w-[120px] flex-shrink-0 flex flex-col items-center">
               <div className="flex items-center gap-4">
                 <span className="text-4xl font-bold">{homeScore}</span>
                 <span className="text-2xl text-muted-foreground">:</span>
                 <span className="text-4xl font-bold">{awayScore}</span>
               </div>
-              <Badge variant="outline" className="mt-2">최종</Badge>
+              <Badge variant="outline" className="mt-2">{t('gameDetail.final')}</Badge>
             </div>
 
             {/* 어웨이팀 */}
             <Link
               to={`/team/${awayTeam.id}`}
-              className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <img src={awayTeam.logo} alt={awayTeam.name} className="w-16 h-16 object-contain mb-2" />
-              <p className="text-xs font-medium text-center hover:text-primary transition-colors whitespace-nowrap">{awayTeam.name}</p>
+              <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
+              <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(awayTeam, currentLang)}</p>
             </Link>
           </div>
 
           {/* 경기 정보 */}
           <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
             <p className="font-medium">
-              {matchDateObj.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {format(matchDateObj, 'PPP', { locale: getDateLocale() })}
             </p>
             <p>{gameDetail.game_info.venue}</p>
-            <p>관중: {gameDetail.spectators.toLocaleString()}명</p>
+            <p>{t('gameDetail.spectators')}: {gameDetail.spectators.toLocaleString()}</p>
           </div>
         </Card>
 
@@ -936,13 +951,13 @@ const GameDetail = () => {
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Play className="h-4 w-4" />
-              경기 하이라이트
+              {t('gameDetail.gameHighlight')}
             </h3>
             <div className="aspect-video w-full">
               <iframe
                 className="w-full h-full rounded-lg"
                 src={`https://www.youtube.com/embed/${getYoutubeVideoId(scheduleData.highlight_url)}`}
-                title="경기 하이라이트"
+                title={t('gameDetail.gameHighlight')}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
@@ -952,15 +967,15 @@ const GameDetail = () => {
 
         {/* 경기 요약 카드 */}
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-4">피리어드별 요약</h3>
+          <h3 className="font-semibold mb-4">{t('gameDetail.periodSummary')}</h3>
           <div className="overflow-x-auto scrollbar-hide">
             <Table className="min-w-[330px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-14 whitespace-nowrap">구분</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">득점</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">유효 슈팅</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">페널티(분)</TableHead>
+                  <TableHead className="w-14 whitespace-nowrap">{t('gameDetail.category')}</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">{t('gameDetail.goals')}</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">{t('gameDetail.shotsOnGoal')}</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">{t('gameDetail.penaltyMin')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1013,10 +1028,10 @@ const GameDetail = () => {
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Goal className="h-4 w-4" />
-            득점 기록
+            {t('gameDetail.scoringRecord')}
           </h3>
           {gameDetail.goals.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">득점 기록이 없습니다</p>
+            <p className="text-center text-muted-foreground py-8">{t('error.noHeadToHead')}</p>
           ) : (
             <div className="space-y-3">
               {[...gameDetail.goals]
@@ -1037,11 +1052,11 @@ const GameDetail = () => {
                           <Badge className="text-xs whitespace-nowrap">{getSituationLabel(goal.situation)}</Badge>
                         </div>
                         <p className="font-medium text-sm">
-                          득점: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
+                          {t('gameDetail.scorer')}: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
                         </p>
                         {(goal.assist1_no || goal.assist2_no) && (
                           <p className="text-xs text-muted-foreground">
-                            어시스트:
+                            {t('gameDetail.assist')}:
                             {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
                             {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
                           </p>
@@ -1058,10 +1073,10 @@ const GameDetail = () => {
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            페널티 기록
+            {t('gameDetail.penalty')}
           </h3>
           {gameDetail.penalties.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">페널티 기록이 없습니다</p>
+            <p className="text-center text-muted-foreground py-8">{t('gameDetail.noPenalty')}</p>
           ) : (
             <div className="space-y-3">
               {[...gameDetail.penalties]
@@ -1079,12 +1094,12 @@ const GameDetail = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <Badge variant="outline" className="text-xs whitespace-nowrap">{getPeriodLabel(penalty.period)} {adjustGameTime(penalty.period, penalty.time)}</Badge>
-                          <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes}분</Badge>
+                          <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes} min</Badge>
                         </div>
                         <p className="font-medium text-sm">
                           {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
                         </p>
-                        <p className="text-xs text-muted-foreground">반칙: {penalty.offence}</p>
+                        <p className="text-xs text-muted-foreground">{t('gameDetail.offence')}: {penalty.offence}</p>
                       </div>
                     </div>
                   );
@@ -1097,7 +1112,7 @@ const GameDetail = () => {
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Users className="h-4 w-4" />
-            선수 명단
+            {t('gameDetail.roster')}
           </h3>
 
           {/* 홈팀 선수 명단 */}
@@ -1117,9 +1132,9 @@ const GameDetail = () => {
                 <Table className="min-w-[350px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-14 whitespace-nowrap">번호</TableHead>
-                      <TableHead className="whitespace-nowrap">이름</TableHead>
-                      <TableHead className="text-center w-16 whitespace-nowrap">포지션</TableHead>
+                      <TableHead className="w-14 whitespace-nowrap">{t('gameDetail.rosterNumber')}</TableHead>
+                      <TableHead className="whitespace-nowrap">{t('gameDetail.rosterName')}</TableHead>
+                      <TableHead className="text-center w-16 whitespace-nowrap">{t('gameDetail.rosterPosition')}</TableHead>
                       <TableHead className="text-center w-14 whitespace-nowrap">SOG</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1196,37 +1211,37 @@ const GameDetail = () => {
         </Card>
 
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-3">아이스하키 용어 설명</h3>
+          <h3 className="font-semibold mb-3">{t('gameDetail.glossary')}</h3>
           <div className="space-y-3 text-sm">
             <div>
               <p className="font-medium">SOG (Shot on Goal)</p>
-              <p className="text-xs text-muted-foreground">유효 슈팅 수</p>
+              <p className="text-xs text-muted-foreground">{t('gameDetail.shotsOnGoal')}</p>
             </div>
             <div>
               <p className="font-medium">PIM (Penalties in Minutes)</p>
-              <p className="text-xs text-muted-foreground">페널티로 인해 퇴장당한 총 시간(분)</p>
+              <p className="text-xs text-muted-foreground">{t('gameDetail.penaltyMin')}</p>
             </div>
             <div>
               <p className="font-medium">PPG (Power Play Goal)</p>
-              <p className="text-xs text-muted-foreground">팀이 수적 우위 상황에서 넣은 골</p>
+              <p className="text-xs text-muted-foreground">{currentLang === 'ko' ? '팀이 수적 우위 상황에서 넣은 골' : currentLang === 'ja' ? 'パワープレイゴール' : 'Power play goal'}</p>
             </div>
             <div>
               <p className="font-medium">SHG (Short Handed Goal)</p>
-              <p className="text-xs text-muted-foreground">팀이 수적 열세 상황에서 넣은 골</p>
+              <p className="text-xs text-muted-foreground">{currentLang === 'ko' ? '팀이 수적 열세 상황에서 넣은 골' : currentLang === 'ja' ? 'ショートハンドゴール' : 'Short handed goal'}</p>
             </div>
           </div>
         </Card>
 
         {/* 기타 정보 */}
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-3">경기 정보</h3>
+          <h3 className="font-semibold mb-3">{t('gameDetail.gameInfo')}</h3>
           <div className="text-sm">
-            <h4 className="font-medium mb-2">코치진</h4>
+            <h4 className="font-medium mb-2">{currentLang === 'ko' ? '코치진' : currentLang === 'ja' ? 'コーチ陣' : 'Coaches'}</h4>
             <div className="space-y-1 text-muted-foreground">
-              <p>홈 감독: {gameDetail.game_info.coaches.home_manager}</p>
-              <p>홈 코치: {gameDetail.game_info.coaches.home_coach}</p>
-              <p>원정 감독: {gameDetail.game_info.coaches.away_manager}</p>
-              <p>원정 코치: {gameDetail.game_info.coaches.away_coach}</p>
+              <p>{currentLang === 'ko' ? '홈 감독' : currentLang === 'ja' ? 'ホーム監督' : 'Home Manager'}: {gameDetail.game_info.coaches.home_manager}</p>
+              <p>{currentLang === 'ko' ? '홈 코치' : currentLang === 'ja' ? 'ホームコーチ' : 'Home Coach'}: {gameDetail.game_info.coaches.home_coach}</p>
+              <p>{currentLang === 'ko' ? '원정 감독' : currentLang === 'ja' ? 'アウェイ監督' : 'Away Manager'}: {gameDetail.game_info.coaches.away_manager}</p>
+              <p>{currentLang === 'ko' ? '원정 코치' : currentLang === 'ja' ? 'アウェイコーチ' : 'Away Coach'}: {gameDetail.game_info.coaches.away_coach}</p>
             </div>
           </div>
         </Card>

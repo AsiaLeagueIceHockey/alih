@@ -38,10 +38,17 @@
 | 기술 | 버전 | 용도 |
 |------|------|------|
 | react-helmet-async | 2.0.5 | 메타 태그 관리 |
-| date-fns | 3.6 | 날짜 처리 (한국어 로케일) |
+| date-fns | 3.6 | 날짜 처리 (ko/ja/en 로케일) |
 | lucide-react | 0.462 | 아이콘 |
 
----
+### i18n (다국어 지원)
+| 기술 | 버전 | 용도 |
+|------|------|------|
+| react-i18next | 16.5 | React i18n 통합 |
+| i18next | 25.7 | i18n 프레임워크 |
+| i18next-browser-languagedetector | 8.2 | 브라우저 언어 자동 감지 |
+
+> **Note**: 한국어(ko), 일본어(ja), 영어(en) 3개 국어 지원. `/instagram/*` 경로는 SNS 자동화용이므로 한국어 고정.
 
 ## 3. 프로젝트 구조
 
@@ -67,6 +74,13 @@ src/
 │   ├── useSchedules.ts          # 스케줄 데이터 공통 훅 (캐시 일관성 보장) ⭐
 │   ├── use-mobile.tsx           # 모바일 감지 훅
 │   └── use-toast.ts             # 토스트 알림 훅
+│
+├── i18n/                        # 다국어 지원 ⭐
+│   ├── index.ts                 # i18n 설정 (언어 감지, fallback)
+│   └── locales/
+│       ├── ko.json              # 한국어 (~150개 키)
+│       ├── ja.json              # 일본어
+│       └── en.json              # 영어
 │
 ├── lib/
 │   ├── supabase-external.ts     # Supabase 싱글톤 클라이언트 ⭐
@@ -564,6 +578,113 @@ const teamLogo = getTeamLogo(englishName, teams);
 🔧 supabase/config.toml                  - project_id 변경시 주의
 ```
 
+### 8.5 🌐 다국어 지원 (i18n) 규칙
+
+> **필수!** 새 기능 개발 시 모든 UI 텍스트는 i18n을 적용해야 합니다.
+
+#### 기본 사용법
+
+```typescript
+import { useTranslation } from 'react-i18next';
+
+const MyComponent = () => {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;  // 'ko' | 'ja' | 'en'
+
+  return <h1>{t('section.recentResults')}</h1>;
+};
+```
+
+#### 팀 이름 현지화 (필수!)
+
+```typescript
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+
+// ✅ 올바른 사용
+<span>{getLocalizedTeamName(team, currentLang)}</span>
+<img alt={getLocalizedTeamName(team, currentLang)} />
+
+// ❌ 잘못된 사용
+<span>{team.name}</span>  // 한국어 고정됨!
+```
+
+#### 날짜 현지화 (필수!)
+
+```typescript
+import { format } from 'date-fns';
+import { ko, ja, enUS } from 'date-fns/locale';
+
+// getDateLocale 헬퍼 함수 필수
+const getDateLocale = () => {
+  switch (currentLang) {
+    case 'ja': return ja;
+    case 'en': return enUS;
+    default: return ko;
+  }
+};
+
+// ✅ 올바른 사용
+{format(date, 'PPP', { locale: getDateLocale() })}  // "2026년 1월 4일"
+{format(date, 'p', { locale: getDateLocale() })}    // "오후 7:00"
+
+// ❌ 잘못된 사용
+{date.toLocaleDateString('ko-KR')}  // 한국어 고정됨!
+{format(date, 'M/d')}               // 로케일 없음!
+```
+
+#### 번역 키 추가 시 규칙
+
+1. **3개 파일 모두 수정**: `ko.json`, `ja.json`, `en.json`
+2. **키 네이밍**: `section.keyName`, `gameDetail.keyName` 형식
+3. **일관성**: 기존 구조 따르기
+
+```json
+// ko.json
+"gameDetail": {
+  "scorer": "득점",
+  "assist": "어시스트"
+}
+
+// ja.json  
+"gameDetail": {
+  "scorer": "得点",
+  "assist": "アシスト"
+}
+
+// en.json
+"gameDetail": {
+  "scorer": "Goal",
+  "assist": "Assist"
+}
+```
+
+#### 경기 상태 비교 (i18n 주의!)
+
+```typescript
+// ✅ 올바른 사용 - 번역 키로 비교
+const isInProgress = getGameStatus(game) === t('game.status.inProgress');
+
+// ❌ 잘못된 사용 - 하드코딩된 한국어로 비교
+const isInProgress = getGameStatus(game) === '진행 중';  // 다른 언어에서 작동 안함!
+```
+
+#### 언어별 조건부 렌더링
+
+```typescript
+// 복잡한 텍스트나 외부 링크는 언어별 분기
+{currentLang === 'ko' ? (
+  <a href="https://kakaopay.com">카카오페이</a>
+) : (
+  <a href="https://buymeacoffee.com">Buy Me a Coffee</a>
+)}
+```
+
+#### Instagram 페이지 예외
+
+```
+/instagram/score, /instagram/preview, /instagram/goals
+→ SNS 자동화용이므로 한국어 고정 (i18n 적용 안 함)
+```
 ---
 
 ## 9. SEO 구현

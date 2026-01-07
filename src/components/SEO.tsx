@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 
 interface SEOProps {
   title: string;
@@ -25,13 +26,50 @@ const SEO = ({
   noindex = false,
   article
 }: SEOProps) => {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language;
+  
   const siteUrl = "https://alhockey.fans";
   const fullUrl = `${siteUrl}${path}`;
-  const siteName = "아시아리그 아이스하키";
-  const fullTitle = title.includes("아시아리그") ? title : `${title} | 아시아리그 아이스하키`;
+  
+  // Language-specific site names
+  const siteNames: Record<string, string> = {
+    ko: "아시아리그 아이스하키",
+    ja: "アジアリーグアイスホッケー",
+    en: "Asia League Ice Hockey"
+  };
+  const siteName = siteNames[currentLang] || siteNames.ko;
+  
+  // Language-specific title suffix
+  const suffixes: Record<string, string> = {
+    ko: "아시아리그 아이스하키",
+    ja: "アジアリーグ",
+    en: "Asia League Ice Hockey"
+  };
+  const suffix = suffixes[currentLang] || suffixes.ko;
+  const fullTitle = title.includes("아시아리그") || title.includes("Asia League") || title.includes("アジアリーグ") 
+    ? title 
+    : `${title} | ${suffix}`;
+
+  // Language to locale mapping
+  const locales: Record<string, string> = {
+    ko: "ko_KR",
+    ja: "ja_JP",
+    en: "en_US"
+  };
+  const ogLocale = locales[currentLang] || locales.ko;
+
+  // Content language mapping
+  const contentLangs: Record<string, string> = {
+    ko: "ko-KR",
+    ja: "ja-JP",
+    en: "en-US"
+  };
+  const contentLang = contentLangs[currentLang] || contentLangs.ko;
 
   return (
     <Helmet>
+      <html lang={currentLang} />
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
@@ -40,14 +78,14 @@ const SEO = ({
       <meta name="author" content="alhockey_fans" />
       <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"} />
       <meta name="googlebot" content={noindex ? "noindex, nofollow" : "index, follow"} />
-      <meta name="language" content="ko" />
+      <meta name="language" content={currentLang} />
       <meta name="revisit-after" content="1 days" />
       <meta name="rating" content="general" />
       
       {/* 지역/언어 태그 */}
-      <meta name="geo.region" content="KR" />
-      <meta name="geo.placename" content="South Korea" />
-      <meta name="content-language" content="ko-KR" />
+      <meta name="geo.region" content={currentLang === 'ja' ? 'JP' : currentLang === 'en' ? 'US' : 'KR'} />
+      <meta name="geo.placename" content={currentLang === 'ja' ? 'Japan' : currentLang === 'en' ? 'United States' : 'South Korea'} />
+      <meta name="content-language" content={contentLang} />
       
       {/* Open Graph */}
       <meta property="og:site_name" content={siteName} />
@@ -59,7 +97,10 @@ const SEO = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={title} />
-      <meta property="og:locale" content="ko_KR" />
+      <meta property="og:locale" content={ogLocale} />
+      <meta property="og:locale:alternate" content="ko_KR" />
+      <meta property="og:locale:alternate" content="ja_JP" />
+      <meta property="og:locale:alternate" content="en_US" />
       
       {/* Article 메타 (뉴스, 경기 결과 등) */}
       {article?.publishedTime && <meta property="article:published_time" content={article.publishedTime} />}
@@ -78,11 +119,13 @@ const SEO = ({
       {/* Canonical & hreflang */}
       <link rel="canonical" href={fullUrl} />
       <link rel="alternate" hrefLang="ko" href={fullUrl} />
+      <link rel="alternate" hrefLang="ja" href={fullUrl} />
+      <link rel="alternate" hrefLang="en" href={fullUrl} />
       <link rel="alternate" hrefLang="x-default" href={fullUrl} />
       
       {/* Theme & App */}
       <meta name="theme-color" content="#0a0a0a" />
-      <meta name="apple-mobile-web-app-title" content="아시아리그하키" />
+      <meta name="apple-mobile-web-app-title" content={currentLang === 'ja' ? 'ALIHホッケー' : currentLang === 'en' ? 'ALIH Hockey' : '아시아리그하키'} />
       
       {/* Structured Data */}
       {structuredData && (
@@ -95,3 +138,4 @@ const SEO = ({
 };
 
 export default SEO;
+
