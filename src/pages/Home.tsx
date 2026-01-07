@@ -527,7 +527,7 @@ const Home = () => {
             >
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">
-                  {format(new Date(recentGames[0].match_at), 'M/d', { locale: getDateLocale() })}
+                  {format(new Date(recentGames[0].match_at), 'PPP', { locale: getDateLocale() })}
                 </Badge>
                 <Badge variant="outline" className="text-xs">{t('game.status.finished')}</Badge>
               </div>
@@ -580,7 +580,7 @@ const Home = () => {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="text-xs">
-                          {format(new Date(game.match_at), 'M/d', { locale: getDateLocale() })}
+                          {format(new Date(game.match_at), 'PPP', { locale: getDateLocale() })}
                         </Badge>
                         <Badge variant="outline" className="text-xs">{t('game.status.finished')}</Badge>
                       </div>
@@ -652,11 +652,15 @@ const Home = () => {
                 variant="outline"
                 className="gap-2 h-auto py-3 flex-col"
                 onClick={() => {
-                  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                  if (isMobile) {
-                    window.open('https://qr.kakaopay.com/FQqvZxoia9c405515', '_blank');
+                  if (currentLang === 'ko') {
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (isMobile) {
+                      window.open('https://qr.kakaopay.com/FQqvZxoia9c405515', '_blank');
+                    } else {
+                      window.open('/images/kakaopay-qr.jpg', '_blank');
+                    }
                   } else {
-                    window.open('/images/kakaopay-qr.jpg', '_blank');
+                    window.open('https://buymeacoffee.com/joelonsw', '_blank');
                   }
                 }}
               >

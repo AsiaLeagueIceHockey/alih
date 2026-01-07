@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TeamStanding } from "@/types/team";
 import { useTranslation } from "react-i18next";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 
 interface LeagueStandingsSectionProps {
   standings: TeamStanding[];
@@ -11,7 +12,8 @@ interface LeagueStandingsSectionProps {
 }
 
 const LeagueStandingsSection = ({ standings, currentTeamId }: LeagueStandingsSectionProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   return (
     <section className="mb-6">
       <h2 className="text-lg font-bold mb-4 px-1">{t('nav.standings')}</h2>
@@ -44,11 +46,11 @@ const LeagueStandingsSection = ({ standings, currentTeamId }: LeagueStandingsSec
                   >
                     <img
                       src={standing.team?.logo || ""}
-                      alt={standing.team?.name || ""}
+                      alt={getLocalizedTeamName(standing.team, currentLang)}
                       className="w-5 h-5 object-contain"
                       loading="lazy"
                     />
-                    <span className="font-medium">{standing.team?.name}</span>
+                    <span className="font-medium">{getLocalizedTeamName(standing.team, currentLang)}</span>
                   </Link>
                 </td>
                 <td className="p-3 text-center">{standing.games_played}</td>

@@ -337,7 +337,7 @@ const Standings = () => {
                             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                               <img 
                                 src={player.team?.logo || ''} 
-                                alt={player.team?.name || ''}
+                                alt={getLocalizedTeamName(player.team, currentLang)}
                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
                                 loading="lazy"
                               />
@@ -348,7 +348,7 @@ const Standings = () => {
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
                                   <span>•</span>
-                                  <span className="truncate">{player.team?.name}</span>
+                                  <span className="truncate">{getLocalizedTeamName(player.team, currentLang)}</span>
                                 </div>
                               </div>
                             </div>
@@ -407,7 +407,7 @@ const Standings = () => {
                             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                               <img 
                                 src={player.team?.logo || ''} 
-                                alt={player.team?.name || ''}
+                                alt={getLocalizedTeamName(player.team, currentLang)}
                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
                                 loading="lazy"
                               />
@@ -418,7 +418,7 @@ const Standings = () => {
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
                                   <span>•</span>
-                                  <span className="truncate">{player.team?.name}</span>
+                                  <span className="truncate">{getLocalizedTeamName(player.team, currentLang)}</span>
                                 </div>
                               </div>
                             </div>
@@ -477,7 +477,7 @@ const Standings = () => {
                             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                               <img 
                                 src={player.team?.logo || ''} 
-                                alt={player.team?.name || ''}
+                                alt={getLocalizedTeamName(player.team, currentLang)}
                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0 bg-muted/50 p-1"
                                 loading="lazy"
                               />
@@ -488,7 +488,7 @@ const Standings = () => {
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
                                   <span>•</span>
-                                  <span className="truncate">{player.team?.name}</span>
+                                  <span className="truncate">{getLocalizedTeamName(player.team, currentLang)}</span>
                                 </div>
                               </div>
                             </div>

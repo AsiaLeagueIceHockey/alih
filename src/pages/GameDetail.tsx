@@ -951,13 +951,13 @@ const GameDetail = () => {
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Play className="h-4 w-4" />
-              경기 하이라이트
+              {t('gameDetail.gameHighlight')}
             </h3>
             <div className="aspect-video w-full">
               <iframe
                 className="w-full h-full rounded-lg"
                 src={`https://www.youtube.com/embed/${getYoutubeVideoId(scheduleData.highlight_url)}`}
-                title="경기 하이라이트"
+                title={t('gameDetail.gameHighlight')}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
@@ -967,15 +967,15 @@ const GameDetail = () => {
 
         {/* 경기 요약 카드 */}
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-4">피리어드별 요약</h3>
+          <h3 className="font-semibold mb-4">{t('gameDetail.periodSummary')}</h3>
           <div className="overflow-x-auto scrollbar-hide">
             <Table className="min-w-[330px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-14 whitespace-nowrap">구분</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">득점</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">유효 슈팅</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">페널티(분)</TableHead>
+                  <TableHead className="w-14 whitespace-nowrap">{t('gameDetail.category')}</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">{t('gameDetail.goals')}</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">{t('gameDetail.shotsOnGoal')}</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">{t('gameDetail.penaltyMin')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1073,10 +1073,10 @@ const GameDetail = () => {
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            페널티 기록
+            {t('gameDetail.penalty')}
           </h3>
           {gameDetail.penalties.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">페널티 기록이 없습니다</p>
+            <p className="text-center text-muted-foreground py-8">{t('gameDetail.noPenalty')}</p>
           ) : (
             <div className="space-y-3">
               {[...gameDetail.penalties]
@@ -1094,12 +1094,12 @@ const GameDetail = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <Badge variant="outline" className="text-xs whitespace-nowrap">{getPeriodLabel(penalty.period)} {adjustGameTime(penalty.period, penalty.time)}</Badge>
-                          <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes}분</Badge>
+                          <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes} min</Badge>
                         </div>
                         <p className="font-medium text-sm">
                           {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
                         </p>
-                        <p className="text-xs text-muted-foreground">반칙: {penalty.offence}</p>
+                        <p className="text-xs text-muted-foreground">{t('gameDetail.offence')}: {penalty.offence}</p>
                       </div>
                     </div>
                   );
@@ -1112,7 +1112,7 @@ const GameDetail = () => {
         <Card className="p-4 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Users className="h-4 w-4" />
-            선수 명단
+            {t('gameDetail.roster')}
           </h3>
 
           {/* 홈팀 선수 명단 */}
@@ -1211,37 +1211,37 @@ const GameDetail = () => {
         </Card>
 
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-3">아이스하키 용어 설명</h3>
+          <h3 className="font-semibold mb-3">{t('gameDetail.glossary')}</h3>
           <div className="space-y-3 text-sm">
             <div>
               <p className="font-medium">SOG (Shot on Goal)</p>
-              <p className="text-xs text-muted-foreground">유효 슈팅 수</p>
+              <p className="text-xs text-muted-foreground">{t('gameDetail.shotsOnGoal')}</p>
             </div>
             <div>
               <p className="font-medium">PIM (Penalties in Minutes)</p>
-              <p className="text-xs text-muted-foreground">페널티로 인해 퇴장당한 총 시간(분)</p>
+              <p className="text-xs text-muted-foreground">{t('gameDetail.penaltyMin')}</p>
             </div>
             <div>
               <p className="font-medium">PPG (Power Play Goal)</p>
-              <p className="text-xs text-muted-foreground">팀이 수적 우위 상황에서 넣은 골</p>
+              <p className="text-xs text-muted-foreground">{currentLang === 'ko' ? '팀이 수적 우위 상황에서 넣은 골' : currentLang === 'ja' ? 'パワープレイゴール' : 'Power play goal'}</p>
             </div>
             <div>
               <p className="font-medium">SHG (Short Handed Goal)</p>
-              <p className="text-xs text-muted-foreground">팀이 수적 열세 상황에서 넣은 골</p>
+              <p className="text-xs text-muted-foreground">{currentLang === 'ko' ? '팀이 수적 열세 상황에서 넣은 골' : currentLang === 'ja' ? 'ショートハンドゴール' : 'Short handed goal'}</p>
             </div>
           </div>
         </Card>
 
         {/* 기타 정보 */}
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-3">경기 정보</h3>
+          <h3 className="font-semibold mb-3">{t('gameDetail.gameInfo')}</h3>
           <div className="text-sm">
-            <h4 className="font-medium mb-2">코치진</h4>
+            <h4 className="font-medium mb-2">{currentLang === 'ko' ? '코치진' : currentLang === 'ja' ? 'コーチ陣' : 'Coaches'}</h4>
             <div className="space-y-1 text-muted-foreground">
-              <p>홈 감독: {gameDetail.game_info.coaches.home_manager}</p>
-              <p>홈 코치: {gameDetail.game_info.coaches.home_coach}</p>
-              <p>원정 감독: {gameDetail.game_info.coaches.away_manager}</p>
-              <p>원정 코치: {gameDetail.game_info.coaches.away_coach}</p>
+              <p>{currentLang === 'ko' ? '홈 감독' : currentLang === 'ja' ? 'ホーム監督' : 'Home Manager'}: {gameDetail.game_info.coaches.home_manager}</p>
+              <p>{currentLang === 'ko' ? '홈 코치' : currentLang === 'ja' ? 'ホームコーチ' : 'Home Coach'}: {gameDetail.game_info.coaches.home_coach}</p>
+              <p>{currentLang === 'ko' ? '원정 감독' : currentLang === 'ja' ? 'アウェイ監督' : 'Away Manager'}: {gameDetail.game_info.coaches.away_manager}</p>
+              <p>{currentLang === 'ko' ? '원정 코치' : currentLang === 'ja' ? 'アウェイコーチ' : 'Away Coach'}: {gameDetail.game_info.coaches.away_coach}</p>
             </div>
           </div>
         </Card>

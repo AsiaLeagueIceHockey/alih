@@ -182,7 +182,19 @@
         "liveStreamPending": "Live streaming link will be updated",
         "linkCopied": "Link copied to clipboard!",
         "noH2HRecord": "No head-to-head record",
-        "spectators": "Attendance"
+        "spectators": "Attendance",
+        "gameHighlight": "Game Highlights",
+        "periodSummary": "Period Summary",
+        "category": "Period",
+        "goals": "Goals",
+        "shotsOnGoal": "Shots on Goal",
+        "penaltyMin": "Penalty (min)",
+        "penalty": "Penalty Record",
+        "noPenalty": "No penalty record",
+        "offence": "Offence",
+        "roster": "Roster",
+        "glossary": "Ice Hockey Terms",
+        "gameInfo": "Game Info"
     },
     "team": {
         "roster": "Roster",

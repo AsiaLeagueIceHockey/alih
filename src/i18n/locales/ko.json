@@ -184,7 +184,19 @@
         "liveStreamPending": "라이브 스트리밍 링크 업데이트 예정입니다",
         "linkCopied": "링크가 클립보드에 복사되었습니다!",
         "noH2HRecord": "맞대결 기록이 없습니다",
-        "spectators": "관중"
+        "spectators": "관중",
+        "gameHighlight": "경기 하이라이트",
+        "periodSummary": "피리어드별 요약",
+        "category": "구분",
+        "goals": "득점",
+        "shotsOnGoal": "유효 슈팅",
+        "penaltyMin": "페널티(분)",
+        "penalty": "페널티 기록",
+        "noPenalty": "페널티 기록이 없습니다",
+        "offence": "반칙",
+        "roster": "선수 명단",
+        "glossary": "아이스하키 용어 설명",
+        "gameInfo": "경기 정보"
     },
     "cheerBattle": {
         "title": "응원하기",

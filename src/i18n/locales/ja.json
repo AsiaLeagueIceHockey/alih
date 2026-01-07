@@ -182,7 +182,19 @@
         "liveStreamPending": "ライブストリーミングリンクは更新予定です",
         "linkCopied": "リンクがクリップボードにコピーされました！",
         "noH2HRecord": "対戦記録がありません",
-        "spectators": "観客数"
+        "spectators": "観客数",
+        "gameHighlight": "試合ハイライト",
+        "periodSummary": "ピリオド別サマリー",
+        "category": "区分",
+        "goals": "得点",
+        "shotsOnGoal": "シュート数",
+        "penaltyMin": "ペナルティ(分)",
+        "penalty": "ペナルティ記録",
+        "noPenalty": "ペナルティ記録がありません",
+        "offence": "反則",
+        "roster": "選手名簿",
+        "glossary": "アイスホッケー用語解説",
+        "gameInfo": "試合情報"
     },
     "team": {
         "roster": "選手団",
