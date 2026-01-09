@@ -72,33 +72,30 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="아시아리그하키">
 
-  <!-- Favicon (구글 검색 결과 노출용 - 48x48 이상 권장) -->
-  <link rel="icon" type="image/png" sizes="192x192" href="https://alhockey.fans/favicon.png?v=2">
-  <link rel="icon" type="image/png" sizes="48x48" href="https://alhockey.fans/favicon-48x48.png?v=2">
-  <link rel="icon" type="image/png" sizes="16x16" href="https://alhockey.fans/favicon-16x16.png?v=2">
-  <link rel="icon" type="image/png" sizes="32x32" href="https://alhockey.fans/favicon-32x32.png?v=2">
-  <link rel="icon" href="https://alhockey.fans/favicon.ico?v=2">
-  <link rel="icon" type="image/png" sizes="512x512" href="https://alhockey.fans/android-chrome-512x512.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="https://alhockey.fans/apple-touch-icon.png">
-  <link rel="apple-touch-icon-precomposed" sizes="180x180"
-    href="https://alhockey.fans/apple-touch-icon-precomposed.png">
+  <!-- Favicon (Recommended for Google Search Results - 48x48 or larger) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png">
 
   <!-- Web App Manifest -->
-  <link rel="manifest" href="https://alhockey.fans/manifest.json">
+  <link rel="manifest" href="/manifest.json">
 
   <!-- Canonical -->
   <link rel="canonical" href="https://alhockey.fans/">
 
-  <!-- Structured Data - Organization -->
+  <!-- Structured Data - WebSite -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "아시아리그 아이스하키",
-    "alternateName": ["Asia League Ice Hockey", "아시아리그하키", "alhockey.fans"],
-    "url": "https://alhockey.fans",
-    "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 실시간 스코어, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한 곳에서",
-    "inLanguage": "ko-KR",
+    "alternateName": ["Asia League Ice Hockey", "아시아리그하키", "ALHockey"],
+    "url": "https://alhockey.fans/",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -106,17 +103,21 @@
         "urlTemplate": "https://alhockey.fans/schedule?q={search_term_string}"
       },
       "query-input": "required name=search_term_string"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "아시아리그 아이스하키",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://alhockey.fans/favicon.png",
-        "width": 192,
-        "height": 192
-      }
     }
+  }
+  </script>
+
+  <!-- Structured Data - Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "아시아리그 아이스하키",
+    "url": "https://alhockey.fans/",
+    "logo": "https://alhockey.fans/favicon.png",
+    "sameAs": [
+      "https://www.instagram.com/alhockey_fans"
+    ]
   }
   </script>
 </head>
