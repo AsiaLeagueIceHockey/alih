@@ -6,6 +6,29 @@ import ko from './locales/ko.json';
 import ja from './locales/ja.json';
 import en from './locales/en.json';
 
+// Query parameter language detector (?lang=ko, ?lang=ja, ?lang=en)
+const queryParamDetector = {
+  name: 'queryParamDetector',
+  lookup() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang');
+    
+    if (langParam) {
+      // Normalize: jp -> ja
+      const normalizedLang = langParam === 'jp' ? 'ja' : langParam;
+      if (['ko', 'ja', 'en'].includes(normalizedLang)) {
+        // Save to localStorage so subsequent navigation maintains the language
+        localStorage.setItem('alih-language', normalizedLang);
+        return normalizedLang;
+      }
+    }
+    return null;
+  },
+  cacheUserLanguage() {
+    // Already handled in lookup
+  }
+};
+
 // Custom language detector that maps browser language to supported languages
 const customLanguageDetector = {
   name: 'customDetector',
@@ -40,8 +63,9 @@ const customLanguageDetector = {
   }
 };
 
-// Add custom detector to LanguageDetector
+// Add custom detectors to LanguageDetector
 const languageDetector = new LanguageDetector();
+languageDetector.addDetector(queryParamDetector);
 languageDetector.addDetector(customLanguageDetector);
 
 i18n
@@ -59,7 +83,7 @@ i18n
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'customDetector', 'navigator', 'htmlTag'],
+      order: ['queryParamDetector', 'localStorage', 'customDetector', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
       lookupLocalStorage: 'alih-language',
     },
