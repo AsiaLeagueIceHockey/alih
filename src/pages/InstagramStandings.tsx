@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
-import { Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -13,14 +13,6 @@ interface Standing {
   rank: number;
   games_played: number;
   points: number;
-  win_60min: number;
-  win_ot: number;
-  win_pss: number;
-  lose_pss: number;
-  lose_ot: number;
-  lose_60min: number;
-  goals_for: number;
-  goals_against: number;
   team?: {
     name: string;
     logo: string;
@@ -82,46 +74,37 @@ const InstagramStandings = () => {
         <div className="absolute bottom-40 right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex flex-col h-full p-10">
+      <div className="relative z-10 flex flex-col h-full p-12">
         {/* 헤더 */}
-        <div className="text-center mb-8">
-          <p className="text-primary/80 text-2xl tracking-[0.3em] font-light mb-4">
+        <div className="text-center mb-12">
+          <p className="text-primary/80 text-3xl tracking-[0.3em] font-light mb-6">
             ASIA LEAGUE ICE HOCKEY
           </p>
-          <h1 className="text-white text-5xl font-bold tracking-wider mb-4">
+          <h1 className="text-white text-7xl font-bold tracking-wider mb-6">
             STANDINGS
           </h1>
-          <p className="text-slate-400 text-xl">
+          <p className="text-slate-400 text-2xl">
             {formattedDate} 기준
           </p>
         </div>
 
-        {/* 순위표 */}
-        <div className="flex-1 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+        {/* 순위표 - 간소화 */}
+        <div className="flex-1 bg-slate-800/50 backdrop-blur-sm rounded-3xl border border-slate-700/50 overflow-hidden">
           {/* 테이블 헤더 */}
-          <div className="grid grid-cols-12 gap-2 px-6 py-4 bg-slate-700/50 text-slate-300 text-sm font-medium">
+          <div className="grid grid-cols-12 gap-4 px-10 py-6 bg-slate-700/50 text-slate-300 text-xl font-medium">
             <div className="col-span-1 text-center">#</div>
-            <div className="col-span-4">팀</div>
-            <div className="col-span-1 text-center">경기</div>
-            <div className="col-span-1 text-center">승</div>
-            <div className="col-span-1 text-center">OT승</div>
-            <div className="col-span-1 text-center">OT패</div>
-            <div className="col-span-1 text-center">패</div>
-            <div className="col-span-1 text-center">득실</div>
-            <div className="col-span-1 text-center font-bold text-primary">P</div>
+            <div className="col-span-7 pl-4">팀</div>
+            <div className="col-span-2 text-center">경기</div>
+            <div className="col-span-2 text-center font-bold text-primary">P</div>
           </div>
 
           {/* 팀 순위 */}
           <div className="divide-y divide-slate-700/50">
             {standings.map((standing, index) => {
-              const goalDiff = standing.goals_for - standing.goals_against;
-              const totalWins = standing.win_60min + standing.win_ot + standing.win_pss;
-              const totalLosses = standing.lose_60min + standing.lose_ot + standing.lose_pss;
-              
               return (
                 <div 
                   key={standing.id}
-                  className={`grid grid-cols-12 gap-2 px-6 py-5 items-center transition-all ${
+                  className={`grid grid-cols-12 gap-4 px-10 py-8 items-center transition-all ${
                     index === 0 
                       ? 'bg-gradient-to-r from-yellow-500/20 to-transparent' 
                       : index < 4
@@ -131,7 +114,7 @@ const InstagramStandings = () => {
                 >
                   {/* 순위 */}
                   <div className="col-span-1 text-center">
-                    <span className={`text-2xl font-bold ${
+                    <span className={`text-4xl font-bold ${
                       index === 0 ? 'text-yellow-500' :
                       index === 1 ? 'text-slate-300' :
                       index === 2 ? 'text-amber-600' :
@@ -142,58 +125,27 @@ const InstagramStandings = () => {
                   </div>
 
                   {/* 팀 정보 */}
-                  <div className="col-span-4 flex items-center gap-3">
+                  <div className="col-span-7 flex items-center gap-5 pl-4">
                     {standing.team && (
                       <img 
                         src={standing.team.logo} 
                         alt={standing.team.name} 
-                        className="w-12 h-12 object-contain"
+                        className="w-16 h-16 object-contain"
                       />
                     )}
-                    <span className="text-white font-bold text-lg truncate">
+                    <span className="text-white font-bold text-2xl truncate">
                       {standing.team?.name}
                     </span>
                   </div>
 
                   {/* 경기 수 */}
-                  <div className="col-span-1 text-center text-slate-300 text-lg">
+                  <div className="col-span-2 text-center text-slate-300 text-2xl">
                     {standing.games_played}
                   </div>
 
-                  {/* 승 */}
-                  <div className="col-span-1 text-center text-green-400 font-bold text-lg">
-                    {standing.win_60min}
-                  </div>
-
-                  {/* OT승 */}
-                  <div className="col-span-1 text-center text-green-300 text-lg">
-                    {standing.win_ot + standing.win_pss}
-                  </div>
-
-                  {/* OT패 */}
-                  <div className="col-span-1 text-center text-red-300 text-lg">
-                    {standing.lose_ot + standing.lose_pss}
-                  </div>
-
-                  {/* 패 */}
-                  <div className="col-span-1 text-center text-red-400 font-bold text-lg">
-                    {standing.lose_60min}
-                  </div>
-
-                  {/* 득실차 */}
-                  <div className="col-span-1 text-center">
-                    <span className={`text-lg font-medium ${
-                      goalDiff > 0 ? 'text-green-400' : 
-                      goalDiff < 0 ? 'text-red-400' : 
-                      'text-slate-400'
-                    }`}>
-                      {goalDiff > 0 ? '+' : ''}{goalDiff}
-                    </span>
-                  </div>
-
                   {/* 승점 */}
-                  <div className="col-span-1 text-center">
-                    <span className="text-2xl font-bold text-primary">
+                  <div className="col-span-2 text-center">
+                    <span className="text-4xl font-bold text-primary">
                       {standing.points}
                     </span>
                   </div>
@@ -204,22 +156,22 @@ const InstagramStandings = () => {
         </div>
 
         {/* 범례 */}
-        <div className="mt-6 flex justify-center gap-8 text-sm text-slate-400">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-yellow-500/50 rounded" />
+        <div className="mt-8 flex justify-center gap-10 text-lg text-slate-400">
+          <div className="flex items-center gap-3">
+            <div className="w-4 h-4 bg-yellow-500/50 rounded" />
             <span>1위</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500/30 rounded" />
+          <div className="flex items-center gap-3">
+            <div className="w-4 h-4 bg-green-500/30 rounded" />
             <span>플레이오프 진출권</span>
           </div>
         </div>
 
         {/* 푸터 */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full px-8 py-4">
-            <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
-            <span className="text-slate-300 text-xl font-medium">
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full px-10 py-5">
+            <div className="w-4 h-4 bg-primary rounded-full animate-pulse" />
+            <span className="text-slate-300 text-2xl font-medium">
               @alhockey_fans
             </span>
           </div>
