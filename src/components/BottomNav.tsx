@@ -23,7 +23,7 @@ const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border backdrop-blur-lg bg-opacity-95 pb-safe">
-      <div className="flex justify-around items-center h-16 max-w-screen-xl mx-auto px-2">
+      <div className="flex justify-around items-center h-12 max-w-screen-xl mx-auto px-2">
         {navItems.map(({ to, icon: Icon, labelKey }) => (
           <NavLink
             key={to}

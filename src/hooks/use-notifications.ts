@@ -4,8 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 
 // NOTE: This public key should be from your VAPID keys.
 // You can generate one using web-push library: webpush.generateVAPIDKeys()
-// For now, this is a placeholder. You MUST replace this.
-const VAPID_PUBLIC_KEY = "REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY";
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -33,7 +32,8 @@ export function useNotifications() {
       const result = await Notification.requestPermission();
       setPermission(result);
       if (result === 'granted') {
-        await subscribeToPush();
+        const subResult = await subscribeToPush();
+        return subResult ? 'granted' : 'error';
       }
       return result;
     } catch (error) {
@@ -43,8 +43,8 @@ export function useNotifications() {
   };
 
   const subscribeToPush = async () => {
-    if (!user) return;
-    if (!('serviceWorker' in navigator)) return;
+    if (!user) return false;
+    if (!('serviceWorker' in navigator)) return false;
 
     try {
       const registration = await navigator.serviceWorker.ready;
@@ -54,9 +54,10 @@ export function useNotifications() {
       
       if (!subscription) {
         // Subscribe new
-        if (VAPID_PUBLIC_KEY === "REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY") {
-           console.warn("VAPID Key not set. Skipping subscription.");
-           return;
+        if (!VAPID_PUBLIC_KEY) {
+           console.warn("VITE_VAPID_PUBLIC_KEY is not set in .env. Notifications cannot be enabled.");
+           alert("알림 설정을 위한 VAPID 키가 설정되지 않았습니다. 관리자에게 문의하세요.");
+           return false;
         }
 
         subscription = await registration.pushManager.subscribe({
@@ -72,19 +73,24 @@ export function useNotifications() {
           user_id: user.id,
           token: subscription.toJSON(), // Stores endpoint, keys
           platform: 'web',
-          updated_at: new Date().toISOString()
+          // removing updated_at if not in table or ensuring we have created_at default
         }, { onConflict: 'user_id, token' });
 
       if (error) {
         console.error('Error saving notification token:', error);
+        return false;
       } else {
         console.log('Notification token saved!');
+        return true;
       }
 
     } catch (error) {
       console.error('Error subscribing to push:', error);
+      return false;
     }
   };
+
+
 
   return {
     permission,

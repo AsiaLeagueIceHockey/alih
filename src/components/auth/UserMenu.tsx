@@ -17,6 +17,7 @@ import { LogOut, User as UserIcon, Globe, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SettingsDialog from "./SettingsDialog";
 
 const languages = [
   { code: 'ko', label: '한국어', flag: '🇰🇷' },
@@ -45,11 +46,10 @@ const UserMenu = () => {
   const { user, profile, logout, signInWithGoogle, signInWithKakao, updateProfile } = useAuth();
   const { t, i18n } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const handleLanguageChange = (langCode: string) => {
     updateProfile({ preferred_language: langCode });
-    // Also change i18n immediately needed if profile update is slow? 
-    // AuthContext usually handles it but we can force it too.
     i18n.changeLanguage(langCode);
   };
 
@@ -100,61 +100,65 @@ const UserMenu = () => {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-          <Avatar className="h-9 w-9 border border-border/50">
-            <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-            <AvatarFallback>{nicknameInitial}</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground truncate">
-              {profile?.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Globe className="mr-2 h-4 w-4" />
-              <span>Language ({currentLang.flag})</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              {languages.map((lang) => (
-                <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
-                  <span className="mr-2">{lang.flag}</span>
-                  {lang.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+            <Avatar className="h-9 w-9 border border-border/50">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
+              <AvatarFallback>{nicknameInitial}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{displayName}</p>
+              <p className="text-xs leading-none text-muted-foreground truncate">
+                {profile?.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
           
-          <DropdownMenuItem disabled>
-             <UserIcon className="mr-2 h-4 w-4" />
-             <span>{t('auth.myPage', 'My Page')}</span>
+          <DropdownMenuGroup>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Globe className="mr-2 h-4 w-4" />
+                <span>Language ({currentLang.flag})</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {languages.map((lang) => (
+                  <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
+                    <span className="mr-2">{lang.flag}</span>
+                    {lang.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            
+            <DropdownMenuItem onClick={() => setShowSettingsModal(true)}>
+               <UserIcon className="mr-2 h-4 w-4" />
+               <span>{t('auth.myPage', 'My Page')}</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={logout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>{t('auth.logout', 'Log out')}</span>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={logout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{t('auth.logout', 'Log out')}</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem className="text-destructive focus:text-destructive" disabled>
-          <Trash2 className="mr-2 h-4 w-4" />
-          <span>{t('auth.deleteAccount', 'Delete Account')}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          
+          <DropdownMenuItem className="text-destructive focus:text-destructive" disabled>
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>{t('auth.deleteAccount', 'Delete Account')}</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <SettingsDialog open={showSettingsModal} onOpenChange={setShowSettingsModal} />
+    </>
   );
 };
 
