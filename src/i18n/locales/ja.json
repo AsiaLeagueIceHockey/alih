@@ -246,5 +246,16 @@
         "title": "応援する",
         "liveCheer": "リアルタイム応援",
         "description": "ボタンを押して応援しよう！リアルタイムで反映されます。"
+    },
+    "installPrompt": {
+        "bannerText": "アプリでもっと快適に！",
+        "bannerSubtext": "ホーム画面に追加",
+        "installButton": "追加",
+        "modalTitle": "ホーム画面に追加",
+        "modalDescription": "Safariで以下の手順に従ってください",
+        "step1": "画面下部の共有ボタンをタップ",
+        "step2": "「ホーム画面に追加」を選択",
+        "step3": "「追加」をタップして完了",
+        "confirm": "確認"
     }
 }

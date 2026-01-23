@@ -10,6 +10,7 @@ import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import BottomNav from "./components/BottomNav";
 import ScrollToTop from "./components/ScrollToTop";
+import InstallPrompt from "./components/install-prompt";
 import './i18n'; // i18n initialization
 
 // Lazy load pages for code splitting
@@ -59,6 +60,16 @@ const ConditionalBottomNav = () => {
     return null;
   }
   return <BottomNav />;
+};
+
+// InstallPrompt를 조건부로 표시하는 컴포넌트
+const ConditionalInstallPrompt = () => {
+  const location = useLocation();
+  // 인스타그램 경로에서는 InstallPrompt 숨김
+  if (location.pathname.startsWith('/instagram')) {
+    return null;
+  }
+  return <InstallPrompt />;
 };
 
 const App = () => {
@@ -157,6 +168,7 @@ const App = () => {
                 </Suspense>
               } />
             </Routes>
+            <ConditionalInstallPrompt />
             <ConditionalBottomNav />
           </BrowserRouter>
         </TooltipProvider>

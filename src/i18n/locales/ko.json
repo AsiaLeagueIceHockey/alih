@@ -246,5 +246,16 @@
         "korean": "한국어",
         "japanese": "日本語",
         "english": "English"
+    },
+    "installPrompt": {
+        "bannerText": "앱으로 더 빠르게!",
+        "bannerSubtext": "홈 화면에 추가하세요",
+        "installButton": "설치",
+        "modalTitle": "홈 화면에 추가하기",
+        "modalDescription": "Safari에서 아래 단계를 따라주세요",
+        "step1": "하단의 공유 버튼을 탭하세요",
+        "step2": "'홈 화면에 추가'를 선택하세요",
+        "step3": "'추가' 버튼을 탭하여 완료하세요",
+        "confirm": "확인"
     }
 }

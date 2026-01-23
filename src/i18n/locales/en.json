@@ -246,5 +246,16 @@
         "title": "Cheer",
         "liveCheer": "Live Cheer",
         "description": "Press the button to cheer! It's reflected in real-time."
+    },
+    "installPrompt": {
+        "bannerText": "Get the app experience!",
+        "bannerSubtext": "Add to Home Screen",
+        "installButton": "Install",
+        "modalTitle": "Add to Home Screen",
+        "modalDescription": "Follow these steps in Safari",
+        "step1": "Tap the Share button at the bottom",
+        "step2": "Select 'Add to Home Screen'",
+        "step3": "Tap 'Add' to complete",
+        "confirm": "OK"
     }
 }
