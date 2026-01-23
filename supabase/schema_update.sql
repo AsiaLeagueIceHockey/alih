@@ -1,4 +1,4 @@
--- Create profiles table
+-- Create profiles table (safe)
 create table if not exists public.profiles (
   id uuid references auth.users not null primary key,
   email text,
@@ -9,19 +9,23 @@ create table if not exists public.profiles (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Enable RLS on profiles
+-- Enable RLS (safe)
 alter table public.profiles enable row level security;
 
--- Policies for profiles
+-- Policies for profiles - Drop first to ensure update (Idempotent)
+drop policy if exists "Users can view their own profile" on profiles;
 create policy "Users can view their own profile" on profiles 
   for select using (auth.uid() = id);
 
+drop policy if exists "Users can update their own profile" on profiles;
 create policy "Users can update their own profile" on profiles 
   for update using (auth.uid() = id);
 
+drop policy if exists "Users can insert their own profile" on profiles;
 create policy "Users can insert their own profile" on profiles 
   for insert with check (auth.uid() = id);
 
+drop policy if exists "Users can delete their own profile" on profiles;
 create policy "Users can delete their own profile" on profiles 
   for delete using (auth.uid() = id);
 
@@ -35,16 +39,19 @@ create table if not exists public.notification_tokens (
   unique(user_id, token)
 );
 
--- Enable RLS on notification_tokens
+-- Enable RLS
 alter table public.notification_tokens enable row level security;
 
 -- Policies for notification_tokens
+drop policy if exists "Users can view their own tokens" on notification_tokens;
 create policy "Users can view their own tokens" on notification_tokens 
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own tokens" on notification_tokens;
 create policy "Users can insert their own tokens" on notification_tokens 
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can delete their own tokens" on notification_tokens;
 create policy "Users can delete their own tokens" on notification_tokens 
   for delete using (auth.uid() = user_id);
 
@@ -69,7 +76,7 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
--- Migration: Add favorite_team_ids if not exists (for existing tables)
+-- Migration: Add favorite_team_ids if not exists
 do $$
 begin
   if not exists (select 1 from information_schema.columns where table_name = 'profiles' and column_name = 'favorite_team_ids') then
@@ -77,7 +84,7 @@ begin
   end if;
 end $$;
 
--- Optional: Drop old column if it exists (warning: data loss if you care about old selection)
+-- Optional: Drop old column
 do $$
 begin
   if exists (select 1 from information_schema.columns where table_name = 'profiles' and column_name = 'favorite_team_id') then

@@ -7,21 +7,29 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // CORS 처리
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const externalSupabase = createClient(
-      'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bHBiZHlxZnptbHJqYXV2aHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTYwMTYsImV4cCI6MjA3ODI3MjAxNn0._-QXs8CF8p6mkJYQYouC7oQWR-WHdpH8Iy4TqJKut68'
-    );
+    // [변경 1] 하드코딩된 URL/Key 제거 -> 내부 환경 변수 사용
+    // Supabase Edge Function에서는 이 변수들이 자동으로 주입됩니다.
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 
+    // 만약 RLS(Row Level Security) 정책 때문에 Anon Key로 조회가 안 된다면
+    // SUPABASE_SERVICE_ROLE_KEY를 대신 사용해야 할 수도 있습니다.
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    // [변경 2] 도메인 변경 반영
     const siteUrl = 'https://alhockey.fans';
     const today = new Date().toISOString().split('T')[0];
 
+    // --- 이하 로직 동일 ---
+
     // Fetch all schedules for game pages
-    const { data: schedules, error: scheduleError } = await externalSupabase
+    const { data: schedules, error: scheduleError } = await supabase
       .from('alih_schedule')
       .select('game_no, match_at, game_status')
       .order('game_no', { ascending: true });
@@ -32,7 +40,7 @@ serve(async (req) => {
     }
 
     // Fetch all teams for team pages
-    const { data: teams, error: teamError } = await externalSupabase
+    const { data: teams, error: teamError } = await supabase
       .from('alih_teams')
       .select('id')
       .order('id', { ascending: true });
@@ -46,7 +54,7 @@ serve(async (req) => {
 
     // Static pages
     const staticPages = [
-      { url: '', priority: '1.0', changefreq: 'hourly' },
+      { url: '', priority: '1.0', changefreq: 'hourly' }, // 메인 페이지
       { url: '/schedule', priority: '0.9', changefreq: 'hourly' },
       { url: '/standings', priority: '0.8', changefreq: 'daily' },
       { url: '/highlights', priority: '0.8', changefreq: 'daily' },
@@ -71,6 +79,7 @@ serve(async (req) => {
     // Add game pages
     if (schedules) {
       for (const schedule of schedules) {
+        // match_at이 null일 경우 대비
         const lastmod = schedule.match_at ? schedule.match_at.split('T')[0] : today;
         const isCompleted = schedule.game_status === 'Game Finished';
         const changefreq = isCompleted ? 'monthly' : 'hourly';
@@ -105,6 +114,7 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/xml',
+        // 브라우저나 봇이 1시간 동안은 캐시하도록 설정 (부하 방지)
         'Cache-Control': 'public, max-age=3600',
       },
     });
