@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { useTeams } from "@/hooks/useTeams";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
-import { Check, Bell, ChevronRight, Globe, Trophy } from "lucide-react";
+import { Check, Bell, ChevronRight } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 
 const languages = [
@@ -26,7 +26,7 @@ const OnboardingDialog = () => {
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
 
   useEffect(() => {
-    // 로그인 상태이고, 온보딩이 완료되지 않았으면 모달 오픈
+    // Force open if logged in but onboarding incomplete
     if (user && !isOnboardingCompleted && profile) {
       setOpen(true);
       if (profile.favorite_team_id) {
@@ -39,7 +39,7 @@ const OnboardingDialog = () => {
 
   const handleLangSelect = (code: string) => {
     setSelectedLang(code);
-    i18n.changeLanguage(code);
+    i18n.changeLanguage(code); 
   };
 
   const handleNextStep1 = async () => {
@@ -51,40 +51,41 @@ const OnboardingDialog = () => {
     setSelectedTeamId(teamId);
   };
 
-  const handleNextStep2 = async () => {
+  const handleNextStep2 = () => {
+    // Do NOT update profile here, as it would complete onboarding prematurely
     if (selectedTeamId) {
-      await updateProfile({ favorite_team_id: selectedTeamId });
       setStep(3);
     }
   };
 
   const handleComplete = async () => {
-    // Request notification permission
+    // 1. Update Profile with Favorite Team (This completes onboarding on backend logic)
+    if (selectedTeamId) {
+       await updateProfile({ favorite_team_id: selectedTeamId });
+    }
+    
+    // 2. Request Notification Permission
     await requestPermission();
-    // Finish onboarding
-    setOpen(false); // AuthContext will eventually update isOnboardingCompleted state
+    
+    // 3. Close (Effect will also close when profile updates, but we can be explicit)
+    setOpen(false);
   };
 
   if (!user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={() => {
-        // Prevent closing if onboarding is needed? 
-        // Or allow close but remind later? 
-        // For now, allow close only if user clicks outside if we want, but shadcn Dialog doesn't easily lock.
-        // But we forced open based on state. If they close, state is still incomplete.
-    }}>
-      <DialogContent className="sm:max-w-md [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="sm:max-w-md [&>button]:hidden focus:outline-none" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-center text-xl">
-            {step === 1 && "Start Setup"}
-            {step === 2 && "Favorite Team"}
-            {step === 3 && "Stay Updated"}
+            {step === 1 && t('onboarding.step1Title', 'Start Setup')}
+            {step === 2 && t('onboarding.step2Title', 'Favorite Team')}
+            {step === 3 && t('onboarding.step3Title', 'Stay Updated')}
           </DialogTitle>
           <DialogDescription className="text-center">
-            {step === 1 && "Select your preferred language"}
-            {step === 2 && "Which team do you support?"}
-            {step === 3 && "Enable notifications for your team"}
+            {step === 1 && t('onboarding.step1Desc', 'Select your preferred language')}
+            {step === 2 && t('onboarding.step2Desc', 'Which team do you support?')}
+            {step === 3 && t('onboarding.step3Desc', 'Enable notifications for your team')}
           </DialogDescription>
         </DialogHeader>
 
@@ -107,48 +108,57 @@ const OnboardingDialog = () => {
                 </div>
               ))}
               <Button onClick={handleNextStep1} className="mt-4 w-full">
-                Next <ChevronRight className="ml-2 w-4 h-4" />
+                {t('onboarding.next', 'Next')} <ChevronRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
           )}
 
           {step === 2 && (
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+              {/* Show all teams in grid, no scroll */}
+              <div className="grid grid-cols-3 gap-3">
                 {teams?.map((team) => (
                   <div
                     key={team.id}
-                    className={`flex flex-col items-center p-3 rounded-lg border cursor-pointer transition-colors text-center ${
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer transition-all aspect-square ${
                       selectedTeamId === team.id
-                        ? 'border-primary bg-primary/10'
+                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
                         : 'border-border hover:bg-secondary/50'
                     }`}
                     onClick={() => handleTeamSelect(team.id)}
                   >
-                    <img src={team.logo} alt={team.name} className="w-12 h-12 mb-2 object-contain" />
-                    <span className="text-sm font-medium">{getLocalizedTeamName(team, i18n.language)}</span>
+                    <img src={team.logo} alt={team.name} className="w-10 h-10 mb-2 object-contain" />
+                    <span className="text-xs font-medium text-center leading-tight break-keep">
+                      {getLocalizedTeamName(team, i18n.language)}
+                    </span>
                   </div>
                 ))}
               </div>
               <Button onClick={handleNextStep2} disabled={!selectedTeamId} className="w-full">
-                Next <ChevronRight className="ml-2 w-4 h-4" />
+                {t('onboarding.next', 'Next')} <ChevronRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
           )}
 
           {step === 3 && (
             <div className="flex flex-col items-center gap-6 py-4">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-                <Bell className="w-8 h-8 text-primary" />
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                <Bell className="w-10 h-10 text-primary" />
               </div>
               <div className="text-center space-y-2">
-                <p className="font-medium text-lg">Get Match Alerts</p>
-                <p className="text-sm text-muted-foreground">
-                  Receive notifications when your favorite team starts a match or scores a goal.
+                <p className="font-medium text-lg text-primary">
+                  {/* Dynamic Team Name could be added here if we want */}
+                  {t('onboarding.step3Desc', 'Get Match Alerts')}
+                </p>
+                <p className="text-sm text-center text-muted-foreground px-4">
+                   {selectedTeamId && teams?.find(t => t.id === selectedTeamId) 
+                      ? `${getLocalizedTeamName(teams.find(t => t.id === selectedTeamId)!, i18n.language)} ` 
+                      : ''}
+                   {i18n.language === 'ko' ? '경기가 시작되거나 득점하면 알림을 보내드립니다.' : 'matches and goal alerts.'}
                 </p>
               </div>
-              <Button onClick={handleComplete} className="w-full">
-                Allow Notifications & Finish
+              <Button onClick={handleComplete} className="w-full h-12 text-base shadow-lg hover:shadow-xl transition-all">
+                {t('onboarding.step3Button', 'Allow Notifications & Finish')}
               </Button>
             </div>
           )}
@@ -159,7 +169,7 @@ const OnboardingDialog = () => {
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 rounded-full transition-colors ${
                 step >= s ? 'bg-primary' : 'bg-secondary'
               }`}
             />

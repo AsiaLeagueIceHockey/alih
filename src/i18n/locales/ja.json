@@ -257,5 +257,24 @@
         "step2": "「ホーム画面に追加」を選択",
         "step3": "「追加」をタップして完了",
         "confirm": "確認"
+    },
+    "auth": {
+        "login": "ログイン",
+        "loginTitle": "ログイン / 新規登録",
+        "google": "Googleで続ける",
+        "kakao": "Kakaoで続ける",
+        "myPage": "マイページ（準備中）",
+        "logout": "ログアウト",
+        "deleteAccount": "会員退会"
+    },
+    "onboarding": {
+        "step1Title": "設定開始",
+        "step1Desc": "希望の言語を選択してください",
+        "step2Title": "応援チーム選択",
+        "step2Desc": "どのチームを応援しますか？",
+        "step3Title": "通知設定",
+        "step3Desc": "応援チームの試合開始や得点情報を受け取りましょう",
+        "step3Button": "通知を許可して完了",
+        "next": "次へ"
     }
 }

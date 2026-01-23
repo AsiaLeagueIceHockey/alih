@@ -77,7 +77,7 @@ i18n
       ja: { translation: ja },
       en: { translation: en },
     },
-    fallbackLng: 'en',
+    fallbackLng: 'ko',
     supportedLngs: ['ko', 'ja', 'en'],
     interpolation: {
       escapeValue: false,
