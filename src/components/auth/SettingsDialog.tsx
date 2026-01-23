@@ -28,6 +28,8 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const favoriteTeams = teams?.filter(t => profile?.favorite_team_ids?.includes(t.id));
 
   useEffect(() => {
+    // If permission is denied or default, it's definitely off.
+    // If granted, we assume on (user has token). In a real app we might check if token exists in DB too.
     setIsNotifEnabled(permission === 'granted');
   }, [permission]);
 
@@ -97,7 +99,7 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             {/* Notifications */}
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-muted-foreground">
-                {i18n.language === 'ko' ? "알림 설정" : "Notifications"}
+                {t('onboarding.step3Title', 'Notification Settings')}
               </h3>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">

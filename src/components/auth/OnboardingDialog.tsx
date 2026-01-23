@@ -143,9 +143,14 @@ const OnboardingDialog = () => {
                   );
                 })}
               </div>
-              <Button onClick={handleNextStep2} disabled={selectedTeamIds.length === 0} className="w-full">
-                {t('onboarding.next', 'Next')} <ChevronRight className="ml-2 w-4 h-4" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                  {i18n.language === 'ko' ? '이전' : t('button.back', 'Back')}
+                </Button>
+                <Button onClick={handleNextStep2} disabled={selectedTeamIds.length === 0} className="flex-1">
+                  {t('onboarding.next', 'Next')} <ChevronRight className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
 
@@ -173,9 +178,14 @@ const OnboardingDialog = () => {
                    {i18n.language === 'ko' ? ' 경기가 시작되거나 득점하면 알림을 보내드립니다.' : ' matches and goal alerts.'}
                 </p>
               </div>
-              <Button onClick={handleComplete} className="w-full h-12 text-base shadow-lg hover:shadow-xl transition-all">
-                {t('onboarding.step3Button', 'Allow Notifications & Finish')}
-              </Button>
+              <div className="flex gap-2 w-full">
+                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                  {i18n.language === 'ko' ? '이전' : t('button.back', 'Back')}
+                </Button>
+                <Button onClick={handleComplete} className="flex-[2] h-12 text-base shadow-lg hover:shadow-xl transition-all">
+                  {t('onboarding.step3Button', 'Allow Notifications & Finish')}
+                </Button>
+              </div>
             </div>
           )}
         </div>

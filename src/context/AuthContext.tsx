@@ -113,6 +113,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       provider: 'google',
       options: {
         redirectTo: window.location.origin,
+        queryParams: {
+          prompt: 'select_account',
+        },
       },
     });
   };
@@ -122,6 +125,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       provider: 'kakao',
       options: {
         redirectTo: window.location.origin,
+        queryParams: {
+          prompt: 'login',
+        },
       },
     });
   };
