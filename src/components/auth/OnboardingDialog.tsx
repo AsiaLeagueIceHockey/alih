@@ -23,14 +23,14 @@ const OnboardingDialog = () => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedLang, setSelectedLang] = useState<string>(i18n.language);
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<number[]>([]);
 
   useEffect(() => {
     // Force open if logged in but onboarding incomplete
     if (user && !isOnboardingCompleted && profile) {
       setOpen(true);
-      if (profile.favorite_team_id) {
-        setSelectedTeamId(profile.favorite_team_id);
+      if (profile.favorite_team_ids) {
+        setSelectedTeamIds(profile.favorite_team_ids);
       }
     } else {
       setOpen(false);
@@ -47,27 +47,30 @@ const OnboardingDialog = () => {
     setStep(2);
   };
 
-  const handleTeamSelect = (teamId: number) => {
-    setSelectedTeamId(teamId);
+  const handleTeamToggle = (teamId: number) => {
+    setSelectedTeamIds(prev => 
+      prev.includes(teamId) 
+        ? prev.filter(id => id !== teamId) 
+        : [...prev, teamId]
+    );
   };
 
   const handleNextStep2 = () => {
-    // Do NOT update profile here, as it would complete onboarding prematurely
-    if (selectedTeamId) {
+    if (selectedTeamIds.length > 0) {
       setStep(3);
     }
   };
 
   const handleComplete = async () => {
-    // 1. Update Profile with Favorite Team (This completes onboarding on backend logic)
-    if (selectedTeamId) {
-       await updateProfile({ favorite_team_id: selectedTeamId });
+    // 1. Update Profile (This completes onboarding on backend logic)
+    if (selectedTeamIds.length > 0) {
+       await updateProfile({ favorite_team_ids: selectedTeamIds });
     }
     
     // 2. Request Notification Permission
     await requestPermission();
     
-    // 3. Close (Effect will also close when profile updates, but we can be explicit)
+    // 3. Close
     setOpen(false);
   };
 
@@ -115,26 +118,32 @@ const OnboardingDialog = () => {
 
           {step === 2 && (
             <div className="flex flex-col gap-4">
-              {/* Show all teams in grid, no scroll */}
+              <p className="text-center text-sm text-muted-foreground -mt-2 mb-2">
+                {i18n.language === 'ko' ? "응원하는 팀을 모두 선택해주세요!" : "Select all usage teams!"}
+              </p>
               <div className="grid grid-cols-3 gap-3">
-                {teams?.map((team) => (
-                  <div
-                    key={team.id}
-                    className={`flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer transition-all aspect-square ${
-                      selectedTeamId === team.id
-                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
-                        : 'border-border hover:bg-secondary/50'
-                    }`}
-                    onClick={() => handleTeamSelect(team.id)}
-                  >
-                    <img src={team.logo} alt={team.name} className="w-10 h-10 mb-2 object-contain" />
-                    <span className="text-xs font-medium text-center leading-tight break-keep">
-                      {getLocalizedTeamName(team, i18n.language)}
-                    </span>
-                  </div>
-                ))}
+                {teams?.map((team) => {
+                  const isSelected = selectedTeamIds.includes(team.id);
+                  return (
+                    <div
+                      key={team.id}
+                      className={`flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer transition-all aspect-square relative ${
+                        isSelected
+                          ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                          : 'border-border hover:bg-secondary/50'
+                      }`}
+                      onClick={() => handleTeamToggle(team.id)}
+                    >
+                      <img src={team.logo} alt={team.name} className="w-10 h-10 mb-2 object-contain" />
+                      <span className="text-xs font-medium text-center leading-tight break-keep">
+                        {getLocalizedTeamName(team, i18n.language)}
+                      </span>
+                      {isSelected && <Check className="absolute top-1 right-1 w-4 h-4 text-primary" />}
+                    </div>
+                  );
+                })}
               </div>
-              <Button onClick={handleNextStep2} disabled={!selectedTeamId} className="w-full">
+              <Button onClick={handleNextStep2} disabled={selectedTeamIds.length === 0} className="w-full">
                 {t('onboarding.next', 'Next')} <ChevronRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
@@ -147,14 +156,21 @@ const OnboardingDialog = () => {
               </div>
               <div className="text-center space-y-2">
                 <p className="font-medium text-lg text-primary">
-                  {/* Dynamic Team Name could be added here if we want */}
                   {t('onboarding.step3Desc', 'Get Match Alerts')}
                 </p>
                 <p className="text-sm text-center text-muted-foreground px-4">
-                   {selectedTeamId && teams?.find(t => t.id === selectedTeamId) 
-                      ? `${getLocalizedTeamName(teams.find(t => t.id === selectedTeamId)!, i18n.language)} ` 
-                      : ''}
-                   {i18n.language === 'ko' ? '경기가 시작되거나 득점하면 알림을 보내드립니다.' : 'matches and goal alerts.'}
+                   {selectedTeamIds.length > 0 && (
+                     <span className="font-medium text-foreground">
+                       {selectedTeamIds
+                         .map(id => {
+                           const team = teams?.find(t => t.id === id);
+                           return team ? getLocalizedTeamName(team, i18n.language) : '';
+                         })
+                         .filter(Boolean)
+                         .join(", ")}
+                     </span>
+                   )}
+                   {i18n.language === 'ko' ? ' 경기가 시작되거나 득점하면 알림을 보내드립니다.' : ' matches and goal alerts.'}
                 </p>
               </div>
               <Button onClick={handleComplete} className="w-full h-12 text-base shadow-lg hover:shadow-xl transition-all">

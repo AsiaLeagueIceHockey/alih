@@ -5,7 +5,7 @@ create table if not exists public.profiles (
   nickname text,
   avatar_url text,
   preferred_language text,
-  favorite_team_id bigint references public.alih_teams(id),
+  favorite_team_ids bigint[] default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -21,6 +21,9 @@ create policy "Users can update their own profile" on profiles
 
 create policy "Users can insert their own profile" on profiles 
   for insert with check (auth.uid() = id);
+
+create policy "Users can delete their own profile" on profiles 
+  for delete using (auth.uid() = id);
 
 -- Create notification_tokens table
 create table if not exists public.notification_tokens (
@@ -65,3 +68,19 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Migration: Add favorite_team_ids if not exists (for existing tables)
+do $$
+begin
+  if not exists (select 1 from information_schema.columns where table_name = 'profiles' and column_name = 'favorite_team_ids') then
+    alter table public.profiles add column favorite_team_ids bigint[] default '{}'::bigint[];
+  end if;
+end $$;
+
+-- Optional: Drop old column if it exists (warning: data loss if you care about old selection)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_name = 'profiles' and column_name = 'favorite_team_id') then
+    alter table public.profiles drop column favorite_team_id;
+  end if;
+end $$;

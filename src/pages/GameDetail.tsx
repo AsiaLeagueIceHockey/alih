@@ -446,7 +446,7 @@ const GameDetail = () => {
         />
 
         {/* 헤더 */}
-        <div className="bg-gradient-to-b from-primary/10 to-background pt-6 pb-4">
+        <div className="bg-gradient-to-b from-primary/10 to-background pt-[calc(1rem+env(safe-area-inset-top))] pb-4">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <div className="w-10" /> {/* Spacer */}

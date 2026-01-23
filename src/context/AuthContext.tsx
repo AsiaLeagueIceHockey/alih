@@ -9,7 +9,7 @@ export interface Profile {
   nickname: string | null;
   avatar_url: string | null;
   preferred_language: string | null;
-  favorite_team_id: number | null;
+  favorite_team_ids: number[] | null;
 }
 
 interface AuthContextType {
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           nickname: currentUser.user_metadata?.full_name ?? currentUser.user_metadata?.name ?? currentUser.email?.split('@')[0] ?? 'User',
           avatar_url: currentUser.user_metadata?.avatar_url ?? null,
           preferred_language: i18n.language,
-          favorite_team_id: null,
+          favorite_team_ids: [],
         };
         
         // Insert new profile
@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isOnboardingCompleted = !!(profile?.favorite_team_id);
+  const isOnboardingCompleted = !!(profile?.favorite_team_ids && profile.favorite_team_ids.length > 0);
 
   return (
     <AuthContext.Provider

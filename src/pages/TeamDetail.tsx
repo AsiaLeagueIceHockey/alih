@@ -291,7 +291,7 @@ const TeamDetail = () => {
 
       <div className="min-h-screen pb-20">
         {/* 헤더 & 팀 아이덴티티 */}
-        <div className="relative bg-gradient-to-b from-secondary/50 to-background">
+        <div className="relative bg-gradient-to-b from-secondary/50 to-background pt-[calc(1rem+env(safe-area-inset-top))]">
           <TeamHeader team={team} rank={currentRank} />
         </div>
 
