@@ -1,6 +1,6 @@
 {
-    "name": "아시아리그 아이스하키",
-    "short_name": "ALIH",
+    "name": "alhockey_fans",
+    "short_name": "alhockey_fans",
     "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 실시간 스코어, 하이라이트",
     "start_url": "https://alhockey.fans/",
     "display": "standalone",

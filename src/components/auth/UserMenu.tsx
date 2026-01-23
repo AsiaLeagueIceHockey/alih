@@ -53,7 +53,9 @@ const UserMenu = () => {
     i18n.changeLanguage(langCode);
   };
 
-  const nicknameInitial = profile?.nickname ? profile.nickname[0].toUpperCase() : user?.email?.[0].toUpperCase() || "U";
+  // Priority: Profile Nickname -> User Metadata Name -> Email -> "U"
+  const displayName = profile?.nickname || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || "User";
+  const nicknameInitial = displayName[0].toUpperCase();
   const currentLang = languages.find(lang => lang.code === i18n.language) || languages[0];
 
   if (!user) {
@@ -102,7 +104,7 @@ const UserMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9 border border-border/50">
-            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.nickname || "User"} />
+            <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
             <AvatarFallback>{nicknameInitial}</AvatarFallback>
           </Avatar>
         </Button>
@@ -110,7 +112,7 @@ const UserMenu = () => {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile?.nickname || "User"}</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground truncate">
               {profile?.email}
             </p>

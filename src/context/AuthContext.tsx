@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user);
       } else {
         setIsLoading(false);
       }
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user);
       } else {
         setProfile(null);
         setIsLoading(false);
@@ -61,12 +61,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (currentUser: User) => {
     try {
       const { data, error } = await externalSupabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', currentUser.id)
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116: no rows returned
@@ -81,11 +81,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } else {
         // 프로필이 없으면 생성 (기본값)
+        // Note: DB Trigger should handle this, but as a fallback/client-side fix:
+        const userId = currentUser.id;
         const newProfile: Profile = {
           id: userId,
-          email: user?.email ?? null,
-          nickname: user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'User',
-          avatar_url: user?.user_metadata?.avatar_url ?? null,
+          email: currentUser.email ?? null,
+          nickname: currentUser.user_metadata?.full_name ?? currentUser.user_metadata?.name ?? currentUser.email?.split('@')[0] ?? 'User',
+          avatar_url: currentUser.user_metadata?.avatar_url ?? null,
           preferred_language: i18n.language,
           favorite_team_id: null,
         };

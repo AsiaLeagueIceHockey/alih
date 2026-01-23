@@ -31,9 +31,9 @@ const BottomNav = () => {
             onClick={() => handleNavClick(to)}
             className="flex flex-col items-center justify-center flex-1 h-full text-muted-foreground transition-all duration-200 hover:text-primary"
             activeClassName="text-primary"
+            aria-label={t(labelKey)}
           >
-            <Icon className="w-5 h-5 mb-1" />
-            <span className="text-xs font-medium">{t(labelKey)}</span>
+            <Icon className="w-6 h-6" />
           </NavLink>
         ))}
       </div>
@@ -42,4 +42,3 @@ const BottomNav = () => {
 };
 
 export default BottomNav;
-
