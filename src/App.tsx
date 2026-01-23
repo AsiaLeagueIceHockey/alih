@@ -12,6 +12,8 @@ import BottomNav from "./components/BottomNav";
 import ScrollToTop from "./components/ScrollToTop";
 import InstallPrompt from "./components/install-prompt";
 import './i18n'; // i18n initialization
+import { AuthProvider } from "./context/AuthContext";
+import OnboardingDialog from "./components/auth/OnboardingDialog";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -88,7 +90,8 @@ const App = () => {
           },
         }}
       >
-        <TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -170,8 +173,10 @@ const App = () => {
             </Routes>
             <ConditionalInstallPrompt />
             <ConditionalBottomNav />
+            <OnboardingDialog />
           </BrowserRouter>
         </TooltipProvider>
+        </AuthProvider>
       </PersistQueryClientProvider>
     </HelmetProvider>
   );

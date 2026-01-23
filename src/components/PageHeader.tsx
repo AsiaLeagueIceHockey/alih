@@ -1,4 +1,4 @@
-import LanguageSwitcher from './LanguageSwitcher';
+import UserMenu from './auth/UserMenu';
 
 interface PageHeaderProps {
   title: string;
@@ -16,7 +16,7 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
               <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
             )}
           </div>
-          <LanguageSwitcher />
+          <UserMenu />
         </div>
       </div>
     </header>
