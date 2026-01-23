@@ -24,10 +24,15 @@ function urlBase64ToUint8Array(base64String: string) {
 export function useNotifications() {
   const { user } = useAuth();
   const [permission, setPermission] = useState<NotificationPermission>(
-    Notification.permission
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
 
   const requestPermission = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      console.warn('Notification API not supported in this environment');
+      return 'denied';
+    }
+
     try {
       const result = await Notification.requestPermission();
       setPermission(result);
