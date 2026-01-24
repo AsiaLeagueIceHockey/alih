@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-// deno-dom 버전을 고정(v0.1.38)하여 안정성 확보
+// deno-dom 버전 고정 (안정성)
 import { DOMParser, Element } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
-// [중요 수정] esm.sh 대신 npm: 스키마 사용 (Node 호환성 문제 해결)
+// npm:web-push 사용 (Node 호환성 해결)
 import webpush from "npm:web-push@3.6.3";
 
 // 1. Supabase 클라이언트 설정
@@ -45,67 +45,79 @@ const safeParseInt = (text: string | undefined | null): number | null => {
   return isNaN(num) ? null : num;
 };
 
-// 알림 전송 함수
+// 알림 전송 함수 (로그 강화됨)
 async function sendNotification(teamId: number | null, title: string, body: string, url: string) {
-  if (!teamId) return;
+  if (!teamId) {
+    console.log(`[PUSH] Skipped: Invalid teamId (null)`);
+    return;
+  }
+
+  console.log(`[PUSH] Preparing to send to Team ID ${teamId} | Title: "${title}"`);
 
   try {
-    // 1. 해당 팀을 구독한 유저들의 ID 조회
+    // 1. 구독자 조회
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('id')
       .contains('favorite_team_ids', [teamId]);
 
-    if (profileError || !profiles || profiles.length === 0) {
-      console.log(`No users found subscribing to team ${teamId}`);
+    if (profileError) {
+      console.error(`[PUSH] Error fetching profiles for team ${teamId}:`, profileError);
+      return;
+    }
+    if (!profiles || profiles.length === 0) {
+      console.log(`[PUSH] No subscribers found for team ${teamId}.`);
       return;
     }
 
     const userIds = profiles.map(p => p.id);
+    console.log(`[PUSH] Found ${userIds.length} subscribers for team ${teamId}. Fetching tokens...`);
 
-    // 2. 해당 유저들의 알림 토큰 조회
+    // 2. 토큰 조회
     const { data: tokens, error: tokenError } = await supabase
       .from('notification_tokens')
       .select('token')
       .in('user_id', userIds);
 
-    if (tokenError || !tokens || tokens.length === 0) {
-      console.log(`No tokens found for interested users.`);
+    if (tokenError) {
+      console.error(`[PUSH] Error fetching tokens:`, tokenError);
+      return;
+    }
+    if (!tokens || tokens.length === 0) {
+      console.log(`[PUSH] No active tokens found for these users.`);
       return;
     }
 
-    console.log(`Sending notification to ${tokens.length} devices for team ${teamId}...`);
+    console.log(`[PUSH] Sending to ${tokens.length} devices...`);
 
-    // 3. 알림 전송 (Promise.allSettled)
+    // 3. 알림 전송
     const notifications = tokens.map(async (t) => {
       try {
-        const pushSubscription = t.token; 
-        
-        await webpush.sendNotification(
-          pushSubscription,
-          JSON.stringify({
-            title,
-            body,
-            url, 
-          })
-        );
+        await webpush.sendNotification(t.token, JSON.stringify({ title, body, url }));
+        return { status: 'fulfilled' };
       } catch (error) {
-        console.error("Error sending push:", error);
-        // 필요 시 410 Gone 에러 처리(토큰 삭제) 로직 추가
+        // 410 Gone 등은 여기서 처리 가능
+        // console.error("Individual push error:", error); 
+        return { status: 'rejected', reason: error };
       }
     });
 
-    await Promise.allSettled(notifications);
-    console.log("Notifications sent.");
+    const results = await Promise.allSettled(notifications);
+    
+    // 결과 집계 로그
+    const successCount = results.filter(r => r.status === 'fulfilled').length;
+    const failCount = results.filter(r => r.status === 'rejected').length;
+
+    console.log(`[PUSH] Result for Team ${teamId}: ✅ Success: ${successCount}, ❌ Failed: ${failCount}`);
 
   } catch (err) {
-    console.error("Notification logic error:", err);
+    console.error(`[PUSH] Critical Logic Error:`, err);
   }
 }
 
 serve(async (req) => {
   try {
-    console.log("Starting Live Polling...");
+    console.log("--- Starting Live Polling ---");
 
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -119,24 +131,24 @@ serve(async (req) => {
       .gte("match_at", yesterday.toISOString())
       .lte("match_at", now.toISOString());
 
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+        console.error("[DB] Error fetching games:", fetchError);
+        throw fetchError;
+    }
 
-    // 종료된 게임 필터링
     const ongoingGames = (potentialGames || []).filter((game) => {
       const status = game.game_status ? game.game_status.toLowerCase() : "";
-      if (status.includes("finish") || status.includes("final") || status.includes("試合終了")) {
-        return false;
-      }
-      return true;
+      return !(status.includes("finish") || status.includes("final") || status.includes("試合終了"));
     });
 
     if (ongoingGames.length === 0) {
-      return new Response(JSON.stringify({ message: "No ongoing games to update." }), {
+      console.log("[INFO] No ongoing games found.");
+      return new Response(JSON.stringify({ message: "No ongoing games." }), {
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Found ${ongoingGames.length} active games.`);
+    console.log(`[INFO] Found ${ongoingGames.length} active games.`);
 
     const results = [];
 
@@ -146,13 +158,17 @@ serve(async (req) => {
     for (const game of ongoingGames) {
       const targetUrlId = (game.game_no ?? 0) + 20388;
       const targetUrl = `https://asiaicehockey.com/score/${targetUrlId}`;
-      console.log(`Fetching: ${targetUrl}`);
+      
+      console.log(`[GAME ${game.game_no}] Fetching URL: ${targetUrl}`);
 
       const response = await fetch(targetUrl);
       const htmlText = await response.text();
       const doc = new DOMParser().parseFromString(htmlText, "text/html");
 
-      if (!doc) continue;
+      if (!doc) {
+          console.warn(`[GAME ${game.game_no}] Failed to parse HTML.`);
+          continue;
+      }
 
       // --- A. 경기 시간 및 상태 텍스트 파싱 ---
       const statusNode = doc.querySelector(".uk-text-lighter.uk-text-right");
@@ -226,46 +242,46 @@ serve(async (req) => {
          gameStatus = "Game Finished"; 
       }
 
-      // --- [NOTIFICATION LOGIC] ---
+      // --- [STATE COMPARISON LOG] ---
       const oldStatus = game.game_status ?? "";
       const oldHomeScore = game.home_alih_team_score ?? 0;
       const oldAwayScore = game.away_alih_team_score ?? 0;
-      
+
+      console.log(`[GAME ${game.game_no}] State Compare: DB[${oldHomeScore}:${oldAwayScore} (${oldStatus})] vs Web[${homeScoreTotal}:${awayScoreTotal} (${gameStatus})]`);
+
       const isGameStart = (!oldStatus.includes("Live") && gameStatus.includes("Live"));
       const isGameEnd = (!oldStatus.includes("Finish") && gameStatus.includes("Game Finished"));
 
       // 1. 경기 시작 알림
       if (isGameStart) {
+        console.log(`[EVENT] Game Start Detected: Game ${game.game_no}`);
         const title = "🏒 경기 시작!";
         const body = `경기가 시작되었습니다!\n${game.match_place}`;
         await sendNotification(game.home_alih_team_id, title, body, `/schedule/${game.game_no}`);
         await sendNotification(game.away_alih_team_id, title, body, `/schedule/${game.game_no}`);
       }
 
-      // 2. 득점 알림 (Live 상태)
+      // 2. 득점 알림 (Live 상태 또는 종료 직후) - 점수 상승 시 무조건 발송
       if (gameStatus === "Live" || isGameEnd) { 
         // 홈팀 득점
         if (homeScoreTotal > oldHomeScore) {
-             const diff = homeScoreTotal - oldHomeScore;
-             if (diff === 1) { 
-                const title = "🚨 골!";
-                const body = `[HOME] 득점! 현재 스코어 ${homeScoreTotal} : ${awayScoreTotal}`;
-                await sendNotification(game.home_alih_team_id, title, body, `/schedule/${game.game_no}`);
-             }
+            console.log(`[EVENT] HOME Goal Detected: Game ${game.game_no} (${oldHomeScore} -> ${homeScoreTotal})`);
+            const title = "🚨 골!";
+            const body = `[HOME] 득점! 현재 스코어 ${homeScoreTotal} : ${awayScoreTotal}`;
+            await sendNotification(game.home_alih_team_id, title, body, `/schedule/${game.game_no}`);
         }
         // 원정팀 득점
         if (awayScoreTotal > oldAwayScore) {
-             const diff = awayScoreTotal - oldAwayScore;
-             if (diff === 1) {
-                const title = "🚨 골!";
-                const body = `[AWAY] 득점! 현재 스코어 ${homeScoreTotal} : ${awayScoreTotal}`;
-                await sendNotification(game.away_alih_team_id, title, body, `/schedule/${game.game_no}`);
-             }
+            console.log(`[EVENT] AWAY Goal Detected: Game ${game.game_no} (${oldAwayScore} -> ${awayScoreTotal})`);
+            const title = "🚨 골!";
+            const body = `[AWAY] 득점! 현재 스코어 ${homeScoreTotal} : ${awayScoreTotal}`;
+            await sendNotification(game.away_alih_team_id, title, body, `/schedule/${game.game_no}`);
         }
       }
 
       // 3. 경기 종료 알림
       if (isGameEnd) {
+         console.log(`[EVENT] Game Finished Detected: Game ${game.game_no}`);
          const title = "🏁 경기 종료";
          const body = `최종 스코어 ${homeScoreTotal} : ${awayScoreTotal}`;
          await sendNotification(game.home_alih_team_id, title, body, `/schedule/${game.game_no}`);
@@ -313,13 +329,12 @@ serve(async (req) => {
       }
       
       const shotsData: any = { "1p": { home: 0, away: 0 }, "2p": { home: 0, away: 0 }, "3p": { home: 0, away: 0 }, "ovt": { home: 0, away: 0 }, "pss": { home: 0, away: 0 }, "total": { home: 0, away: 0 }};
-      
       if (shotTable) {
          const shotRows = shotTable.querySelectorAll("tbody tr");
          for (const row of shotRows) {
             const th = (row as Element).querySelector("th"); 
             if (!th) continue;
-            const label = th.textContent.trim().toLowerCase(); // 1p, 2p, ...
+            const label = th.textContent.trim().toLowerCase();
             const cols = (row as Element).querySelectorAll("td");
             if (cols.length >= 2) {
                 const homeShot = safeParseInt(cols[0].textContent) ?? 0;
@@ -350,18 +365,21 @@ serve(async (req) => {
         .eq("id", game.id);
 
       if (updateError) {
-        console.error(`Error updating game ${game.id}:`, updateError);
+        console.error(`[DB] Error updating game ${game.id}:`, updateError);
       } else {
+         console.log(`[DB] Updated Game ${game.id} Successfully.`);
          results.push({ id: game.id, status: "Updated", score: `${homeScoreTotal}-${awayScoreTotal} (${gameStatus})` });
       }
     }
+
+    console.log("--- Polling Completed ---");
 
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" },
     });
 
   } catch (err: any) {
-    console.error(err);
+    console.error("[ERROR] Unhandled Exception:", err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 });
