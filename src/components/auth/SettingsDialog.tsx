@@ -18,7 +18,7 @@ interface SettingsDialogProps {
 const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const { user, profile, logout } = useAuth();
   const { t, i18n } = useTranslation();
-  const { permission, requestPermission } = useNotifications();
+  const { permission, requestPermission, refreshPermission } = useNotifications();
   const { data: teams } = useTeams();
 
   const [isNotifEnabled, setIsNotifEnabled] = useState(permission === 'granted');
@@ -26,6 +26,12 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
   // Filter favorite teams based on profile.favorite_team_ids array
   const favoriteTeams = teams?.filter(t => profile?.favorite_team_ids?.includes(t.id));
+
+  useEffect(() => {
+    if (open) {
+      refreshPermission();
+    }
+  }, [open, refreshPermission]);
 
   useEffect(() => {
     // If permission is denied or default, it's definitely off.

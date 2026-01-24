@@ -6,7 +6,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import BottomNav from "./components/BottomNav";
 import ScrollToTop from "./components/ScrollToTop";
@@ -14,6 +14,8 @@ import InstallPrompt from "./components/install-prompt";
 import './i18n'; // i18n initialization
 import { AuthProvider } from "./context/AuthContext";
 import OnboardingDialog from "./components/auth/OnboardingDialog";
+import { handleInAppBrowser } from "./utils/in-app";
+import InAppGuide from "./components/common/InAppGuide";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -75,6 +77,15 @@ const ConditionalInstallPrompt = () => {
 };
 
 const App = () => {
+  const [showInAppGuide, setShowInAppGuide] = useState(false);
+
+  useEffect(() => {
+    const { shouldShowGuide } = handleInAppBrowser();
+    if (shouldShowGuide) {
+      setShowInAppGuide(true);
+    }
+  }, []);
+
   return (
     <HelmetProvider>
       <PersistQueryClientProvider
@@ -174,6 +185,9 @@ const App = () => {
             <ConditionalInstallPrompt />
             <ConditionalBottomNav />
             <OnboardingDialog />
+            {showInAppGuide && (
+              <InAppGuide onClose={() => setShowInAppGuide(false)} />
+            )}
           </BrowserRouter>
         </TooltipProvider>
         </AuthProvider>

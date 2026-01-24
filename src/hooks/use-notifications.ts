@@ -97,8 +97,15 @@ export function useNotifications() {
 
 
 
+  const refreshPermission = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setPermission(Notification.permission);
+    }
+  };
+
   return {
     permission,
     requestPermission,
+    refreshPermission,
   };
 }
