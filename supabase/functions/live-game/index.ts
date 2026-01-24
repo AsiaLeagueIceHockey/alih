@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-// deno-dom 버전 고정 (안정성)
 import { DOMParser, Element } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
-// npm:web-push 사용 (Node 호환성 해결)
 import webpush from "npm:web-push@3.6.3";
 
 // 1. Supabase 클라이언트 설정
@@ -45,7 +43,7 @@ const safeParseInt = (text: string | undefined | null): number | null => {
   return isNaN(num) ? null : num;
 };
 
-// 알림 전송 함수 (로그 강화됨)
+// 알림 전송 함수
 async function sendNotification(teamId: number | null, title: string, body: string, url: string) {
   if (!teamId) {
     console.log(`[PUSH] Skipped: Invalid teamId (null)`);
@@ -55,7 +53,6 @@ async function sendNotification(teamId: number | null, title: string, body: stri
   console.log(`[PUSH] Preparing to send to Team ID ${teamId} | Title: "${title}"`);
 
   try {
-    // 1. 구독자 조회
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('id')
@@ -71,9 +68,8 @@ async function sendNotification(teamId: number | null, title: string, body: stri
     }
 
     const userIds = profiles.map(p => p.id);
-    console.log(`[PUSH] Found ${userIds.length} subscribers for team ${teamId}. Fetching tokens...`);
+    // console.log(`[PUSH] Found ${userIds.length} subscribers. Fetching tokens...`);
 
-    // 2. 토큰 조회
     const { data: tokens, error: tokenError } = await supabase
       .from('notification_tokens')
       .select('token')
@@ -90,23 +86,36 @@ async function sendNotification(teamId: number | null, title: string, body: stri
 
     console.log(`[PUSH] Sending to ${tokens.length} devices...`);
 
-    // 3. 알림 전송
-    const notifications = tokens.map(async (t) => {
-      try {
-        await webpush.sendNotification(t.token, JSON.stringify({ title, body, url }));
-        return { status: 'fulfilled' };
-      } catch (error) {
-        // 410 Gone 등은 여기서 처리 가능
-        // console.error("Individual push error:", error); 
-        return { status: 'rejected', reason: error };
-      }
+    const notifications = tokens.map((t) => {
+      // 토큰이 문자열이면 파싱 (text 컬럼 대응)
+      const subscription = typeof t.token === 'string' ? JSON.parse(t.token) : t.token;
+      return webpush.sendNotification(subscription, JSON.stringify({ title, body, url }));
     });
 
     const results = await Promise.allSettled(notifications);
-    
-    // 결과 집계 로그
-    const successCount = results.filter(r => r.status === 'fulfilled').length;
-    const failCount = results.filter(r => r.status === 'rejected').length;
+    const successCount = results.filter((r: PromiseSettledResult<void>) => r.status === 'fulfilled').length;
+    const failCount = results.filter((r: PromiseSettledResult<void>) => r.status === 'rejected').length;
+
+    // 실패한 케이스 상세 로깅
+    results.forEach((r: PromiseSettledResult<void>, idx: number) => {
+      if (r.status === 'rejected') {
+        const error = (r as PromiseRejectedResult).reason;
+        const statusCode = error?.statusCode || error?.status || 'unknown';
+        const errorBody = error?.body || error?.message || JSON.stringify(error);
+        const endpoint = tokens[idx]?.token?.endpoint || 
+          (typeof tokens[idx]?.token === 'string' ? JSON.parse(tokens[idx].token)?.endpoint : 'unknown');
+        
+        console.error(`[PUSH] ❌ Device ${idx} Failed:`);
+        console.error(`  - Status Code: ${statusCode}`);
+        console.error(`  - Error Body: ${errorBody}`);
+        console.error(`  - Endpoint: ${endpoint}`);
+        
+        // 410 Gone = 만료된 구독, 삭제 권장
+        if (statusCode === 410) {
+          console.warn(`  - ⚠️ Subscription expired (410 Gone). Consider removing this token.`);
+        }
+      }
+    });
 
     console.log(`[PUSH] Result for Team ${teamId}: ✅ Success: ${successCount}, ❌ Failed: ${failCount}`);
 
@@ -122,9 +131,6 @@ serve(async (req) => {
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    // ---------------------------------------------------------
-    // 3. 진행 중인 경기 조회
-    // ---------------------------------------------------------
     const { data: potentialGames, error: fetchError } = await supabase
       .from("alih_schedule")
       .select("*")
@@ -152,9 +158,6 @@ serve(async (req) => {
 
     const results = [];
 
-    // ---------------------------------------------------------
-    // 4. 각 경기별 Polling 및 파싱
-    // ---------------------------------------------------------
     for (const game of ongoingGames) {
       const targetUrlId = (game.game_no ?? 0) + 20388;
       const targetUrl = `https://asiaicehockey.com/score/${targetUrlId}`;
@@ -219,12 +222,14 @@ serve(async (req) => {
         periodScores["pss"] = parseSubRow(4);
       }
 
-      // --- 3 Period 20:00 종료 감지 로직 ---
+      // --- 3 Period 20:00 종료 감지 ---
       let endRegulationDetectedAt = game.live_data?.end_regulation_detected_at ?? null;
       const isThirdPeriodEnd = rawStatusText.includes("3 Period") && rawStatusText.includes("20:00");
       const isTied = homeScoreTotal === awayScoreTotal;
 
-      if (!gameStatus.toLowerCase().includes("finish") && !gameStatus.includes("試合終了")) {
+      const isStatusFinished = gameStatus.toLowerCase().includes("finish") || gameStatus.includes("試合終了") || gameStatus.toLowerCase().includes("final");
+
+      if (!isStatusFinished) {
         if (isThirdPeriodEnd && !isTied) {
             if (!endRegulationDetectedAt) {
                 endRegulationDetectedAt = new Date().toISOString();
@@ -238,19 +243,34 @@ serve(async (req) => {
             if (endRegulationDetectedAt) endRegulationDetectedAt = null;
         }
       }
-      if (gameStatus.toLowerCase().includes("game finished") || gameStatus.includes("試合終了")) {
+      
+      // 최종적으로 상태가 Finish인지 다시 확인 (위의 3분 대기 로직 결과 반영)
+      const isGameEndStatus = gameStatus.toLowerCase().includes("game finished") || gameStatus.includes("試合終了");
+      if (isGameEndStatus) {
          gameStatus = "Game Finished"; 
       }
 
-      // --- [STATE COMPARISON LOG] ---
+      // --- [NOTIFICATION LOGIC FIX] ---
       const oldStatus = game.game_status ?? "";
       const oldHomeScore = game.home_alih_team_score ?? 0;
       const oldAwayScore = game.away_alih_team_score ?? 0;
 
-      console.log(`[GAME ${game.game_no}] State Compare: DB[${oldHomeScore}:${oldAwayScore} (${oldStatus})] vs Web[${homeScoreTotal}:${awayScoreTotal} (${gameStatus})]`);
+      // "Live" 판단 로직 수정: 정확히 "Live"가 아니어도 Period, OVT 등이 포함되면 진행 중으로 간주
+      const isLiveActive = !isGameEndStatus && (
+          gameStatus === "Live" || 
+          gameStatus.includes("Period") || 
+          gameStatus.includes("OVT") || 
+          gameStatus.includes("PSS") ||
+          gameStatus.includes("GWS")
+      );
 
-      const isGameStart = (!oldStatus.includes("Live") && gameStatus.includes("Live"));
-      const isGameEnd = (!oldStatus.includes("Finish") && gameStatus.includes("Game Finished"));
+      console.log(`[GAME ${game.game_no}] Check: DB[${oldHomeScore}:${oldAwayScore} (${oldStatus})] vs Web[${homeScoreTotal}:${awayScoreTotal} (${gameStatus})] | LiveActive: ${isLiveActive}`);
+
+      // 경기 시작: 이전에는 Live 관련 문구가 없었는데, 지금 생겼을 때
+      const wasNotLive = !oldStatus.includes("Live") && !oldStatus.includes("Period") && !oldStatus.includes("OVT");
+      const isGameStart = wasNotLive && isLiveActive;
+      
+      const isGameEnd = (!oldStatus.includes("Finish") && isGameEndStatus);
 
       // 1. 경기 시작 알림
       if (isGameStart) {
@@ -261,8 +281,8 @@ serve(async (req) => {
         await sendNotification(game.away_alih_team_id, title, body, `/schedule/${game.game_no}`);
       }
 
-      // 2. 득점 알림 (Live 상태 또는 종료 직후) - 점수 상승 시 무조건 발송
-      if (gameStatus === "Live" || isGameEnd) { 
+      // 2. 득점 알림 (진행 중이거나, 막 종료되었을 때)
+      if (isLiveActive || isGameEnd) { 
         // 홈팀 득점
         if (homeScoreTotal > oldHomeScore) {
             console.log(`[EVENT] HOME Goal Detected: Game ${game.game_no} (${oldHomeScore} -> ${homeScoreTotal})`);
