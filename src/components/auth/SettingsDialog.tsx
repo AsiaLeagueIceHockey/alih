@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useTeams } from "@/hooks/useTeams";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
-import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2 } from "lucide-react";
+import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2, Pencil, Check, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { externalSupabase } from "@/lib/supabase-external";
 
@@ -16,16 +16,61 @@ interface SettingsDialogProps {
 }
 
 const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
-  const { user, profile, logout } = useAuth();
+  const { user, profile, logout, updateProfile } = useAuth();
   const { t, i18n } = useTranslation();
   const { permission, requestPermission, refreshPermission } = useNotifications();
   const { data: teams } = useTeams();
 
   const [isNotifEnabled, setIsNotifEnabled] = useState(permission === 'granted');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  // Team editing state
+  const [isEditingTeams, setIsEditingTeams] = useState(false);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<number[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Filter favorite teams based on profile.favorite_team_ids array
   const favoriteTeams = teams?.filter(t => profile?.favorite_team_ids?.includes(t.id));
+  
+  // Initialize selected teams when entering edit mode
+  const handleStartEditTeams = () => {
+    setSelectedTeamIds(profile?.favorite_team_ids || []);
+    setIsEditingTeams(true);
+  };
+  
+  // Toggle team selection
+  const handleTeamToggle = (teamId: number) => {
+    setSelectedTeamIds(prev => 
+      prev.includes(teamId)
+        ? prev.filter(id => id !== teamId)
+        : [...prev, teamId]
+    );
+  };
+  
+  // Save team changes
+  const handleSaveTeams = async () => {
+    if (selectedTeamIds.length === 0) {
+      alert(i18n.language === 'ko' ? "최소 1개 팀을 선택해주세요." : "Please select at least one team.");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      await updateProfile({ favorite_team_ids: selectedTeamIds });
+      setIsEditingTeams(false);
+    } catch (error) {
+      console.error("Error saving teams:", error);
+      alert(i18n.language === 'ko' ? "저장 중 오류가 발생했습니다." : "Error saving changes.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Cancel editing
+  const handleCancelEditTeams = () => {
+    setIsEditingTeams(false);
+    setSelectedTeamIds([]);
+  };
 
   useEffect(() => {
     if (open) {
@@ -135,24 +180,86 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
             {/* Favorite Team */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                {i18n.language === 'ko' ? "응원 팀" : "Favorite Team"}
-              </h3>
-              <div className="grid grid-cols-5 gap-2 p-3 border rounded-lg min-h-[60px]">
-                {favoriteTeams && favoriteTeams.length > 0 ? (
-                  favoriteTeams.map(team => (
-                     <div key={team.id} className="flex flex-col items-center justify-center gap-1" title={getLocalizedTeamName(team, i18n.language)}>
-                        <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
-                     </div>
-                  ))
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {i18n.language === 'ko' ? "응원 팀" : "Favorite Team"}
+                </h3>
+                {!isEditingTeams ? (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleStartEditTeams}
+                    className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Pencil className="w-3.5 h-3.5 mr-1" />
+                    {i18n.language === 'ko' ? "수정" : "Edit"}
+                  </Button>
                 ) : (
-                  <div className="col-span-5 flex items-center justify-center h-full">
-                     <span className="text-muted-foreground text-sm">
-                        {i18n.language === 'ko' ? "선택된 팀이 없습니다." : "No team selected."}
-                     </span>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleCancelEditTeams}
+                      className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={handleSaveTeams}
+                      disabled={isSaving || selectedTeamIds.length === 0}
+                      className="h-7 px-2"
+                    >
+                      <Check className="w-3.5 h-3.5 mr-1" />
+                      {i18n.language === 'ko' ? "저장" : "Save"}
+                    </Button>
                   </div>
                 )}
               </div>
+              
+              {!isEditingTeams ? (
+                // View mode - show selected teams
+                <div className="grid grid-cols-6 gap-2 p-3 border rounded-lg min-h-[60px]">
+                  {favoriteTeams && favoriteTeams.length > 0 ? (
+                    favoriteTeams.map(team => (
+                       <div key={team.id} className="flex flex-col items-center justify-center gap-1" title={getLocalizedTeamName(team, i18n.language)}>
+                          <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
+                       </div>
+                    ))
+                  ) : (
+                    <div className="col-span-6 flex items-center justify-center h-full">
+                       <span className="text-muted-foreground text-sm">
+                          {i18n.language === 'ko' ? "선택된 팀이 없습니다." : "No team selected."}
+                       </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Edit mode - show all teams with toggle
+                <div className="grid grid-cols-3 gap-2 p-3 border rounded-lg border-primary/50 bg-primary/5">
+                  {teams?.map((team) => {
+                    const isSelected = selectedTeamIds.includes(team.id);
+                    return (
+                      <div
+                        key={team.id}
+                        className={`flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer transition-all aspect-square relative ${
+                          isSelected
+                            ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                            : 'border-border hover:bg-secondary/50'
+                        }`}
+                        onClick={() => handleTeamToggle(team.id)}
+                      >
+                        <img src={team.logo} alt={team.name} className="w-8 h-8 mb-1 object-contain" />
+                        <span className="text-xs font-medium text-center leading-tight break-keep">
+                          {getLocalizedTeamName(team, i18n.language)}
+                        </span>
+                        {isSelected && <Check className="absolute top-1 right-1 w-4 h-4 text-primary" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <Separator />

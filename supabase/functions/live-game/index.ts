@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { DOMParser, Element } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
-import webpush from "https://esm.sh/web-push@3.6.3";
+// deno-dom 버전을 고정(v0.1.38)하여 안정성 확보
+import { DOMParser, Element } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+// [중요 수정] esm.sh 대신 npm: 스키마 사용 (Node 호환성 문제 해결)
+import webpush from "npm:web-push@3.6.3";
 
 // 1. Supabase 클라이언트 설정
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -48,8 +50,7 @@ async function sendNotification(teamId: number | null, title: string, body: stri
   if (!teamId) return;
 
   try {
-    // 1. 해당 팀을 구독(favorite_team_ids에 포함)한 유저들의 ID 조회
-    // array column contains check: favorite_team_ids @> {teamId}
+    // 1. 해당 팀을 구독한 유저들의 ID 조회
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('id')
@@ -79,19 +80,18 @@ async function sendNotification(teamId: number | null, title: string, body: stri
     const notifications = tokens.map(async (t) => {
       try {
         const pushSubscription = t.token; 
-        // token column stores the whole subscription object { endpoint, keys: { p256dh, auth } }
         
         await webpush.sendNotification(
           pushSubscription,
           JSON.stringify({
             title,
             body,
-            url, // service worker click handler will use this
+            url, 
           })
         );
       } catch (error) {
         console.error("Error sending push:", error);
-        // 410 Gone 등인 경우 토큰 삭제 로직 추가 가능
+        // 필요 시 410 Gone 에러 처리(토큰 삭제) 로직 추가
       }
     });
 
@@ -125,11 +125,6 @@ serve(async (req) => {
     const ongoingGames = (potentialGames || []).filter((game) => {
       const status = game.game_status ? game.game_status.toLowerCase() : "";
       if (status.includes("finish") || status.includes("final") || status.includes("試合終了")) {
-        // 이미 종료된 경기는 기본적으로 패스하지만,
-        // 종료 직후 상태 변경(Live -> Finish)을 위해 로직은 타야 할 수도 있음.
-        // 현재 로직은 '이미 DB가 Finish면 패스'인데, 만약 방금 Finish로 업데이트 해야 한다면 패스하면 안됨.
-        // 하지만 아래 로직들은 '스크래핑 결과'를 기준으로 DB를 업데이트 하므로,
-        // DB가 Finish라면 더 이상 스크래핑할 필요가 없다고 보는게, cron 주기상 맞을 수 있음.
         return false;
       }
       return true;
@@ -161,11 +156,10 @@ serve(async (req) => {
 
       // --- A. 경기 시간 및 상태 텍스트 파싱 ---
       const statusNode = doc.querySelector(".uk-text-lighter.uk-text-right");
-      let gameStatus = "Live"; // Default
+      let gameStatus = "Live"; 
       let rawStatusText = ""; 
 
       if (statusNode) {
-        // "3 Period, time 20:00. (Update : ...)"
         rawStatusText = statusNode.textContent.trim(); 
         gameStatus = rawStatusText.split("(")[0].trim();
       }
@@ -189,7 +183,7 @@ serve(async (req) => {
             homeScoreTotal = safeParseInt(totalHeaders[0].textContent) ?? 0;
             awayScoreTotal = safeParseInt(totalHeaders[1].textContent) ?? 0;
         }
-        // ... (Period detail parsing logic retained/abbreviated for brevity if mostly same) ...
+        
         const row0Cells = (scoreRows[0] as Element).querySelectorAll("td");
         if (row0Cells.length >= 4) {
              periodScores["1p"].home = safeParseInt(row0Cells[1].textContent);
@@ -209,7 +203,7 @@ serve(async (req) => {
         periodScores["pss"] = parseSubRow(4);
       }
 
-      // --- 3 Period 20:00 종료 감지 로직 (기존 유지) ---
+      // --- 3 Period 20:00 종료 감지 로직 ---
       let endRegulationDetectedAt = game.live_data?.end_regulation_detected_at ?? null;
       const isThirdPeriodEnd = rawStatusText.includes("3 Period") && rawStatusText.includes("20:00");
       const isTied = homeScoreTotal === awayScoreTotal;
@@ -233,34 +227,30 @@ serve(async (req) => {
       }
 
       // --- [NOTIFICATION LOGIC] ---
-      // 이전 상태와 비교
       const oldStatus = game.game_status ?? "";
       const oldHomeScore = game.home_alih_team_score ?? 0;
       const oldAwayScore = game.away_alih_team_score ?? 0;
       
-      const isGameStart = (!oldStatus.includes("Live") && gameStatus.includes("Live")); // Scheduled/Pending -> Live
-      const isGameEnd = (!oldStatus.includes("Finish") && gameStatus.includes("Game Finished")); // Live -> Finished
+      const isGameStart = (!oldStatus.includes("Live") && gameStatus.includes("Live"));
+      const isGameEnd = (!oldStatus.includes("Finish") && gameStatus.includes("Game Finished"));
 
       // 1. 경기 시작 알림
       if (isGameStart) {
         const title = "🏒 경기 시작!";
         const body = `경기가 시작되었습니다!\n${game.match_place}`;
-        // 홈팀, 원정팀 구독자에게 전송
         await sendNotification(game.home_alih_team_id, title, body, `/schedule/${game.game_no}`);
         await sendNotification(game.away_alih_team_id, title, body, `/schedule/${game.game_no}`);
       }
 
-      // 2. 득점 알림 (Live 상태일 때만)
+      // 2. 득점 알림 (Live 상태)
       if (gameStatus === "Live" || isGameEnd) { 
         // 홈팀 득점
         if (homeScoreTotal > oldHomeScore) {
              const diff = homeScoreTotal - oldHomeScore;
-             if (diff === 1) { // 1점씩 났을 때만 (대량 업데이트 방지)
+             if (diff === 1) { 
                 const title = "🚨 골!";
                 const body = `[HOME] 득점! 현재 스코어 ${homeScoreTotal} : ${awayScoreTotal}`;
                 await sendNotification(game.home_alih_team_id, title, body, `/schedule/${game.game_no}`);
-                // 원정팀 팬에게도 보낼지? -> 보통 자팀 득점만 받고 싶어할 수 있음. 일단 홈팬에게만.
-                // 혹은 '중요 경기'라면 양쪽 다. 기획상 '응원하는 팀' 알림이므로, 자팀 골만 보내는게 정석.
              }
         }
         // 원정팀 득점
@@ -282,16 +272,10 @@ serve(async (req) => {
          await sendNotification(game.away_alih_team_id, title, body, `/schedule/${game.game_no}`);
       }
 
-      // --- C, D (Event & Shots Parsing - 유지) ---
-      // (Simplified for brevity as they just update `live_data` object)
-      // ... [User's original parsing logic for events/shots] ...
-      // For creating the full file, I will include concise version or full if user wants. 
-      // Assuming I should keep the rest of code intact.
-      
+      // --- C. 이벤트 파싱 ---
       const eventRows = doc.querySelectorAll("div.uk-overflow-auto table.alh-table tbody tr");
       const events = [];
       for (const row of eventRows) {
-        // ... (original parsing logic)
         const cells = (row as Element).querySelectorAll("td");
         if (cells.length < 6) continue;
         const teamNameRaw = cells[0].textContent.trim();
@@ -301,29 +285,48 @@ serve(async (req) => {
         const assist2Raw = cells[4].textContent.trim();
         const goalType = cells[5].textContent.trim();
         const teamId = TEAM_NAME_MAP[teamNameRaw] || null;
-        const parsePlayerSimple = (raw: string) => { /*...*/ 
-            if (!raw) return null; const parts = raw.split("."); 
+        
+        const parsePlayerSimple = (raw: string) => { 
+            if (!raw) return null; 
+            const parts = raw.split("."); 
             if (parts.length > 1) return { name: parts[1].trim(), number: parseInt(parts[0], 10) };
             return { name: raw, number: null };
         };
-        events.push({ team_id: teamId, time, goal_type: goalType, scorer: parsePlayerSimple(goalRaw), assist1: parsePlayerSimple(assist1Raw), assist2: parsePlayerSimple(assist2Raw)});
+        events.push({ 
+            team_id: teamId, 
+            time, 
+            goal_type: goalType, 
+            scorer: parsePlayerSimple(goalRaw), 
+            assist1: parsePlayerSimple(assist1Raw), 
+            assist2: parsePlayerSimple(assist2Raw)
+        });
       }
 
-      // Shots logic...
+      // --- D. 슈팅 수 파싱 ---
       const headers = doc.querySelectorAll("h3.uk-text-center");
       let shotTable: Element | null = null;
-      for (const h of headers) { if (h.textContent.includes("シュート数")) { shotTable = h.parentElement?.nextElementSibling as Element; break; } }
+      for (const h of headers) { 
+        if (h.textContent.includes("シュート数")) { 
+            shotTable = h.parentElement?.nextElementSibling as Element; 
+            break; 
+        } 
+      }
+      
       const shotsData: any = { "1p": { home: 0, away: 0 }, "2p": { home: 0, away: 0 }, "3p": { home: 0, away: 0 }, "ovt": { home: 0, away: 0 }, "pss": { home: 0, away: 0 }, "total": { home: 0, away: 0 }};
+      
       if (shotTable) {
          const shotRows = shotTable.querySelectorAll("tbody tr");
          for (const row of shotRows) {
-            const th = (row as Element).querySelector("th"); if (!th) continue;
-            const label = th.textContent.trim().toLowerCase();
+            const th = (row as Element).querySelector("th"); 
+            if (!th) continue;
+            const label = th.textContent.trim().toLowerCase(); // 1p, 2p, ...
             const cols = (row as Element).querySelectorAll("td");
             if (cols.length >= 2) {
                 const homeShot = safeParseInt(cols[0].textContent) ?? 0;
                 const awayShot = safeParseInt(cols[1].textContent) ?? 0;
-                if (shotsData[label] !== undefined) shotsData[label] = { home: homeShot, away: awayShot };
+                if (shotsData[label] !== undefined) {
+                    shotsData[label] = { home: homeShot, away: awayShot };
+                }
             }
          }
       }
@@ -357,7 +360,7 @@ serve(async (req) => {
       headers: { "Content-Type": "application/json" },
     });
 
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
