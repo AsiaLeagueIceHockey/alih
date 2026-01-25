@@ -235,9 +235,7 @@ const Standings = () => {
                     {teamStandings?.map((standing) => (
                       <tr 
                         key={standing.rank} 
-                        className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${
-                          standing.team_id === 1 ? "bg-primary/5" : ""
-                        }`}
+                        className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
                       >
                         <td className="p-2 md:p-3 font-bold text-primary">{standing.rank}</td>
                         <td className="p-2 md:p-3 pr-4 md:pr-6">
