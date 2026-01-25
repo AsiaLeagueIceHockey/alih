@@ -2,10 +2,18 @@
     "name": "alhockey_fans",
     "short_name": "alhockey_fans",
     "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 실시간 스코어, 하이라이트",
-    "start_url": "https://alhockey.fans/",
+    "id": "alhockey-fans-pwa",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "portrait",
     "background_color": "#0a0a0a",
     "theme_color": "#0a0a0a",
+    "lang": "ko",
+    "categories": [
+        "sports"
+    ],
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "/favicon-48x48.png",
@@ -20,13 +28,20 @@
         {
             "src": "/favicon.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ]
 }
