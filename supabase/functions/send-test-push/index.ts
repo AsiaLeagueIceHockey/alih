@@ -112,7 +112,7 @@ serve(async (req) => {
     const notificationPayload = JSON.stringify({
       title: notificationTitle,
       body,
-      url: "/test/push"
+      url: "/"
     });
 
     // Send notifications

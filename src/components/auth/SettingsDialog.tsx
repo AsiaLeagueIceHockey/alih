@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useTeams } from "@/hooks/useTeams";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
-import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2, Pencil, Check, X } from "lucide-react";
+import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2, Pencil, Check, X, AlertCircle, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { externalSupabase } from "@/lib/supabase-external";
 
@@ -18,11 +18,11 @@ interface SettingsDialogProps {
 const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const { user, profile, logout, updateProfile } = useAuth();
   const { t, i18n } = useTranslation();
-  const { permission, requestPermission, refreshPermission } = useNotifications();
+  const { permission, hasToken, isCheckingToken, requestPermission, resubscribeToPush, refreshPermission, checkTokenInDb } = useNotifications();
   const { data: teams } = useTeams();
 
-  const [isNotifEnabled, setIsNotifEnabled] = useState(permission === 'granted');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isResubscribing, setIsResubscribing] = useState(false);
   
   // Team editing state
   const [isEditingTeams, setIsEditingTeams] = useState(false);
@@ -75,22 +75,36 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   useEffect(() => {
     if (open) {
       refreshPermission();
+      checkTokenInDb();
     }
-  }, [open, refreshPermission]);
+  }, [open, refreshPermission, checkTokenInDb]);
 
-  useEffect(() => {
-    // If permission is denied or default, it's definitely off.
-    // If granted, we assume on (user has token). In a real app we might check if token exists in DB too.
-    setIsNotifEnabled(permission === 'granted');
-  }, [permission]);
+  // 알림 상태 계산: 권한 있고 + DB에 토큰 있어야 진정한 활성화
+  const isFullyEnabled = permission === 'granted' && hasToken === true;
+  const needsResubscribe = permission === 'granted' && hasToken === false;
 
   const handleEnableNotifications = async () => {
     const result = await requestPermission();
     if (result === 'granted') {
-      setIsNotifEnabled(true);
       alert(i18n.language === 'ko' ? "알림이 설정되었습니다." : "Notifications enabled.");
     } else if (result === 'denied') {
       alert(i18n.language === 'ko' ? "알림 권한이 차단되어 있습니다. 브라우저 설정에서 허용해주세요." : "Notifications blocked. Please enable in browser settings.");
+    } else if (result === 'error') {
+      alert(i18n.language === 'ko' ? "알림 설정 중 오류가 발생했습니다. 다시 시도해주세요." : "Error enabling notifications. Please try again.");
+    }
+  };
+
+  const handleResubscribe = async () => {
+    setIsResubscribing(true);
+    try {
+      const result = await resubscribeToPush();
+      if (result === 'granted') {
+        alert(i18n.language === 'ko' ? "알림이 재설정되었습니다." : "Notifications re-enabled.");
+      } else {
+        alert(i18n.language === 'ko' ? "알림 재설정 중 오류가 발생했습니다." : "Error re-enabling notifications.");
+      }
+    } finally {
+      setIsResubscribing(false);
     }
   };
 
@@ -154,8 +168,12 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               </h3>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  {isNotifEnabled ? (
+                  {isCheckingToken ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  ) : isFullyEnabled ? (
                     <Bell className="w-5 h-5 text-primary" />
+                  ) : needsResubscribe ? (
+                    <AlertCircle className="w-5 h-5 text-amber-500" />
                   ) : (
                     <BellOff className="w-5 h-5 text-muted-foreground" />
                   )}
@@ -164,13 +182,24 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
                       {i18n.language === 'ko' ? "경기 알림" : "Match Alerts"}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {isNotifEnabled 
-                        ? (i18n.language === 'ko' ? "알림을 받고 있습니다." : "Notifications enabled.")
-                        : (i18n.language === 'ko' ? "알림이 꺼져 있습니다." : "Notifications disabled.")}
+                      {isCheckingToken 
+                        ? (i18n.language === 'ko' ? "확인 중..." : "Checking...")
+                        : isFullyEnabled 
+                          ? (i18n.language === 'ko' ? "알림을 받고 있습니다." : "Notifications enabled.")
+                          : needsResubscribe
+                            ? (i18n.language === 'ko' ? "알림 재설정이 필요합니다." : "Re-registration required.")
+                            : (i18n.language === 'ko' ? "알림이 꺼져 있습니다." : "Notifications disabled.")}
                     </span>
                   </div>
                 </div>
-                {!isNotifEnabled && (
+                {!isCheckingToken && needsResubscribe && (
+                  <Button size="sm" onClick={handleResubscribe} disabled={isResubscribing}>
+                    {isResubscribing 
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : (i18n.language === 'ko' ? "재설정" : "Re-enable")}
+                  </Button>
+                )}
+                {!isCheckingToken && !isFullyEnabled && !needsResubscribe && (
                   <Button size="sm" onClick={handleEnableNotifications}>
                     {i18n.language === 'ko' ? "켜기" : "Enable"}
                   </Button>

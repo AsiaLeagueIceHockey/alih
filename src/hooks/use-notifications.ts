@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { externalSupabase } from '@/lib/supabase-external';
 import { useAuth } from '@/context/AuthContext';
 
@@ -26,26 +26,47 @@ export function useNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
+  const [hasToken, setHasToken] = useState<boolean | null>(null); // null = loading
+  const [isCheckingToken, setIsCheckingToken] = useState(false);
 
-  const requestPermission = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      console.warn('Notification API not supported in this environment');
-      return 'denied';
+  // DB에서 토큰 존재 여부 확인
+  const checkTokenInDb = useCallback(async () => {
+    if (!user) {
+      setHasToken(null);
+      return;
     }
 
+    setIsCheckingToken(true);
     try {
-      const result = await Notification.requestPermission();
-      setPermission(result);
-      if (result === 'granted') {
-        const subResult = await subscribeToPush();
-        return subResult ? 'granted' : 'error';
+      const { data, error } = await externalSupabase
+        .from('notification_tokens')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking token:', error);
+        setHasToken(false);
+        return;
       }
-      return result;
+
+      setHasToken(data && data.length > 0);
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
-      return 'denied';
+      console.error('Error checking token:', error);
+      setHasToken(false);
+    } finally {
+      setIsCheckingToken(false);
     }
-  };
+  }, [user]);
+
+  // 사용자가 로그인되면 토큰 확인
+  useEffect(() => {
+    if (user) {
+      checkTokenInDb();
+    } else {
+      setHasToken(null);
+    }
+  }, [user, checkTokenInDb]);
 
   const subscribeToPush = async () => {
     if (!user) return false;
@@ -78,7 +99,6 @@ export function useNotifications() {
           user_id: user.id,
           token: subscription.toJSON(), // Stores endpoint, keys
           platform: 'web',
-          // removing updated_at if not in table or ensuring we have created_at default
         }, { onConflict: 'user_id, token' });
 
       if (error) {
@@ -86,6 +106,7 @@ export function useNotifications() {
         return false;
       } else {
         console.log('Notification token saved!');
+        setHasToken(true); // 토큰 저장 성공 시 상태 업데이트
         return true;
       }
 
@@ -95,7 +116,40 @@ export function useNotifications() {
     }
   };
 
+  const requestPermission = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      console.warn('Notification API not supported in this environment');
+      return 'denied';
+    }
 
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      if (result === 'granted') {
+        const subResult = await subscribeToPush();
+        return subResult ? 'granted' : 'error';
+      }
+      return result;
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      return 'denied';
+    }
+  };
+
+  // 권한은 있지만 토큰이 없는 경우 재등록
+  const resubscribeToPush = async () => {
+    if (permission !== 'granted') {
+      // 권한이 없으면 먼저 권한 요청
+      return await requestPermission();
+    }
+    
+    // 권한이 있으면 바로 구독
+    const result = await subscribeToPush();
+    if (result) {
+      return 'granted';
+    }
+    return 'error';
+  };
 
   const refreshPermission = () => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -105,7 +159,11 @@ export function useNotifications() {
 
   return {
     permission,
+    hasToken,
+    isCheckingToken,
     requestPermission,
+    resubscribeToPush,
     refreshPermission,
+    checkTokenInDb,
   };
 }
