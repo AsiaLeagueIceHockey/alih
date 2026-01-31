@@ -52,26 +52,44 @@ const PushTestPage = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        // Get all notification tokens with user info
-        const { data, error } = await externalSupabase
+        // Step 1: Get all notification tokens
+        const { data: tokenData, error: tokenError } = await externalSupabase
           .from('notification_tokens')
-          .select(`
-            user_id,
-            created_at,
-            profiles!inner(id, nickname, email, preferred_language, favorite_team_ids)
-          `)
+          .select('user_id, created_at')
           .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching users:', error);
+        if (tokenError) {
+          console.error('Error fetching tokens:', tokenError);
           return;
         }
 
-        // Group by user and count tokens
+        if (!tokenData || tokenData.length === 0) {
+          setUsers([]);
+          return;
+        }
+
+        // Get unique user IDs
+        const userIds = [...new Set(tokenData.map(t => t.user_id))];
+
+        // Step 2: Get profiles for these users
+        const { data: profileData, error: profileError } = await externalSupabase
+          .from('profiles')
+          .select('id, nickname, email, preferred_language, favorite_team_ids')
+          .in('id', userIds);
+
+        if (profileError) {
+          console.error('Error fetching profiles:', profileError);
+          return;
+        }
+
+        // Create profile lookup map
+        const profileMap = new Map(profileData?.map(p => [p.id, p]) || []);
+
+        // Group tokens by user and count
         const userMap = new Map<string, NotificationUser>();
         
-        data?.forEach((item: any) => {
-          const profile = item.profiles;
+        tokenData.forEach((token) => {
+          const profile = profileMap.get(token.user_id);
           if (!profile) return;
           
           if (userMap.has(profile.id)) {
@@ -85,7 +103,7 @@ const PushTestPage = () => {
               preferred_language: profile.preferred_language,
               favorite_team_ids: profile.favorite_team_ids,
               token_count: 1,
-              token_created_at: item.created_at
+              token_created_at: token.created_at
             });
           }
         });
