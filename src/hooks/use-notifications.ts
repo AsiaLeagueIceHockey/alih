@@ -57,16 +57,18 @@ export function useNotifications() {
     } finally {
       setIsCheckingToken(false);
     }
-  }, [user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // user.id만 dependency로 사용하여 불필요한 재생성 방지
 
-  // 사용자가 로그인되면 토큰 확인
+  // 사용자가 로그인되면 토큰 확인 (최초 1회)
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       checkTokenInDb();
     } else {
       setHasToken(null);
     }
-  }, [user, checkTokenInDb]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // checkTokenInDb 제거하여 무한 루프 방지
 
   const subscribeToPush = async () => {
     if (!user) return false;

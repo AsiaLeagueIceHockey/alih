@@ -77,7 +77,8 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       refreshPermission();
       checkTokenInDb();
     }
-  }, [open, refreshPermission, checkTokenInDb]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]); // refreshPermission, checkTokenInDb 제거하여 무한 루프 방지
 
   // 알림 상태 계산: 권한 있고 + DB에 토큰 있어야 진정한 활성화
   const isFullyEnabled = permission === 'granted' && hasToken === true;
