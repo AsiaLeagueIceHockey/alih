@@ -32,6 +32,7 @@ const InstagramGoals = lazy(() => import("./pages/InstagramGoals"));
 const InstagramWeeklyStats = lazy(() => import("./pages/InstagramWeeklyStats"));
 const InstagramStandings = lazy(() => import("./pages/InstagramStandings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const PushTestPage = lazy(() => import("./pages/PushTestPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -174,6 +175,12 @@ const App = () => {
               <Route path="/news" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <News />
+                </Suspense>
+              } />
+              {/* 테스트 페이지 */}
+              <Route path="/test/push" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <PushTestPage />
                 </Suspense>
               } />
               <Route path="*" element={
