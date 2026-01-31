@@ -108,9 +108,9 @@ function getNotificationMessage(
       en: { title: '🏒 Game Started!', body: `${data.homeTeam} vs ${data.awayTeam}\n${data.venue || 'Venue'}` }
     },
     goal: {
-      ko: { title: '🚨 골!', body: `${data.scoringTeam} 득점!\n현재 ${data.homeScore} : ${data.awayScore}` },
-      ja: { title: '🚨 ゴール!', body: `${data.scoringTeam} 得点!\n現在 ${data.homeScore} : ${data.awayScore}` },
-      en: { title: '🚨 Goal!', body: `${data.scoringTeam} scores!\nCurrent ${data.homeScore} : ${data.awayScore}` }
+      ko: { title: '🚨 골!', body: `${data.scoringTeam} 득점!\n${data.homeTeam} ${data.homeScore} : ${data.awayScore} ${data.awayTeam}` },
+      ja: { title: '🚨 ゴール!', body: `${data.scoringTeam} 得点!\n${data.homeTeam} ${data.homeScore} : ${data.awayScore} ${data.awayTeam}` },
+      en: { title: '🚨 Goal!', body: `${data.scoringTeam} scores!\n${data.homeTeam} ${data.homeScore} : ${data.awayScore} ${data.awayTeam}` }
     },
     game_end: {
       ko: { title: '🏁 경기 종료', body: `${data.homeTeam} ${data.homeScore} : ${data.awayScore} ${data.awayTeam}` },
@@ -197,7 +197,8 @@ async function sendMatchNotification(
         scoringTeam: messageData.scoringTeam?.[langKey] || messageData.scoringTeam?.ko,
         homeScore: messageData.homeScore,
         awayScore: messageData.awayScore,
-        venue: messageData.venue
+        venue: messageData.venue,
+        time: messageData.time
       });
       
       let subscription = t.token;
@@ -272,9 +273,15 @@ serve(async (req) => {
           );
 
           // reminder_sent 플래그 업데이트
-          // [중요] 기존 live_data를 유지하면서 병합
+          // [중요] 최신 live_data를 재조회하여 병합 (race condition 방지)
+          const { data: freshGame } = await supabase
+            .from("alih_schedule")
+            .select("live_data")
+            .eq("id", upcomingGame.id)
+            .single();
+
           const updatedLiveData = {
-            ...(upcomingGame.live_data || {}),
+            ...(freshGame?.live_data || {}),
             reminder_sent: true,
             reminder_sent_at: new Date().toISOString()
           };
@@ -311,7 +318,13 @@ serve(async (req) => {
 
     const ongoingGames = (potentialGames || []).filter((game) => {
       const status = game.game_status ? game.game_status.toLowerCase() : "";
-      return !(status.includes("finish") || status.includes("final") || status.includes("試合終了"));
+      const isFinished = status.includes("finish") || status.includes("final") || status.includes("試合終了");
+      
+      // 경기 시작 시간이 아직 안 된 경기는 제외 (리마인더 대상과의 충돌 방지)
+      const matchStart = new Date(game.match_at);
+      const isNotStartedYet = matchStart > now;
+      
+      return !isFinished && !isNotStartedYet;
     });
 
     if (ongoingGames.length === 0) {
