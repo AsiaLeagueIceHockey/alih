@@ -32,7 +32,10 @@ const InstagramGoals = lazy(() => import("./pages/InstagramGoals"));
 const InstagramWeeklyStats = lazy(() => import("./pages/InstagramWeeklyStats"));
 const InstagramStandings = lazy(() => import("./pages/InstagramStandings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const PushTestPage = lazy(() => import("./pages/PushTestPage"));
+
+// Admin pages
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const AdminPushTest = lazy(() => import("./pages/AdminPushTest"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,21 +60,19 @@ const LoadingFallback = () => (
   </div>
 );
 
-// BottomNav를 조건부로 표시하는 컴포넌트
 const ConditionalBottomNav = () => {
   const location = useLocation();
-  // 인스타그램 경로에서는 BottomNav 숨김
-  if (location.pathname.startsWith('/instagram')) {
+  // 인스타그램 및 어드민 경로에서는 BottomNav 숨김
+  if (location.pathname.startsWith('/instagram') || location.pathname.startsWith('/admin')) {
     return null;
   }
   return <BottomNav />;
 };
 
-// InstallPrompt를 조건부로 표시하는 컴포넌트
 const ConditionalInstallPrompt = () => {
   const location = useLocation();
-  // 인스타그램 경로에서는 InstallPrompt 숨김
-  if (location.pathname.startsWith('/instagram')) {
+  // 인스타그램 및 어드민 경로에서는 InstallPrompt 숨김
+  if (location.pathname.startsWith('/instagram') || location.pathname.startsWith('/admin')) {
     return null;
   }
   return <InstallPrompt />;
@@ -177,10 +178,12 @@ const App = () => {
                   <News />
                 </Suspense>
               } />
-              {/* 테스트 페이지 */}
-              <Route path="/test/push" element={
+              {/* 어드민 페이지 */}
+              <Route path="/admin/test-push" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <PushTestPage />
+                  <AdminLayout>
+                    <AdminPushTest />
+                  </AdminLayout>
                 </Suspense>
               } />
               <Route path="*" element={

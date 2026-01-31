@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { externalSupabase } from '@/lib/supabase-external';
-import { useAuth } from '@/context/AuthContext';
 import { useTeams } from '@/hooks/useTeams';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Bell, User, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, Send, Bell, User, CheckCircle2, XCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
 
 interface NotificationUser {
@@ -34,9 +31,7 @@ interface SendResult {
   details?: any[];
 }
 
-const PushTestPage = () => {
-  const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+const AdminPushTest = () => {
   const { data: teams } = useTeams();
   
   const [users, setUsers] = useState<NotificationUser[]>([]);
@@ -47,70 +42,35 @@ const PushTestPage = () => {
   const [sending, setSending] = useState(false);
   const [results, setResults] = useState<SendResult[]>([]);
 
-  // Fetch users with notification tokens
+  // Fetch users with notification tokens (via Edge Function to bypass RLS)
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        // Step 1: Get all notification tokens
-        const { data: tokenData, error: tokenError } = await externalSupabase
-          .from('notification_tokens')
-          .select('user_id, created_at')
-          .order('created_at', { ascending: false });
+        // Edge Function 호출 (service_role key로 RLS 우회)
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-list-notification-users`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            }
+          }
+        );
 
-        if (tokenError) {
-          console.error('Error fetching tokens:', tokenError);
-          return;
-        }
-
-        if (!tokenData || tokenData.length === 0) {
+        const result = await response.json();
+        
+        if (!result.success) {
+          console.error('Error fetching users:', result.error);
           setUsers([]);
           return;
         }
 
-        // Get unique user IDs
-        const userIds = [...new Set(tokenData.map(t => t.user_id))];
-
-        // Step 2: Get profiles for these users
-        const { data: profileData, error: profileError } = await externalSupabase
-          .from('profiles')
-          .select('id, nickname, email, preferred_language, favorite_team_ids')
-          .in('id', userIds);
-
-        if (profileError) {
-          console.error('Error fetching profiles:', profileError);
-          return;
-        }
-
-        // Create profile lookup map
-        const profileMap = new Map(profileData?.map(p => [p.id, p]) || []);
-
-        // Group tokens by user and count
-        const userMap = new Map<string, NotificationUser>();
-        
-        tokenData.forEach((token) => {
-          const profile = profileMap.get(token.user_id);
-          if (!profile) return;
-          
-          if (userMap.has(profile.id)) {
-            const existing = userMap.get(profile.id)!;
-            existing.token_count++;
-          } else {
-            userMap.set(profile.id, {
-              id: profile.id,
-              nickname: profile.nickname,
-              email: profile.email,
-              preferred_language: profile.preferred_language,
-              favorite_team_ids: profile.favorite_team_ids,
-              token_count: 1,
-              token_created_at: token.created_at
-            });
-          }
-        });
-
-        setUsers(Array.from(userMap.values()));
+        setUsers(result.users || []);
       } catch (err) {
         console.error('Error:', err);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
@@ -187,20 +147,6 @@ const PushTestPage = () => {
       setSending(false);
     }
   };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
-            <p className="text-lg font-medium">로그인이 필요합니다</p>
-            <p className="text-muted-foreground mt-2">테스트 푸시 페이지에 접근하려면 먼저 로그인해주세요.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -389,4 +335,4 @@ const PushTestPage = () => {
   );
 };
 
-export default PushTestPage;
+export default AdminPushTest;
