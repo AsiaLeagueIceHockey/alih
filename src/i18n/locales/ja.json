@@ -34,6 +34,9 @@
             "liveGame": "ライブ試合",
             "gameInfo": "試合情報",
             "gameResult": "試合結果"
+        },
+        "players": {
+            "subtitle": "2025-26シーズン選手"
         }
     },
     "game": {
@@ -276,5 +279,12 @@
         "step3Desc": "応援チームの試合開始や得点情報を受け取りましょう",
         "step3Button": "通知を許可して完了",
         "next": "次へ"
+    },
+    "search": {
+        "placeholder": "選手名、または背番号で検索..."
+    },
+    "players": {
+        "count": "名の選手",
+        "sortedByName": "名前順"
     }
 }

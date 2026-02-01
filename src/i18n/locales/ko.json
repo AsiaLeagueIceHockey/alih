@@ -36,6 +36,9 @@
             "liveGame": "실시간 경기",
             "gameInfo": "경기 정보",
             "gameResult": "경기 결과"
+        },
+        "players": {
+            "subtitle": "2025-26 시즌 선수"
         }
     },
     "game": {

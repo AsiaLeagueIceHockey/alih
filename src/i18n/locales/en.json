@@ -36,6 +36,9 @@
             "liveGame": "Live Game",
             "gameInfo": "Game Info",
             "gameResult": "Game Result"
+        },
+        "players": {
+            "subtitle": "2025-26 Season Players"
         }
     },
     "game": {

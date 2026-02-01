@@ -97,7 +97,7 @@ const Players = () => {
       />
       <PageHeader 
         title={t('nav.players', 'Players')} 
-        subtitle={t('section.keyPlayers', 'Key Players')} 
+        subtitle={t('page.players.subtitle', '2025-26 Season Players')} 
       />
 
       <div className="container mx-auto px-4">
