@@ -109,6 +109,7 @@ supabase/functions/
 | `v1_base_schema.sql` | profiles, notification_tokens, alih_cheers | ✅ 적용됨 |
 | `v2_comments.sql` | alih_comments (댓글) | ✅ 적용됨 |
 | `v3_fix_rls_policies.sql` | RLS 수정 (댓글 삭제, 프로필 공개) | ⚠️ **실행 필요** |
+| `v4_player_profile.sql` | 선수 프로필 확장 + player_cards | ⚠️ **실행 필요** |
 
 **실행 방법:**
 1. Supabase Dashboard → SQL Editor
@@ -161,6 +162,13 @@ supabase/functions/
 - OAuth 로그인 시 실명 대신 커스텀 닉네임 설정 가능
 - 마이페이지 → 닉네임 옆 연필 아이콘으로 수정
 - 2~20자 제한, 즉시 반영
+
+### 5.8 선수 포트폴리오 페이지 ⭐ NEW
+- **경로**: `/player/:playerId` (포트폴리오), `/player/:playerId/card` (디지털 카드)
+- **구성**: Hero Section, Stats Dashboard, Bio/Story, Career History, 댓글
+- **디지털 카드**: 발급 후 PNG 다운로드/공유, 후원 모달
+- **후원**: 한국어 → 카카오페이, 영어/일어 → Buy Me a Coffee
+- **DB**: `player_cards` 테이블, serial_number 자동 발급
 
 ---
 
@@ -257,6 +265,8 @@ supabase functions deploy admin-list-notification-users
 | `/schedule/:gameNo` | GameDetail | 경기 상세 |
 | `/team/:teamId` | TeamDetail | 팀 상세 |
 | `/roster/:teamId` | TeamRoster | 팀 선수단 |
+| `/player/:playerId` | PlayerDetail | 선수 포트폴리오 ⭐ NEW |
+| `/player/:playerId/card` | PlayerCard | 디지털 선수 카드 ⭐ NEW |
 | `/highlights` | Highlights | 하이라이트 영상 |
 | `/standings` | Standings | 팀/개인 순위 |
 | `/news` | News | 뉴스 목록 |
@@ -339,6 +349,8 @@ CREATE POLICY "Users can delete own comments" ON alih_comments
 
 | 날짜 | 변경 내용 |
 |------|----------|
+| 2026-02-01 | 긴급: 경기 상세 크래시 및 푸시 알림 시간대(KST) 수정 🚨 |
+| 2026-02-01 | 선수 포트폴리오 & 디지털 카드 기능 추가 ⭐ |
 | 2026-02-01 | 마이페이지 닉네임 수정 기능 추가 ⭐ |
 | 2026-02-01 | v3 RLS 정책 수정 (댓글 삭제, 프로필 공개) |
 | 2026-02-01 | 댓글 모듈 구현 (CommentSection, Edge Function, Admin) |

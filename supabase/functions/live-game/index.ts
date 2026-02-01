@@ -257,7 +257,7 @@ serve(async (req) => {
 
         if (homeTeamNames && awayTeamNames) {
           const matchTime = new Date(upcomingGame.match_at);
-          const timeStr = matchTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+          const timeStr = matchTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' });
 
           await sendMatchNotification(
             upcomingGame.home_alih_team_id,

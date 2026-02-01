@@ -37,6 +37,23 @@ export interface Team {
   recent_videos: RecentVideo[] | null;
 }
 
+export interface DraftInfo {
+  year: number;
+  round: number;
+  pick: number;
+  team: string;
+}
+
+export interface CareerHistory {
+  team: string;
+  league: string;
+  season: string;
+  gp?: number;
+  g?: number;
+  a?: number;
+  pts?: number;
+}
+
 export interface Player {
   id: number;
   name: string;
@@ -49,6 +66,29 @@ export interface Player {
   pim: number;
   plus_minus: number;
   team_id: number;
+  // Extended profile fields
+  photo_url?: string;
+  instagram_url?: string;
+  birth_date?: string;
+  nationality?: string;
+  nationality_flag?: string;
+  height_cm?: number;
+  weight_kg?: number;
+  draft_info?: DraftInfo;
+  career_history?: CareerHistory[];
+  bio_markdown?: string;
+  name_ko?: string;
+  name_en?: string;
+  name_ja?: string;
+}
+
+export interface PlayerCard {
+  id: number;
+  user_id: string;
+  player_id: number;
+  serial_number: number;
+  card_image_url?: string;
+  created_at: string;
 }
 
 export interface TeamStanding {
