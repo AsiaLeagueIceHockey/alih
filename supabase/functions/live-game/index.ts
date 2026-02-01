@@ -247,7 +247,7 @@ serve(async (req) => {
       console.log(`[REMINDER] Found ${upcomingGames.length} games starting in ~30 min`);
       
       for (const upcomingGame of upcomingGames) {
-        if (upcomingGame.live_data?.reminder_sent) {
+        if (upcomingGame.reminder_sent) {
           console.log(`[REMINDER] Already sent for game ${upcomingGame.game_no}, skipping`);
           continue;
         }
@@ -273,28 +273,19 @@ serve(async (req) => {
           );
 
           // reminder_sent 플래그 업데이트
-          // [중요] 최신 live_data를 재조회하여 병합 (race condition 방지)
-          const { data: freshGame } = await supabase
-            .from("alih_schedule")
-            .select("live_data")
-            .eq("id", upcomingGame.id)
-            .single();
-
-          const updatedLiveData = {
-            ...(freshGame?.live_data || {}),
-            reminder_sent: true,
-            reminder_sent_at: new Date().toISOString()
-          };
-
+          // [Fix] live_data를 건드리지 않고 별도 컬럼만 업데이트하여 데이터 오염 방지
           const { error: updateError } = await supabase
             .from("alih_schedule")
-            .update({ live_data: updatedLiveData })
+            .update({ 
+               reminder_sent: true,
+               reminder_sent_at: new Date().toISOString()
+            })
             .eq("id", upcomingGame.id);
 
           if (updateError) {
             console.error(`[REMINDER] ❌ Failed to update reminder_sent flag:`, updateError);
           } else {
-            console.log(`[REMINDER] ✅ Sent and flagged for game ${upcomingGame.game_no}`);
+            console.log(`[REMINDER] ✅ Sent and flagged (new column) for game ${upcomingGame.game_no}`);
           }
         }
       }

@@ -9,7 +9,8 @@
 | `v1_base_schema.sql` | 기본 스키마 (profiles, notification_tokens, alih_cheers) | 2026-01-04 |
 | `v2_comments.sql` | 댓글 시스템 (alih_comments) | 2026-02-01 |
 | `v3_fix_rls_policies.sql` | RLS 수정 (댓글 삭제, 프로필 공개) | 2026-02-01 |
-| `v4_player_profile.sql` | 선수 프로필 확장 + player_cards | - |
+| `v4_player_profile.sql` | 선수 프로필 확장 + player_cards | 2026-02-01 |
+| `v5_fix_reminder_system.sql` | 리마인더 컬럼 분리 (Data Corruption 방지) | - |
 
 ## 🚀 실행 방법
 
