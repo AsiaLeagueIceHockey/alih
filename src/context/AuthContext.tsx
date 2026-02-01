@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await externalSupabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: window.location.href,
         queryParams: {
           prompt: 'select_account',
         },
@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await externalSupabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: window.location.href,
         queryParams: {
           prompt: 'login',
         },
