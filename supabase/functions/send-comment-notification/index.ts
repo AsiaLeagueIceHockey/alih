@@ -155,7 +155,10 @@ serve(async (req: Request) => {
 
     for (const tokenData of tokens) {
       try {
-        const subscription = JSON.parse(tokenData.token);
+        // 토큰이 string이면 파싱, 이미 객체면 그대로 사용
+        const subscription = typeof tokenData.token === 'string' 
+          ? JSON.parse(tokenData.token) 
+          : tokenData.token;
         await webPush.sendNotification(subscription, payload);
         successCount++;
       } catch (error) {

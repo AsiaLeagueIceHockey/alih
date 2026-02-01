@@ -81,11 +81,13 @@ const AdminComments = () => {
       // Edge Function으로 관리자 삭제 (service_role 사용)
       const adminPin = import.meta.env.VITE_ADMIN_PIN;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
       const response = await fetch(`${supabaseUrl}/functions/v1/admin-delete-comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({ commentId: id, adminPin }),
       });
