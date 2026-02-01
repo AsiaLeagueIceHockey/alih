@@ -308,6 +308,9 @@ const TeamDetail = () => {
           {/* 최근 경기 */}
           <RecentGames games={recentGames || []} teams={teams} teamId={Number(teamId)} />
 
+          {/* 댓글 섹션 */}
+          <CommentSection entityType="team" entityId={Number(teamId)} />
+
           {/* 시즌 통계 */}
           {allFinishedGames && allFinishedGames.length > 0 && (
             <TeamStats
@@ -330,9 +333,6 @@ const TeamDetail = () => {
           {players && players.length > 0 && (
             <StarPlayers players={players} teamId={Number(teamId)} />
           )}
-
-          {/* 댓글 섹션 */}
-          <CommentSection entityType="team" entityId={Number(teamId)} />
         </div>
       </div>
     </>

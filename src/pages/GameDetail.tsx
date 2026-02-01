@@ -583,6 +583,9 @@ const GameDetail = () => {
             isLive={isInProgress}
           />
 
+          {/* 댓글 섹션 */}
+          <CommentSection entityType="game" entityId={scheduleData.id} />
+
           {/* 경기 현황 (live_data가 있을 때만) */}
           {liveData && (
             <Card className="p-4 mb-6">
@@ -832,8 +835,6 @@ const GameDetail = () => {
               </>
             )}
           </Card>
-          {/* 댓글 섹션 */}
-          <CommentSection entityType="game" entityId={scheduleData.id} />
         </div>
       </div>
     );
@@ -948,6 +949,9 @@ const GameDetail = () => {
           awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
           isLive={false}
         />
+
+        {/* 댓글 섹션 */}
+        <CommentSection entityType="game" entityId={scheduleData?.id || 0} />
 
         {/* 경기 하이라이트 */}
         {scheduleData?.highlight_url && (
@@ -1248,8 +1252,6 @@ const GameDetail = () => {
             </div>
           </div>
         </Card>
-        {/* 댓글 섹션 */}
-        <CommentSection entityType="game" entityId={scheduleData?.id || 0} />
       </div>
     </div>
   );

@@ -33,30 +33,49 @@ export const useComments = ({ entityType, entityId }: UseCommentsOptions) => {
   const { data: comments, isLoading, error } = useQuery({
     queryKey,
     queryFn: async () => {
-      const { data, error } = await externalSupabase
+      // 1. 댓글 조회
+      const { data: commentsData, error: commentsError } = await externalSupabase
         .from('alih_comments')
-        .select(`
-          *,
-          user:profiles!user_id(nickname)
-        `)
+        .select('*')
         .eq('entity_type', entityType)
         .eq('entity_id', entityId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (commentsError) throw commentsError;
+      if (!commentsData || commentsData.length === 0) return [];
 
-      // 댓글을 계층 구조로 정리 (부모-자식)
+      // 2. 유저 ID 추출 (중복 제거)
+      const userIds = [...new Set(commentsData.map(c => c.user_id))];
+
+      // 3. 프로필 조회
+      const { data: profiles, error: profilesError } = await externalSupabase
+        .from('profiles')
+        .select('id, nickname')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // 4. 프로필 맵 생성
+      const profileMap = new Map(
+        (profiles || []).map(p => [p.id, { nickname: p.nickname || '익명' }])
+      );
+
+      // 5. 댓글에 유저 정보 추가
+      const commentsWithUser = commentsData.map(comment => ({
+        ...comment,
+        user: profileMap.get(comment.user_id) || { nickname: '익명' }
+      }));
+
+      // 6. 계층 구조로 정리 (부모-자식)
       const commentMap = new Map<number, Comment>();
       const rootComments: Comment[] = [];
 
-      // 먼저 모든 댓글을 맵에 저장
-      (data || []).forEach((comment: Comment) => {
+      commentsWithUser.forEach((comment) => {
         commentMap.set(comment.id, { ...comment, replies: [] });
       });
 
-      // 부모-자식 관계 설정
-      (data || []).forEach((comment: Comment) => {
+      commentsWithUser.forEach((comment) => {
         const mappedComment = commentMap.get(comment.id)!;
         if (comment.parent_id) {
           const parent = commentMap.get(comment.parent_id);
