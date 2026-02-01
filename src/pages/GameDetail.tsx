@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
+import { CommentSection } from "@/components/comments";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -831,6 +832,8 @@ const GameDetail = () => {
               </>
             )}
           </Card>
+          {/* 댓글 섹션 */}
+          <CommentSection entityType="game" entityId={scheduleData.id} />
         </div>
       </div>
     );
@@ -1245,6 +1248,8 @@ const GameDetail = () => {
             </div>
           </div>
         </Card>
+        {/* 댓글 섹션 */}
+        <CommentSection entityType="game" entityId={scheduleData?.id || 0} />
       </div>
     </div>
   );

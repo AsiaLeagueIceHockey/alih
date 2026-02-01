@@ -14,6 +14,7 @@ import { Team, Player, TeamStanding } from "@/types/team";
 import { useTeams } from "@/hooks/useTeams";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { CommentSection } from "@/components/comments";
 
 const TeamDetail = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -329,6 +330,9 @@ const TeamDetail = () => {
           {players && players.length > 0 && (
             <StarPlayers players={players} teamId={Number(teamId)} />
           )}
+
+          {/* 댓글 섹션 */}
+          <CommentSection entityType="team" entityId={Number(teamId)} />
         </div>
       </div>
     </>

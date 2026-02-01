@@ -36,6 +36,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Admin pages
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminPushTest = lazy(() => import("./pages/AdminPushTest"));
+const AdminComments = lazy(() => import("./pages/AdminComments"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,14 +80,15 @@ const ConditionalInstallPrompt = () => {
 };
 
 const App = () => {
-  const [showInAppGuide, setShowInAppGuide] = useState(false);
+  // [2026-02-01] InAppGuide 주석 처리 - 인스타그램에서 유입 시 이탈 유발
+  // const [showInAppGuide, setShowInAppGuide] = useState(false);
 
-  useEffect(() => {
-    const { shouldShowGuide } = handleInAppBrowser();
-    if (shouldShowGuide) {
-      setShowInAppGuide(true);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const { shouldShowGuide } = handleInAppBrowser();
+  //   if (shouldShowGuide) {
+  //     setShowInAppGuide(true);
+  //   }
+  // }, []);
 
   return (
     <HelmetProvider>
@@ -181,9 +183,12 @@ const App = () => {
               {/* 어드민 페이지 */}
               <Route path="/admin/test-push" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <AdminLayout>
-                    <AdminPushTest />
-                  </AdminLayout>
+                  <AdminPushTest />
+                </Suspense>
+              } />
+              <Route path="/admin/comments" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <AdminComments />
                 </Suspense>
               } />
               <Route path="*" element={
@@ -195,9 +200,10 @@ const App = () => {
             <ConditionalInstallPrompt />
             <ConditionalBottomNav />
             <OnboardingDialog />
-            {showInAppGuide && (
+            {/* [2026-02-01] InAppGuide 주석 처리 */}
+            {/* {showInAppGuide && (
               <InAppGuide onClose={() => setShowInAppGuide(false)} />
-            )}
+            )} */}
           </BrowserRouter>
         </TooltipProvider>
         </AuthProvider>
