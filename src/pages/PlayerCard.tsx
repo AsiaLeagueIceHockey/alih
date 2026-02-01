@@ -15,7 +15,7 @@ import { useState, useRef } from "react";
 import { format } from "date-fns";
 
 const PlayerCard = () => {
-  const { playerId } = useParams<{ playerId: string }>();
+  const { playerSlug } = useParams<{ playerSlug: string }>();
   // navigate unused but kept for compatibility
   const { i18n } = useTranslation();
   const currentLang = i18n.language;
@@ -31,20 +31,28 @@ const PlayerCard = () => {
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [customPhoto, setCustomPhoto] = useState<string | null>(null);
 
+  // Detect if the param is a numeric ID (legacy support) or a slug
+  const isNumericId = playerSlug && /^\d+$/.test(playerSlug);
+
   // 선수 정보 조회
   const { data: player, isLoading: isLoadingPlayer } = useQuery({
-    queryKey: ['player-detail', playerId],
+    queryKey: ['player-detail', playerSlug],
     queryFn: async () => {
-      const { data, error } = await externalSupabase
+      let query = externalSupabase
         .from('alih_players')
-        .select('*')
-        .eq('id', playerId)
-        .single();
-
+        .select('*');
+      
+      if (isNumericId) {
+        query = query.eq('id', playerSlug);
+      } else {
+        query = query.eq('slug', playerSlug);
+      }
+      
+      const { data, error } = await query.single();
       if (error) throw error;
       return data as Player;
     },
-    enabled: !!playerId,
+    enabled: !!playerSlug,
     staleTime: 0, // 캐시 제거 (이미지 즉시 반영)
   });
 
@@ -67,18 +75,18 @@ const PlayerCard = () => {
 
   // 기존 카드 확인
   const { data: existingCard, refetch: refetchCard } = useQuery({
-    queryKey: ['player-card', playerId, user?.id],
+    queryKey: ['player-card', player?.id, user?.id],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user || !player) return null;
       const { data } = await externalSupabase
         .from('player_cards')
         .select('*')
-        .eq('player_id', playerId)
+        .eq('player_id', player.id)
         .eq('user_id', user.id)
         .single();
       return data;
     },
-    enabled: !!user && !!playerId,
+    enabled: !!user && !!player?.id,
   });
 
   // 다국어 선수명
@@ -122,7 +130,7 @@ const PlayerCard = () => {
           .from('player_cards')
           .insert({
             user_id: user.id,
-            player_id: Number(playerId),
+            player_id: player!.id,
             serial_number: Math.floor(Math.random() * 10000) + 1,
             // TODO: 커스텀 사진 URL 저장 기능은 추후 구현 (현재는 로컬 프리뷰만)
           });
@@ -227,7 +235,7 @@ const PlayerCard = () => {
     <div className="min-h-screen bg-background pt-[calc(1rem+env(safe-area-inset-top))] px-4 pb-24">
       {/* Header */}
       <div className="flex items-center mb-6">
-        <Link to={`/player/${playerId}`}>
+        <Link to={`/player/${player?.slug || playerSlug}`}>
           <Button variant="ghost" size="sm" className="gap-1">
             <ChevronLeft className="w-4 h-4" />
             {getLocalizedPlayerName()}

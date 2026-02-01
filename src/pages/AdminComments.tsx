@@ -31,6 +31,7 @@ interface AdminComment {
     nickname: string;
     email: string;
   };
+  slug?: string;
 }
 
 const AdminComments = () => {
@@ -67,10 +68,30 @@ const AdminComments = () => {
         (profiles || []).map(p => [p.id, { nickname: p.nickname || '익명', email: p.email || '' }])
       );
 
-      // 5. 댓글에 유저 정보 추가
+      // 5. 선수 슬러그 조회 (선수 타입인 경우)
+      const playerIds = [...new Set(
+        commentsData.filter(c => c.entity_type === 'player').map(c => c.entity_id)
+      )];
+
+      let playerSlugMap = new Map<number, string>();
+      if (playerIds.length > 0) {
+        const { data: players } = await externalSupabase
+          .from('alih_players')
+          .select('id, slug')
+          .in('id', playerIds);
+        
+        if (players) {
+          players.forEach(p => {
+            if (p.slug) playerSlugMap.set(p.id, p.slug);
+          });
+        }
+      }
+
+      // 6. 댓글에 유저 정보 및 엔티티 정보 추가
       return commentsData.map(comment => ({
         ...comment,
-        user: profileMap.get(comment.user_id) || { nickname: '익명', email: '' }
+        user: profileMap.get(comment.user_id) || { nickname: '익명', email: '' },
+        slug: comment.entity_type === 'player' ? playerSlugMap.get(comment.entity_id) : undefined
       })) as AdminComment[];
     },
     staleTime: 1000 * 30,
@@ -129,11 +150,11 @@ const AdminComments = () => {
     }
   };
 
-  const getEntityLink = (type: string, id: number) => {
+  const getEntityLink = (type: string, id: number, slug?: string) => {
     switch (type) {
       case 'game': return `/schedule/${id}`;
       case 'team': return `/team/${id}`;
-      case 'player': return `/player/${id}`;
+      case 'player': return `/player/${slug || id}`;
       default: return '#';
     }
   };
@@ -212,7 +233,7 @@ const AdminComments = () => {
                       </TableCell>
                       <TableCell>
                         <a 
-                          href={getEntityLink(comment.entity_type, comment.entity_id)}
+                          href={getEntityLink(comment.entity_type, comment.entity_id, comment.slug)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"

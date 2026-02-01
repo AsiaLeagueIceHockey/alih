@@ -149,6 +149,7 @@ interface PlayerData {
   assists: number;
   points: number;
   games_played: number;
+  slug?: string;
 }
 
 const GameDetail = () => {
@@ -257,7 +258,7 @@ const GameDetail = () => {
       if (error) throw error;
       return data as PlayerData[];
     },
-    enabled: !!scheduleData && (!isCompleted || hasLiveData),
+    enabled: !!scheduleData,
   });
 
   // 로딩 상태
@@ -270,6 +271,11 @@ const GameDetail = () => {
     const roster = teamId === homeTeam.id ? gameDetail.home_roster : gameDetail.away_roster;
     const player = roster.find(p => p.no === playerNo);
     return player ? player.name : `#${playerNo}`;
+  };
+
+  const getPlayerSlug = (playerNo: number, teamId: number) => {
+    const player = players?.find(p => p.team_id === teamId && p.jersey_number === playerNo);
+    return player?.slug || player?.id; // Fallback to ID if slug missing
   };
 
   const getSituationLabel = (situation: string) => {
@@ -708,12 +714,12 @@ const GameDetail = () => {
                               <Badge className="text-xs">{getGoalTypeLabel(event.goal_type)}</Badge>
                             </div>
                             <p className="font-medium text-sm truncate">
-                              {t('gameDetail.scorer')}: {getLivePlayerName(event.team_id, event.scorer.number)} (#{event.scorer.number})
+                              {t('gameDetail.scorer')}: <Link to={`/player/${getPlayerSlug(event.scorer.number, event.team_id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">{getLivePlayerName(event.team_id, event.scorer.number)}</Link> (#{event.scorer.number})
                             </p>
                             {(event.assist1 || event.assist2) && (
                               <p className="text-xs text-muted-foreground">
-                                {t('gameDetail.assist')}: {event.assist1 && `${getLivePlayerName(event.team_id, event.assist1.number)} (#${event.assist1.number})`}
-                                {event.assist2 && `, ${getLivePlayerName(event.team_id, event.assist2.number)} (#${event.assist2.number})`}
+                                {t('gameDetail.assist')}: {event.assist1 && <><Link to={`/player/${getPlayerSlug(event.assist1.number, event.team_id)}`} className="hover:underline hover:text-primary text-muted-foreground transition-colors">{getLivePlayerName(event.team_id, event.assist1.number)}</Link> (#{event.assist1.number})</>}
+                                {event.assist2 && <>, <Link to={`/player/${getPlayerSlug(event.assist2.number, event.team_id)}`} className="hover:underline hover:text-primary text-muted-foreground transition-colors">{getLivePlayerName(event.team_id, event.assist2.number)}</Link> (#{event.assist2.number})</>}
                               </p>
                             )}
                           </div>
@@ -800,7 +806,11 @@ const GameDetail = () => {
                     </div>
                     {homeTopPlayers.map((player, idx) => (
                       <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
-                        <span className="text-sm truncate flex-1">{player.name}</span>
+                        <span className="text-sm truncate flex-1">
+                          <Link to={`/player/${player.slug || player.id}`} className="hover:underline hover:text-primary text-foreground transition-colors">
+                            {player.name}
+                          </Link>
+                        </span>
                         <div className="flex gap-4 text-sm">
                           <span className="w-6 text-center">{player.goals}</span>
                           <span className="w-6 text-center">{player.assists}</span>
@@ -820,7 +830,11 @@ const GameDetail = () => {
                     </div>
                     {awayTopPlayers.map((player, idx) => (
                       <div key={player.id} className={`flex justify-between items-center py-2 px-2 ${idx === 0 ? 'font-bold' : ''} border-b border-border/50`}>
-                        <span className="text-sm truncate flex-1">{player.name}</span>
+                        <span className="text-sm truncate flex-1">
+                          <Link to={`/player/${player.slug || player.id}`} className="hover:underline hover:text-primary text-foreground transition-colors">
+                            {player.name}
+                          </Link>
+                        </span>
                         <div className="flex gap-4 text-sm">
                           <span className="w-6 text-center">{player.goals}</span>
                           <span className="w-6 text-center">{player.assists}</span>
@@ -1059,13 +1073,17 @@ const GameDetail = () => {
                           <Badge className="text-xs whitespace-nowrap">{getSituationLabel(goal.situation)}</Badge>
                         </div>
                         <p className="font-medium text-sm">
-                          {t('gameDetail.scorer')}: {getPlayerName(goal.goal_no, goal.team_id)} (#{goal.goal_no})
+                          {t('gameDetail.scorer')}: <Link to={`/player/${getPlayerSlug(goal.goal_no, goal.team_id)}`} className="hover:underline hover:text-primary text-primary transition-colors">{getPlayerName(goal.goal_no, goal.team_id)}</Link> (#{goal.goal_no})
                         </p>
                         {(goal.assist1_no || goal.assist2_no) && (
                           <p className="text-xs text-muted-foreground">
                             {t('gameDetail.assist')}:
-                            {goal.assist1_no && ` ${getPlayerName(goal.assist1_no, goal.team_id)} (#${goal.assist1_no})`}
-                            {goal.assist2_no && `, ${getPlayerName(goal.assist2_no, goal.team_id)} (#${goal.assist2_no})`}
+                            {goal.assist1_no && (
+                              <> <Link to={`/player/${getPlayerSlug(goal.assist1_no, goal.team_id)}`} className="hover:underline hover:text-primary text-muted-foreground transition-colors">{getPlayerName(goal.assist1_no, goal.team_id)}</Link> (#{goal.assist1_no})</>
+                            )}
+                            {goal.assist2_no && (
+                              <>, <Link to={`/player/${getPlayerSlug(goal.assist2_no, goal.team_id)}`} className="hover:underline hover:text-primary text-muted-foreground transition-colors">{getPlayerName(goal.assist2_no, goal.team_id)}</Link> (#{goal.assist2_no})</>
+                            )}
                           </p>
                         )}
                       </div>
@@ -1104,7 +1122,9 @@ const GameDetail = () => {
                           <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes} min</Badge>
                         </div>
                         <p className="font-medium text-sm">
-                          {getPlayerName(penalty.player_no, penalty.team_id)} (#{penalty.player_no})
+                          <Link to={`/player/${getPlayerSlug(penalty.player_no, penalty.team_id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">
+                            {getPlayerName(penalty.player_no, penalty.team_id)}
+                          </Link> (#{penalty.player_no})
                         </p>
                         <p className="text-xs text-muted-foreground">{t('gameDetail.offence')}: {penalty.offence}</p>
                       </div>
@@ -1152,7 +1172,9 @@ const GameDetail = () => {
                         <TableRow key={player.no}>
                           <TableCell className="font-medium whitespace-nowrap">#{player.no}</TableCell>
                           <TableCell className="whitespace-nowrap">
-                            {player.name}
+                            <Link to={`/player/${getPlayerSlug(player.no, homeTeam.id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">
+                              {player.name}
+                            </Link>
                             {player.captain_asst && (
                               <Badge variant="secondary" className="ml-2 text-xs">
                                 {player.captain_asst}
@@ -1199,7 +1221,9 @@ const GameDetail = () => {
                         <TableRow key={player.no}>
                           <TableCell className="font-medium whitespace-nowrap">#{player.no}</TableCell>
                           <TableCell className="whitespace-nowrap">
-                            {player.name}
+                            <Link to={`/player/${getPlayerSlug(player.no, awayTeam.id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">
+                              {player.name}
+                            </Link>
                             {player.captain_asst && (
                               <Badge variant="secondary" className="ml-2 text-xs">
                                 {player.captain_asst}

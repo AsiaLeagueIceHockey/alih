@@ -108,6 +108,27 @@ serve(async (req) => {
       }
     }
 
+    // [New] Add player pages
+    const { data: players, error: playerError } = await supabase
+      .from('alih_players')
+      .select('id, slug');
+
+    if (playerError) {
+      console.error('Error fetching players:', playerError);
+      // 선수 페이지 에러가 나도 전체 사이트맵이 실패하지 않도록 로그만 남김
+    } else if (players) {
+      for (const player of players) {
+        const urlParam = player.slug || player.id;
+        sitemap += `  <url>
+    <loc>${siteUrl}/player/${urlParam}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+`;
+      }
+    }
+
     sitemap += `</urlset>`;
 
     return new Response(sitemap, {

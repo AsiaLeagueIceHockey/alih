@@ -26,6 +26,8 @@ interface TeamStanding {
 }
 
 interface PlayerStats {
+  id: number;
+  slug?: string;
   name: string;
   jersey_number: string;
   team_id: number;
@@ -340,9 +342,12 @@ const Standings = () => {
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-sm md:text-base text-foreground truncate">
+                                <Link 
+                                  to={`/player/${player.slug || player.id}`}
+                                  className="font-bold text-sm md:text-base text-foreground truncate hover:text-primary hover:underline transition-colors cursor-pointer"
+                                >
                                   {player.name}
-                                </div>
+                                </Link>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
                                   <span>•</span>
@@ -410,9 +415,12 @@ const Standings = () => {
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-sm md:text-base text-foreground truncate">
+                                <Link 
+                                  to={`/player/${player.slug || player.id}`}
+                                  className="font-bold text-sm md:text-base text-foreground truncate hover:text-primary hover:underline transition-colors cursor-pointer"
+                                >
                                   {player.name}
-                                </div>
+                                </Link>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
                                   <span>•</span>
@@ -480,9 +488,12 @@ const Standings = () => {
                                 loading="lazy"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-sm md:text-base text-foreground truncate">
+                                <Link 
+                                  to={`/player/${player.slug || player.id}`}
+                                  className="font-bold text-sm md:text-base text-foreground truncate hover:text-primary hover:underline transition-colors cursor-pointer"
+                                >
                                   {player.name}
-                                </div>
+                                </Link>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <span>No.{player.jersey_number}</span>
                                   <span>•</span>

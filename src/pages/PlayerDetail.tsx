@@ -14,24 +14,33 @@ import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format, differenceInYears } from "date-fns";
 
 const PlayerDetail = () => {
-  const { playerId } = useParams<{ playerId: string }>();
+  const { playerSlug } = useParams<{ playerSlug: string }>();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
 
+  // Detect if the param is a numeric ID (legacy support) or a slug
+  const isNumericId = playerSlug && /^\d+$/.test(playerSlug);
+
   // 선수 정보 조회
   const { data: player, isLoading: isLoadingPlayer } = useQuery({
-    queryKey: ['player-detail', playerId],
+    queryKey: ['player-detail', playerSlug],
     queryFn: async () => {
-      const { data, error } = await externalSupabase
+      let query = externalSupabase
         .from('alih_players')
-        .select('*')
-        .eq('id', playerId)
-        .single();
-
+        .select('*');
+      
+      // Query by ID (legacy) or slug
+      if (isNumericId) {
+        query = query.eq('id', playerSlug);
+      } else {
+        query = query.eq('slug', playerSlug);
+      }
+      
+      const { data, error } = await query.single();
       if (error) throw error;
       return data as Player;
     },
-    enabled: !!playerId,
+    enabled: !!playerSlug,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -52,20 +61,22 @@ const PlayerDetail = () => {
     staleTime: 1000 * 60 * 60,
   });
 
-  // 득점 순위 조회
-  const { data: scoringRank } = useQuery({
-    queryKey: ['player-scoring-rank', playerId],
+  // 득점 순위 조회 (동률 포함)
+  const { data: goalRank } = useQuery({
+    queryKey: ['player-goal-rank', player?.id],
     queryFn: async () => {
-      const { data, error } = await externalSupabase
+      // 1. 나보다 골이 많은 선수의 수를 셈
+      const { count, error } = await externalSupabase
         .from('alih_players')
-        .select('id, points')
-        .order('points', { ascending: false });
+        .select('*', { count: 'exact', head: true })
+        .gt('goals', player!.goals);
 
       if (error) throw error;
-      const rank = data.findIndex(p => p.id === Number(playerId)) + 1;
-      return rank > 0 ? rank : null;
+      
+      // 2. (더 많은 선수 수) + 1 = 나의 등수
+      return (count ?? 0) + 1;
     },
-    enabled: !!playerId,
+    enabled: !!player,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -195,7 +206,7 @@ const PlayerDetail = () => {
                   </Badge>
                   {team && (
                     <Badge variant="outline" className="text-sm">
-                      <img src={team.logo} alt="" className="w-4 h-4 mr-1" />
+                      <img src={team.logo} alt="" className="w-7 h-4 mr-2" />
                       {getLocalizedTeamName(team, currentLang)}
                     </Badge>
                   )}
@@ -267,16 +278,16 @@ const PlayerDetail = () => {
               </div>
             </div>
 
-            {/* Scoring Rank */}
-            {scoringRank && scoringRank <= 20 && (
+            {/* Goal Rank */}
+            {goalRank && goalRank <= 20 && (
               <div className="mt-4 p-3 bg-primary/10 rounded-lg flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <span className="font-medium">
                   {currentLang === 'ko' 
-                    ? `리그 득점 ${scoringRank}위` 
+                    ? `리그 득점 ${goalRank}위` 
                     : currentLang === 'ja'
-                      ? `リーグ得点${scoringRank}位`
-                      : `#${scoringRank} in League Scoring`}
+                      ? `リーグ得点${goalRank}位`
+                      : `#${goalRank} in Goals`}
                 </span>
               </div>
             )}
@@ -342,7 +353,7 @@ const PlayerDetail = () => {
           )}
 
           {/* Digital Card CTA */}
-          <Card className="p-6 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          {/* <Card className="p-6 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
             <h3 className="text-lg font-bold mb-2">
               🎴 {currentLang === 'ko' ? '나만의 선수 카드 발급받기' : 'Get Your Digital Player Card'}
             </h3>
@@ -351,17 +362,17 @@ const PlayerDetail = () => {
                 ? '팬 한정 디지털 카드를 발급받고 공유하세요!' 
                 : 'Get your exclusive fan card and share it!'}
             </p>
-            <Link to={`/player/${playerId}/card`}>
+            <Link to={`/player/${player.slug || player.id}/card`}>
               <Button size="lg" className="w-full">
                 {currentLang === 'ko' ? '카드 발급하기' : 'Generate Card'}
               </Button>
             </Link>
-          </Card>
+          </Card> */}
 
           <Separator />
 
           {/* Comments */}
-          <CommentSection entityType="player" entityId={Number(playerId)} />
+          <CommentSection entityType="player" entityId={player.id} />
         </div>
       </div>
     </>

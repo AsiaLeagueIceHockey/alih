@@ -177,12 +177,12 @@ const App = () => {
                   <TeamRoster />
                 </Suspense>
               } />
-              <Route path="/player/:playerId" element={
+              <Route path="/player/:playerSlug" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <PlayerDetail />
                 </Suspense>
               } />
-              <Route path="/player/:playerId/card" element={
+              <Route path="/player/:playerSlug/card" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <PlayerCard />
                 </Suspense>

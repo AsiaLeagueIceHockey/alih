@@ -135,88 +135,107 @@ const TeamRoster = () => {
         </div>
 
         <div className="container mx-auto px-4 py-6">
-          {/* 팀 페이지로 돌아가기 */}
-          <Button variant="ghost" asChild className="mb-4">
-            <Link to={`/team/${teamId}`} className="flex items-center gap-1">
-              <ChevronLeft className="h-4 w-4" />
-              {t('button.back')}
-            </Link>
-          </Button>
-
-          {/* 선수 명단 */}
-          <Card className="p-4 md:p-6">
-            <h2 className="text-lg font-bold mb-4">{t('team.roster')}</h2>
-
+          {/* 선수 명단 (포지션별 그룹화) */}
+          <div className="space-y-8">
             {isLoadingPlayers ? (
               <div className="flex items-center justify-center p-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : players && players.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-center">{t('roster.jerseyNumber')}</TableHead>
-                      <TableHead>{t('roster.name')}</TableHead>
-                      <TableHead className="text-center">{t('roster.position')}</TableHead>
-                      <TableHead className="text-center">{t('standings.headers.gamesPlayed')}</TableHead>
-                      <TableHead className="text-center">{t('standings.playerLabels.goal')}</TableHead>
-                      <TableHead className="text-center">{t('section.assists')}</TableHead>
-                      <TableHead className="text-center font-semibold">{t('standings.playerLabels.point')}</TableHead>
-                      <TableHead className="text-center">{t('roster.penalty')}</TableHead>
-                      <TableHead className="text-center">+/-</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {players.map((player) => (
-                      <TableRow key={player.id} className="hover:bg-secondary/30">
-                        <TableCell className="text-center font-medium">
-                          {player.jersey_number}
-                        </TableCell>
-                        <TableCell className="font-medium">{player.name}</TableCell>
-                        <TableCell className="text-center">
-                          <span className="px-2 py-1 bg-secondary rounded text-xs font-medium">
-                            {player.position}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center">{player.games_played}</TableCell>
-                        <TableCell className="text-center font-semibold text-primary">
-                          {player.goals}
-                        </TableCell>
-                        <TableCell className="text-center">{player.assists}</TableCell>
-                        <TableCell className="text-center font-bold text-lg">
-                          {player.points}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground">
-                          {player.pim}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground">
-                          {player.plus_minus > 0 ? '+' : ''}{player.plus_minus}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <>
+                {/* Forwards */}
+                <Card className="p-4 md:p-6">
+                  <h2 className="text-xl font-bold mb-4">
+                    {t('gameDetail.position.forward', 'Forwards')}
+                  </h2>
+                  {renderRosterSection(players.filter(p => p.position === 'F'))}
+                </Card>
+
+                {/* Defenders */}
+                <Card className="p-4 md:p-6">
+                  <h2 className="text-xl font-bold mb-4">
+                    {t('gameDetail.position.defense', 'Defenders')}
+                  </h2>
+                  {renderRosterSection(players.filter(p => p.position === 'D'))}
+                </Card>
+
+                {/* Goalies */}
+                <Card className="p-4 md:p-6">
+                  <h2 className="text-xl font-bold mb-4">
+                    {t('gameDetail.position.goalie', 'Goalies')}
+                  </h2>
+                  {renderRosterSection(players.filter(p => p.position === 'G'))}
+                </Card>
+
+                {/* 통계 용어 설명 */}
+                <div className="p-4 bg-secondary/20 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">+/−</span> : {t('roster.plusMinusDesc')}
+                  </p>
+                </div>
+              </>
             ) : (
               <p className="text-center text-muted-foreground py-8">
                 {t('roster.noPlayers')}
               </p>
             )}
-
-            {/* 통계 용어 설명 */}
-            {players && players.length > 0 && (
-              <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">+/−</span> : {t('roster.plusMinusDesc')}
-                </p>
-              </div>
-            )}
-          </Card>
+          </div>
         </div>
       </div>
     </>
   );
 };
+
+const renderRosterSection = (players: Player[]) => {
+  if (players.length === 0) return <p className="text-muted-foreground text-sm py-4">No players listed.</p>;
+  
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-center w-14">No.</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead className="text-center w-16">GP</TableHead>
+            <TableHead className="text-center w-16">G</TableHead>
+            <TableHead className="text-center w-16">A</TableHead>
+            <TableHead className="text-center w-16 font-semibold">PTS</TableHead>
+            <TableHead className="text-center w-16">PIM</TableHead>
+            <TableHead className="text-center w-16">+/-</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {players.map((player) => (
+            <TableRow key={player.id} className="hover:bg-secondary/30">
+              <TableCell className="text-center font-medium">
+                {player.jersey_number}
+              </TableCell>
+              <TableCell className="font-medium">
+                <Link to={`/player/${player.slug || player.id}`} className="hover:underline hover:text-primary text-foreground transition-colors">
+                  {player.name}
+                </Link>
+              </TableCell>
+              <TableCell className="text-center text-muted-foreground">{player.games_played}</TableCell>
+              <TableCell className="text-center text-primary font-medium">
+                {player.goals}
+              </TableCell>
+              <TableCell className="text-center text-muted-foreground">{player.assists}</TableCell>
+              <TableCell className="text-center font-bold text-foreground">
+                {player.points}
+              </TableCell>
+              <TableCell className="text-center text-muted-foreground hidden md:table-cell">
+                {player.pim}
+              </TableCell>
+              <TableCell className="text-center text-muted-foreground hidden md:table-cell">
+                {player.plus_minus > 0 ? '+' : ''}{player.plus_minus}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
 
 export default TeamRoster;

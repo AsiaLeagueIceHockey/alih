@@ -66,6 +66,8 @@ export interface Player {
   pim: number;
   plus_minus: number;
   team_id: number;
+  // URL slug for name-based routing
+  slug?: string;
   // Extended profile fields
   photo_url?: string;
   instagram_url?: string;

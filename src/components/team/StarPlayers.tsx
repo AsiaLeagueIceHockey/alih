@@ -47,7 +47,11 @@ const StarPlayers = ({ players, teamId }: StarPlayersProps) => {
               >
                 <span className="text-base flex-shrink-0">{getRankEmoji(index)}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{player.name}</p>
+                  <p className="font-medium text-sm truncate">
+                    <Link to={`/player/${player.slug || player.id}`} className="hover:underline hover:text-primary transition-colors">
+                      {player.name}
+                    </Link>
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     No.{player.jersey_number}
                   </p>
@@ -72,7 +76,11 @@ const StarPlayers = ({ players, teamId }: StarPlayersProps) => {
               >
                 <span className="text-base flex-shrink-0">{getRankEmoji(index)}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{player.name}</p>
+                  <p className="font-medium text-sm truncate">
+                    <Link to={`/player/${player.slug || player.id}`} className="hover:underline hover:text-primary transition-colors">
+                      {player.name}
+                    </Link>
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     No.{player.jersey_number}
                   </p>
