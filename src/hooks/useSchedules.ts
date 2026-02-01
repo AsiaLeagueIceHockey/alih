@@ -71,7 +71,7 @@ export const useSchedules = () => {
         const matchDate = new Date(game.match_at);
         return matchDate <= now && game.game_status !== 'Game Finished';
       });
-      return hasInProgress ? 60000 : false;
+      return hasInProgress ? 30000 : false;
     },
     refetchIntervalInBackground: false,
   });
