@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useTeams } from "@/hooks/useTeams";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
@@ -24,6 +25,11 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isResubscribing, setIsResubscribing] = useState(false);
   
+  // Nickname editing state
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState('');
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+  
   // Team editing state
   const [isEditingTeams, setIsEditingTeams] = useState(false);
   const [selectedTeamIds, setSelectedTeamIds] = useState<number[]>([]);
@@ -31,6 +37,40 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
   // Filter favorite teams based on profile.favorite_team_ids array
   const favoriteTeams = teams?.filter(t => profile?.favorite_team_ids?.includes(t.id));
+  
+  // Nickname editing handlers
+  const handleStartEditNickname = () => {
+    setNicknameInput(profile?.nickname || '');
+    setIsEditingNickname(true);
+  };
+  
+  const handleSaveNickname = async () => {
+    const trimmed = nicknameInput.trim();
+    if (!trimmed || trimmed.length < 2) {
+      alert(i18n.language === 'ko' ? "닉네임은 2자 이상이어야 합니다." : "Nickname must be at least 2 characters.");
+      return;
+    }
+    if (trimmed.length > 20) {
+      alert(i18n.language === 'ko' ? "닉네임은 20자 이하여야 합니다." : "Nickname must be 20 characters or less.");
+      return;
+    }
+    
+    setIsSavingNickname(true);
+    try {
+      await updateProfile({ nickname: trimmed });
+      setIsEditingNickname(false);
+    } catch (error) {
+      console.error("Error saving nickname:", error);
+      alert(i18n.language === 'ko' ? "닉네임 저장 중 오류가 발생했습니다." : "Error saving nickname.");
+    } finally {
+      setIsSavingNickname(false);
+    }
+  };
+  
+  const handleCancelEditNickname = () => {
+    setIsEditingNickname(false);
+    setNicknameInput('');
+  };
   
   // Initialize selected teams when entering edit mode
   const handleStartEditTeams = () => {
@@ -154,8 +194,56 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary border border-border">
                 {profile?.nickname?.[0]?.toUpperCase() || "U"}
               </div>
-              <div>
-                <p className="font-medium text-lg">{profile?.nickname}</p>
+              <div className="flex-1">
+                {isEditingNickname ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={nicknameInput}
+                      onChange={(e) => setNicknameInput(e.target.value)}
+                      placeholder={i18n.language === 'ko' ? "닉네임 입력" : "Enter nickname"}
+                      className="h-8 text-base"
+                      maxLength={20}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveNickname();
+                        if (e.key === 'Escape') handleCancelEditNickname();
+                      }}
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 w-8 p-0"
+                      onClick={handleCancelEditNickname}
+                      disabled={isSavingNickname}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={handleSaveNickname}
+                      disabled={isSavingNickname}
+                    >
+                      {isSavingNickname ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-lg">{profile?.nickname}</p>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                      onClick={handleStartEditNickname}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                )}
                 <p className="text-sm text-muted-foreground">{profile?.email}</p>
               </div>
             </div>

@@ -41,17 +41,37 @@ const AdminComments = () => {
   const { data: comments, isLoading } = useQuery({
     queryKey: ['admin-comments'],
     queryFn: async () => {
-      const { data, error } = await externalSupabase
+      // 1. 댓글 조회
+      const { data: commentsData, error: commentsError } = await externalSupabase
         .from('alih_comments')
-        .select(`
-          *,
-          user:profiles!user_id(nickname, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) throw error;
-      return data as AdminComment[];
+      if (commentsError) throw commentsError;
+      if (!commentsData || commentsData.length === 0) return [];
+
+      // 2. 유저 ID 추출 (중복 제거)
+      const userIds = [...new Set(commentsData.map(c => c.user_id))];
+
+      // 3. 프로필 조회
+      const { data: profiles, error: profilesError } = await externalSupabase
+        .from('profiles')
+        .select('id, nickname, email')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // 4. 프로필 맵 생성
+      const profileMap = new Map(
+        (profiles || []).map(p => [p.id, { nickname: p.nickname || '익명', email: p.email || '' }])
+      );
+
+      // 5. 댓글에 유저 정보 추가
+      return commentsData.map(comment => ({
+        ...comment,
+        user: profileMap.get(comment.user_id) || { nickname: '익명', email: '' }
+      })) as AdminComment[];
     },
     staleTime: 1000 * 30,
   });

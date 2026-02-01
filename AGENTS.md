@@ -47,7 +47,7 @@ src/
 │   ├── admin/                   # 관리자 전용 컴포넌트 ⭐ NEW
 │   │   └── AdminLayout.tsx      # 비밀번호 보호 레이아웃
 │   ├── auth/
-│   │   └── SettingsDialog.tsx   # 마이페이지 (알림 설정 포함)
+│   │   └── SettingsDialog.tsx   # 마이페이지 (닉네임 수정, 알림 설정)
 │   ├── team/                    # 팀 상세 페이지 컴포넌트
 │   ├── ui/                      # shadcn/ui 컴포넌트
 │   └── BottomNav.tsx            # 하단 탭 네비게이션
@@ -107,7 +107,8 @@ supabase/functions/
 | 파일 | 설명 | 상태 |
 |------|------|:---:|
 | `v1_base_schema.sql` | profiles, notification_tokens, alih_cheers | ✅ 적용됨 |
-| `v2_comments.sql` | alih_comments (댓글) | ⚠️ **실행 필요** |
+| `v2_comments.sql` | alih_comments (댓글) | ✅ 적용됨 |
+| `v3_fix_rls_policies.sql` | RLS 수정 (댓글 삭제, 프로필 공개) | ⚠️ **실행 필요** |
 
 **실행 방법:**
 1. Supabase Dashboard → SQL Editor
@@ -152,7 +153,14 @@ supabase/functions/
 ### 5.6 관리자 섹션 ⭐ NEW
 - **접근**: `/admin/*` 경로
 - **인증**: `VITE_ADMIN_PIN` 환경변수로 비밀번호 보호
-- **기능**: 푸시 알림 테스트 (`/admin/test-push`)
+- **기능**: 
+  - 푸시 알림 테스트 (`/admin/test-push`)
+  - 댓글 관리 (`/admin/comments`)
+
+### 5.7 마이페이지 닉네임 수정 ⭐ NEW
+- OAuth 로그인 시 실명 대신 커스텀 닉네임 설정 가능
+- 마이페이지 → 닉네임 옆 연필 아이콘으로 수정
+- 2~20자 제한, 즉시 반영
 
 ---
 
@@ -331,11 +339,13 @@ CREATE POLICY "Users can delete own comments" ON alih_comments
 
 | 날짜 | 변경 내용 |
 |------|----------|
-| 2026-02-01 | 댓글 모듈 구현 (CommentSection, Edge Function, Admin) ⭐ |
+| 2026-02-01 | 마이페이지 닉네임 수정 기능 추가 ⭐ |
+| 2026-02-01 | v3 RLS 정책 수정 (댓글 삭제, 프로필 공개) |
+| 2026-02-01 | 댓글 모듈 구현 (CommentSection, Edge Function, Admin) |
 | 2026-02-01 | InAppGuide 주석 처리 (인스타 유입 이탈 방지) |
 | 2026-02-01 | AGENTS.md 통합 (PROJECT_CONTEXT + ROADMAP) |
 | 2026-02-01 | 알림 상태 버그 수정 (hasToken 기반 3가지 상태) |
-| 2026-02-01 | 관리자 섹션 추가 (`/admin/test-push`) |
+| 2026-02-01 | 관리자 섹션 추가 (`/admin/test-push`, `/admin/comments`) |
 | 2026-02-01 | 푸시 테스트 Edge Functions 추가 |
 | 2026-01-31 | TeamRoster safe-area 패딩 수정 |
 | 2026-01-03 | UI 일관성 개선: 시맨틱 색상 토큰 추가 |
