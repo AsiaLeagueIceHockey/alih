@@ -48,7 +48,7 @@ const CommentSection = ({ entityType, entityId }: CommentSectionProps) => {
   };
 
   return (
-    <Card className="mt-6 p-4 md:p-6">
+    <Card className="mt-6 p-4 mb-6">
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle className="h-5 w-5" />
         <h3 className="text-lg font-bold">{getTitle()}</h3>
