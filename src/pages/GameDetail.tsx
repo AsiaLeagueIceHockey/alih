@@ -591,7 +591,9 @@ const GameDetail = () => {
           />
 
           {/* 댓글 섹션 */}
-          <CommentSection entityType="game" entityId={scheduleData.id} />
+          <div className="mb-6">
+            <CommentSection entityType="game" entityId={scheduleData.id} />
+          </div>
 
           {/* 경기 현황 (live_data가 있을 때만) */}
           {liveData && (
