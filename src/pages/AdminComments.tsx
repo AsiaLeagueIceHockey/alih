@@ -78,13 +78,25 @@ const AdminComments = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      // Admin soft delete (using service role would be ideal, but we'll use is_deleted flag)
-      const { error } = await externalSupabase
-        .from('alih_comments')
-        .update({ is_deleted: true })
-        .eq('id', id);
+      // Edge Function으로 관리자 삭제 (service_role 사용)
+      const adminPin = import.meta.env.VITE_ADMIN_PIN;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/admin-delete-comment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ commentId: id, adminPin }),
+      });
 
-      if (error) throw error;
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Delete failed');
+      }
+      
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-comments'] });

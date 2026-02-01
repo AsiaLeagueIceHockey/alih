@@ -33,18 +33,26 @@ serve(async (req: Request) => {
 
     webPush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 
-    // 새 댓글 정보 가져오기
+    // 새 댓글 정보 가져오기 (profiles 조인 대신 별도 쿼리)
     const { data: comment, error: commentError } = await supabaseAdmin
       .from('alih_comments')
-      .select('*, user:profiles!user_id(nickname)')
+      .select('*')
       .eq('id', commentId)
       .single();
 
     if (commentError || !comment) {
+      console.error('Comment query error:', commentError);
       throw new Error('Comment not found');
     }
 
-    const authorNickname = comment.user?.nickname || '익명';
+    // 작성자 프로필 별도 조회
+    const { data: authorProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('nickname')
+      .eq('id', comment.user_id)
+      .single();
+
+    const authorNickname = authorProfile?.nickname || '익명';
 
     // 엔티티 정보 가져오기 (알림 메시지용)
     let entityName = '';
