@@ -409,14 +409,7 @@ const GameDetail = () => {
   };
 
   // 미완료 경기 UI 또는 종료됐지만 gameDetail이 없는 경우 (live_data 기반)
-  // [Fix] live_data가 있어도 scores_by_period 등 필수 데이터가 없으면(리마인더만 있는 경우) 렌더링하지 않음
-  const isValidLiveData = (data: any) => {
-    return data && data.scores_by_period && data.shots;
-  };
-  
-  const showLiveDataUI = (!isCompleted || (isCompleted && !gameDetail)) && 
-                         scheduleData?.live_data && 
-                         isValidLiveData(scheduleData.live_data);
+  const showLiveDataUI = !isCompleted || (isCompleted && !gameDetail && scheduleData?.live_data);
 
   if (showLiveDataUI) {
     const homePlayers = players?.filter(p => p.team_id === homeTeam.id) || [];
@@ -591,9 +584,7 @@ const GameDetail = () => {
           />
 
           {/* 댓글 섹션 */}
-          <div className="mb-6">
-            <CommentSection entityType="game" entityId={scheduleData.id} />
-          </div>
+          <CommentSection entityType="game" entityId={scheduleData.id} />
 
           {/* 경기 현황 (live_data가 있을 때만) */}
           {liveData && (

@@ -235,7 +235,7 @@ const PlayerDetail = () => {
               📊 {currentLang === 'ko' ? '25-26 시즌 스탯' : currentLang === 'ja' ? '25-26 シーズン成績' : '25-26 Season Stats'}
             </h2>
             
-            <div className="grid grid-cols-5 gap-2 text-center">
+            <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-secondary/50 rounded-lg p-3">
                 <div className="text-xs text-muted-foreground mb-1">GP</div>
                 <div className="text-xl font-bold">{player.games_played}</div>
@@ -248,15 +248,22 @@ const PlayerDetail = () => {
                 <div className="text-xs text-muted-foreground mb-1">A</div>
                 <div className="text-xl font-bold text-primary">{player.assists}</div>
               </div>
+              
               <div className="bg-secondary/50 rounded-lg p-3">
                 <div className="text-xs text-muted-foreground mb-1">PTS</div>
                 <div className="text-xl font-bold">{player.points}</div>
               </div>
               <div className="bg-secondary/50 rounded-lg p-3">
-                <div className="text-xs text-muted-foreground mb-1">+/-</div>
-                <div className={`text-xl font-bold ${player.plus_minus > 0 ? 'text-success' : player.plus_minus < 0 ? 'text-destructive' : ''}`}>
-                  {player.plus_minus > 0 ? '+' : ''}{player.plus_minus}
+                <div className="text-xs text-muted-foreground mb-1">
+                  {player.position === 'G' ? 'SVS/SA' : '+/-'}
                 </div>
+                <div className={`font-bold ${player.position === 'G' ? 'text-sm flex items-center justify-center h-7' : 'text-xl'} ${!player.position && player.plus_minus > 0 ? 'text-success' : !player.position && player.plus_minus < 0 ? 'text-destructive' : ''}`}>
+                  {player.position !== 'G' && player.plus_minus > 0 ? '+' : ''}{player.plus_minus}
+                </div>
+              </div>
+              <div className="bg-secondary/50 rounded-lg p-3">
+                <div className="text-xs text-muted-foreground mb-1">PIM</div>
+                <div className="text-xl font-bold">{player.pim}</div>
               </div>
             </div>
 
@@ -273,16 +280,6 @@ const PlayerDetail = () => {
                 </span>
               </div>
             )}
-          </Card>
-
-          {/* PIM 카드 */}
-          <Card className="p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">
-                {currentLang === 'ko' ? '페널티 (PIM)' : 'Penalty Minutes'}
-              </span>
-              <span className="text-xl font-bold">{player.pim}</span>
-            </div>
           </Card>
 
           {/* Draft Info */}
