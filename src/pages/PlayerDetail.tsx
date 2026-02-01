@@ -151,18 +151,11 @@ const PlayerDetail = () => {
           )}
           
           <div className="relative pt-[calc(1rem+env(safe-area-inset-top))] px-4 pb-6">
-            {/* Back Button */}
-            <div className="flex items-center justify-between mb-4">
-              <Link to={team ? `/team/${team.id}` : '/'}>
-                <Button variant="ghost" size="sm" className="gap-1">
-                  <ChevronLeft className="w-4 h-4" />
-                  {team ? getLocalizedTeamName(team, currentLang) : t('common.back', 'Back')}
-                </Button>
-              </Link>
-              
+            {/* Top Bar - Instagram Only */}
+            <div className="flex items-center justify-end mb-4">
               {player.instagram_url && (
                 <a href={player.instagram_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm border-white/20 hover:bg-background/80">
                     <Instagram className="w-4 h-4" />
                     Instagram
                   </Button>
@@ -171,9 +164,9 @@ const PlayerDetail = () => {
             </div>
 
             {/* Player Info */}
-            <div className="flex gap-4 items-start">
+            <div className="flex gap-4 items-start mt-8">
               {/* Photo */}
-              <div className="w-28 h-36 md:w-36 md:h-48 rounded-lg overflow-hidden bg-secondary border-2 border-border shadow-lg flex-shrink-0">
+              <div className="w-28 h-36 md:w-36 md:h-48 rounded-lg overflow-hidden bg-secondary border-2 border-border shadow-lg flex-shrink-0 relative z-10">
                 {player.photo_url ? (
                   <img 
                     src={player.photo_url} 
@@ -188,7 +181,7 @@ const PlayerDetail = () => {
               </div>
 
               {/* Info */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 pt-2 text-white drop-shadow-md">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-2xl font-bold">#{player.jersey_number}</span>
                   {player.nationality_flag && (
@@ -196,19 +189,21 @@ const PlayerDetail = () => {
                   )}
                 </div>
                 
-                <h1 className="text-2xl md:text-3xl font-bold mb-2 truncate">
+                <h1 className="text-2xl md:text-3xl font-bold mb-3 truncate">
                   {getLocalizedPlayerName()}
                 </h1>
                 
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge variant="secondary" className="text-sm bg-black/50 backdrop-blur-md border-white/10 text-white hover:bg-black/60">
                     {getPositionLabel(player.position)}
                   </Badge>
                   {team && (
-                    <Badge variant="outline" className="text-sm">
-                      <img src={team.logo} alt="" className="w-7 h-4 mr-2" />
-                      {getLocalizedTeamName(team, currentLang)}
-                    </Badge>
+                    <Link to={`/team/${team.id}`}>
+                      <Badge variant="outline" className="text-sm hover:bg-secondary/80 transition-colors border-foreground/20 text-foreground/80 cursor-pointer gap-2 pl-2 pr-3 py-1">
+                         <img src={team.logo} alt="" className="w-5 h-5 object-contain" />
+                        {getLocalizedTeamName(team, currentLang)}
+                      </Badge>
+                    </Link>
                   )}
                 </div>
 

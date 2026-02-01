@@ -1,8 +1,10 @@
 {
     "nav": {
         "home": "Home",
+        "game": "Game",
         "schedule": "Schedule",
-        "highlights": "Videos",
+        "highlights": "Highlights",
+        "players": "Players",
         "standings": "Standings",
         "news": "News"
     },
@@ -276,5 +278,12 @@
         "step3Desc": "Get updates when your team plays or scores",
         "step3Button": "Enable Notifications & Finish",
         "next": "Next"
+    },
+    "search": {
+        "placeholder": "Search by name or number..."
+    },
+    "players": {
+        "count": "players",
+        "sortedByName": "Sorted by Name"
     }
 }

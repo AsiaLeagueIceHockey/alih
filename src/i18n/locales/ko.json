@@ -1,8 +1,10 @@
 {
     "nav": {
         "home": "홈",
-        "schedule": "일정",
-        "highlights": "영상",
+        "game": "경기",
+        "schedule": "일정/결과",
+        "highlights": "하이라이트",
+        "players": "선수",
         "standings": "순위",
         "news": "뉴스"
     },
@@ -276,5 +278,12 @@
         "step3Desc": "응원하는 팀의 경기 시작과 득점 소식을 받아보세요",
         "step3Button": "알림 허용 및 완료",
         "next": "다음"
+    },
+    "search": {
+        "placeholder": "선수 이름 또는 등번호 검색..."
+    },
+    "players": {
+        "count": "명의 선수",
+        "sortedByName": "이름순 정렬"
     }
 }

@@ -25,7 +25,7 @@ const MONTHS_DATA = [
   { value: 4, year: 2026 },
 ];
 
-const Schedule = () => {
+const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
@@ -147,7 +147,7 @@ const Schedule = () => {
         path="/schedule"
         structuredData={[scheduleStructuredData, breadcrumbData]}
       />
-      <PageHeader title={t('page.schedule.title')} subtitle={t('page.schedule.subtitle')} />
+      {!hideHeader && <PageHeader title={t('page.schedule.title')} subtitle={t('page.schedule.subtitle')} />}
       
       <div className="container mx-auto px-4">
         {/* 월별 필터 */}

@@ -1,5 +1,5 @@
 import { NavLink } from "./NavLink";
-import { Home, Calendar, Video, Trophy, Newspaper } from "lucide-react";
+import { Home, Calendar, Users, Trophy, Newspaper } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -9,8 +9,8 @@ const BottomNav = () => {
 
   const navItems = [
     { to: "/", icon: Home, labelKey: "nav.home" },
-    { to: "/schedule", icon: Calendar, labelKey: "nav.schedule" },
-    { to: "/highlights", icon: Video, labelKey: "nav.highlights" },
+    { to: "/game", icon: Calendar, labelKey: "nav.game" },
+    { to: "/players", icon: Users, labelKey: "nav.players" },
     { to: "/standings", icon: Trophy, labelKey: "nav.standings" },
     { to: "/news", icon: Newspaper, labelKey: "nav.news" },
   ];

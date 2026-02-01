@@ -19,6 +19,8 @@ import InAppGuide from "./components/common/InAppGuide";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
+const Game = lazy(() => import("./pages/Game"));
+const Players = lazy(() => import("./pages/Players"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const GameDetail = lazy(() => import("./pages/GameDetail"));
 const Highlights = lazy(() => import("./pages/Highlights"));
@@ -145,6 +147,16 @@ const App = () => {
               <Route path="/" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <Home />
+                </Suspense>
+              } />
+              <Route path="/game" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Game />
+                </Suspense>
+              } />
+              <Route path="/players" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Players />
                 </Suspense>
               } />
               <Route path="/schedule" element={

@@ -62,10 +62,16 @@ src/
 │
 ├── pages/
 │   ├── Home.tsx                 # 홈
-│   ├── Schedule.tsx             # 경기 일정
+│   ├── Home.tsx                 # 홈
+│   ├── Game.tsx                 # 경기 (일정/결과 + 하이라이트 탭) ⭐ NEW
+│   ├── Players.tsx              # 선수 (선수 검색 + 필터) ⭐ NEW
+│   ├── Schedule.tsx             # 경기 일정 (Game 하위)
 │   ├── GameDetail.tsx           # 경기 상세 (라이브 스코어)
+│   ├── Highlights.tsx           # 하이라이트 (Game 하위)
 │   ├── TeamDetail.tsx           # 팀 상세
 │   ├── TeamRoster.tsx           # 팀 선수단
+│   ├── PlayerDetail.tsx         # 선수 상세 프로필 (스탯, 인스타, 코멘트) ⭐ NEW
+│   ├── PlayerCard.tsx           # 선수 디지털 ID 카드 생성 ⭐ NEW
 │   ├── AdminPushTest.tsx        # 관리자 푸시 테스트 ⭐ NEW
 │   └── Instagram*.tsx           # SNS 자동화용 페이지
 │
@@ -261,10 +267,16 @@ supabase functions deploy admin-list-notification-users
 | 경로 | 페이지 | 설명 |
 |------|--------|------|
 | `/` | Home | 메인 (진행중/다음경기) |
-| `/schedule` | Schedule | 경기 일정 |
+| `/` | Home | 메인 (진행중/다음경기) |
+| `/game` | Game | 경기 (일정/결과 + 하이라이트) |
+| `/players` | Players | 선수 검색 및 필터 |
+| `/schedule` | Schedule | 경기 일정 (Legacy, filtered) |
 | `/schedule/:gameNo` | GameDetail | 경기 상세 |
+| `/highlights` | Highlights | 하이라이트 (Legacy, filtered) |
 | `/team/:teamId` | TeamDetail | 팀 상세 |
 | `/roster/:teamId` | TeamRoster | 팀 선수단 |
+| `/player/:slug` | PlayerDetail | 선수 상세 프로필 ⭐ NEW |
+| `/player/:slug/card` | PlayerCard | 선수 디지털 카드 ⭐ NEW |
 | `/player/:playerId` | PlayerDetail | 선수 포트폴리오 ⭐ NEW |
 | `/player/:playerId/card` | PlayerCard | 디지털 선수 카드 ⭐ NEW |
 | `/highlights` | Highlights | 하이라이트 영상 |

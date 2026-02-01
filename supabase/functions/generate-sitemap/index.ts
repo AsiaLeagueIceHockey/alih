@@ -58,6 +58,7 @@ serve(async (req) => {
       { url: '/schedule', priority: '0.9', changefreq: 'hourly' },
       { url: '/standings', priority: '0.8', changefreq: 'daily' },
       { url: '/highlights', priority: '0.8', changefreq: 'daily' },
+      { url: '/players', priority: '0.8', changefreq: 'daily' },
       { url: '/news', priority: '0.7', changefreq: 'daily' },
     ];
 

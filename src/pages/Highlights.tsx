@@ -22,7 +22,7 @@ interface ScheduleGame {
   highlight_title: string;
 }
 
-const Highlights = () => {
+const Highlights = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -117,7 +117,7 @@ const Highlights = () => {
         path="/highlights"
         structuredData={[highlightStructuredData, breadcrumbData]}
       />
-      <PageHeader title={t('page.highlights.title')} subtitle={t('page.highlights.subtitle')} />
+      {!hideHeader && <PageHeader title={t('page.highlights.title')} subtitle={t('page.highlights.subtitle')} />}
       
       <div className="container mx-auto px-4">
         {/* 팀별 필터 */}
