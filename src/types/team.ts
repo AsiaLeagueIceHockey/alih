@@ -66,6 +66,14 @@ export interface Player {
   pim: number;
   plus_minus: number;
   team_id: number;
+  // Goalie specific stats
+  save_pct?: number;
+  goals_against_average?: number;
+  saves?: number;
+  shots_against?: number;
+  goals_against?: number;
+  gkc?: number;
+  play_time?: string;
   // URL slug for name-based routing
   slug?: string;
   // Extended profile fields

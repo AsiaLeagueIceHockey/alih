@@ -207,7 +207,21 @@
         "rosterNumber": "번호",
         "rosterName": "이름",
         "rosterPosition": "포지션",
-        "assistLabel": "도움"
+        "assistLabel": "도움",
+        "glossary": {
+            "title": "스탯 용어 설명",
+            "gp": "경기수",
+            "sv_pct": "세이브율",
+            "gaa": "평균 실점 (60분 기준)",
+            "saves": "총 세이브 / 유효 슈팅",
+            "gkc": "(100 - SV%) * GAA",
+            "time": "총 출전 시간",
+            "g": "골",
+            "a": "어시스트",
+            "pts": "공격 포인트 (골 + 어시스트)",
+            "plus_minus": "온아이스 득점/실점",
+            "pim": "페널티 (분)"
+        }
     },
     "cheerBattle": {
         "title": "응원하기",

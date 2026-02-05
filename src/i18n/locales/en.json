@@ -207,7 +207,21 @@
         "rosterNumber": "No.",
         "rosterName": "Name",
         "rosterPosition": "Pos",
-        "assistLabel": "Assists"
+        "assistLabel": "Assists",
+        "glossary": {
+            "title": "Stats Glossary",
+            "gp": "Games Played",
+            "sv_pct": "Save Percentage",
+            "gaa": "Goals Against Average",
+            "saves": "Saves / Shots Against",
+            "gkc": "(100 - SV%) * GAA",
+            "time": "Time on Ice",
+            "g": "Goals",
+            "a": "Assists",
+            "pts": "Points (Goals + Assists)",
+            "plus_minus": "On-ice Goals For/Against",
+            "pim": "Penalty Minutes"
+        }
     },
     "team": {
         "roster": "Roster",
