@@ -1,8 +1,10 @@
 {
     "nav": {
         "home": "ホーム",
+        "game": "試合",
         "schedule": "日程",
         "highlights": "動画",
+        "players": "選手",
         "standings": "順位",
         "news": "ニュース"
     },
