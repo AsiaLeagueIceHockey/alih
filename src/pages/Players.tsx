@@ -163,7 +163,7 @@ const Players = () => {
           </div>
         ) : filteredPlayers.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p>{t('error.noData', 'No players found')}</p>
+            <p>{t('error.noPlayers', 'No players found')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

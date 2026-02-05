@@ -174,7 +174,8 @@
         "gameNotFound": "Unable to load game information",
         "teamNotFound": "Team information not found",
         "noRecentGames": "No recent game records",
-        "noHeadToHead": "No head-to-head records"
+        "noHeadToHead": "No head-to-head records",
+        "noPlayers": "No players found"
     },
     "loading": {
         "schedule": "Loading schedule...",
