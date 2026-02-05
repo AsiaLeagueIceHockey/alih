@@ -241,33 +241,33 @@ const PlayerDetail = () => {
               📊 {currentLang === 'ko' ? '25-26 시즌 스탯' : currentLang === 'ja' ? '25-26 シーズン成績' : '25-26 Season Stats'}
             </h2>
             
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="grid grid-cols-6 gap-2 text-center">
               {/* Common Stat: GP */}
-              <div className="bg-secondary/50 rounded-lg p-3">
+              <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                 <div className="text-xs text-muted-foreground mb-1">GP</div>
                 <div className="text-xl font-bold">{player.games_played}</div>
               </div>
 
               {/* Conditional Rendering based on Position */}
-              {(player.position === 'G') ? (
+              {(player.position === 'G' || player.position === 'GK' || player.position === '골리') ? (
                 <>
                   {/* Goalie Stats */}
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">SV%</div>
                     <div className="text-xl font-bold text-success">
                       {player.save_pct ? `${Number(player.save_pct).toFixed(2)}%` : '-'}
                     </div>
                   </div>
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">GAA</div>
                     <div className="text-xl font-bold text-primary">
                       {player.goals_against_average ? player.goals_against_average.toFixed(2) : '-'}
                     </div>
                   </div>
                   
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-3">
                     <div className="text-xs text-muted-foreground mb-1">Saves</div>
-                    <div className="text-lg font-bold">
+                    <div className="text-lg sm:text-xl font-bold tracking-tight">
                       {player.saves !== undefined ? (
                         player.shots_against 
                           ? `${player.saves} / ${player.shots_against}`
@@ -275,15 +275,9 @@ const PlayerDetail = () => {
                       ) : '-'}
                     </div>
                   </div>
-                  <div className="bg-secondary/50 rounded-lg p-3">
-                    <div className="text-xs text-muted-foreground mb-1">GKC</div>
-                    <div className="text-xl font-bold">
-                      {player.gkc !== undefined ? player.gkc.toFixed(2) : '-'}
-                    </div>
-                  </div>
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-3">
                     <div className="text-xs text-muted-foreground mb-1">Time</div>
-                    <div className="text-lg font-bold truncate px-1">
+                    <div className="text-lg sm:text-xl font-bold truncate px-0 tracking-tight">
                       {player.play_time || '-'}
                     </div>
                   </div>
@@ -291,20 +285,20 @@ const PlayerDetail = () => {
               ) : (
                 <>
                   {/* Field Player Stats */}
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">G</div>
                     <div className="text-xl font-bold text-success">{player.goals}</div>
                   </div>
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">A</div>
                     <div className="text-xl font-bold text-primary">{player.assists}</div>
                   </div>
                   
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">PTS</div>
                     <div className="text-xl font-bold">{player.points}</div>
                   </div>
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">
                       +/-
                     </div>
@@ -312,7 +306,7 @@ const PlayerDetail = () => {
                       {player.plus_minus > 0 ? '+' : ''}{player.plus_minus}
                     </div>
                   </div>
-                  <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">PIM</div>
                     <div className="text-xl font-bold">{player.pim}</div>
                   </div>
@@ -346,7 +340,6 @@ const PlayerDetail = () => {
                     <div><span className="font-bold">SV%:</span> {t('gameDetail.glossary.sv_pct')}</div>
                     <div><span className="font-bold">GAA:</span> {t('gameDetail.glossary.gaa')}</div>
                     <div><span className="font-bold">Saves:</span> {t('gameDetail.glossary.saves')}</div>
-                    <div><span className="font-bold">GKC:</span> {t('gameDetail.glossary.gkc')}</div>
                     <div><span className="font-bold">Time:</span> {t('gameDetail.glossary.time')}</div>
                   </>
                 ) : (
