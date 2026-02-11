@@ -159,7 +159,10 @@ serve(async (req: Request) => {
         const subscription = typeof tokenData.token === 'string' 
           ? JSON.parse(tokenData.token) 
           : tokenData.token;
-        await webPush.sendNotification(subscription, payload);
+        await webPush.sendNotification(subscription, payload, {
+          urgency: 'high',
+          TTL: 60 * 60,
+        });
         successCount++;
       } catch (error) {
         console.error('Push send error:', error);

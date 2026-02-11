@@ -209,7 +209,10 @@ async function sendMatchNotification(
           return Promise.reject({ message: "Invalid JSON token" });
         }
       }
-      return webpush.sendNotification(subscription, JSON.stringify({ title, body, url }));
+      return webpush.sendNotification(subscription, JSON.stringify({ title, body, url }), {
+        urgency: 'high',
+        TTL: 60 * 60, // 1시간 (경기 알림은 시의성 중요)
+      });
     });
 
     const results = await Promise.allSettled(notifications);

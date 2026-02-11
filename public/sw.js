@@ -44,3 +44,18 @@ self.addEventListener('notificationclick', function(event) {
     })
   );
 });
+
+// 구독 토큰이 브라우저에 의해 갱신될 때 자동 재구독
+self.addEventListener('pushsubscriptionchange', function(event) {
+  console.log('[SW] Push subscription changed, re-subscribing...');
+  event.waitUntil(
+    self.registration.pushManager.subscribe(event.oldSubscription.options)
+      .then(function(newSubscription) {
+        console.log('[SW] Re-subscribed successfully:', newSubscription.endpoint);
+        // 새 토큰을 DB에 저장하려면 앱 재방문 시 use-notifications 훅이 처리
+      })
+      .catch(function(err) {
+        console.error('[SW] Re-subscription failed:', err);
+      })
+  );
+});

@@ -126,7 +126,10 @@ serve(async (req) => {
         }
       }
       
-      return webpush.sendNotification(subscription, notificationPayload)
+      return webpush.sendNotification(subscription, notificationPayload, {
+          urgency: 'high',
+          TTL: 60 * 60,
+        })
         .then(() => ({ 
           endpoint: subscription.endpoint || "unknown",
           status: "fulfilled" as const
