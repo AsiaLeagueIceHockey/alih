@@ -117,10 +117,10 @@ const SEO = ({
       <meta name="twitter:image:alt" content={title} />
       
       {/* Canonical & hreflang */}
-      <link rel="canonical" href={fullUrl} />
-      <link rel="alternate" hrefLang="ko" href={fullUrl} />
-      <link rel="alternate" hrefLang="ja" href={fullUrl} />
-      <link rel="alternate" hrefLang="en" href={fullUrl} />
+      <link rel="canonical" href={`${fullUrl}?lang=${currentLang}`} />
+      <link rel="alternate" hrefLang="ko" href={`${fullUrl}?lang=ko`} />
+      <link rel="alternate" hrefLang="ja" href={`${fullUrl}?lang=ja`} />
+      <link rel="alternate" hrefLang="en" href={`${fullUrl}?lang=en`} />
       <link rel="alternate" hrefLang="x-default" href={fullUrl} />
       
       {/* Theme & App */}

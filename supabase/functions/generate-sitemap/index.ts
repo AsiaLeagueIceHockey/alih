@@ -62,50 +62,52 @@ serve(async (req) => {
       { url: '/news', priority: '0.7', changefreq: 'daily' },
     ];
 
-    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`;
+    const languages = ['ko', 'ja', 'en'];
 
-    // Add static pages
-    for (const page of staticPages) {
-      sitemap += `  <url>
-    <loc>${siteUrl}${page.url}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>
-`;
-    }
-
-    // Add game pages
-    if (schedules) {
-      for (const schedule of schedules) {
-        // match_at이 null일 경우 대비
-        const lastmod = schedule.match_at ? schedule.match_at.split('T')[0] : today;
-        const isCompleted = schedule.game_status === 'Game Finished';
-        const changefreq = isCompleted ? 'monthly' : 'hourly';
-        const priority = isCompleted ? '0.6' : '0.8';
-
-        sitemap += `  <url>
-    <loc>${siteUrl}/schedule/${schedule.game_no}</loc>
+    // Helper: generate URL entry with hreflang links for all languages
+    const generateUrlEntry = (path: string, lastmod: string, changefreq: string, priority: string): string => {
+      let entries = '';
+      for (const lang of languages) {
+        const langUrl = `${siteUrl}${path}${path === '' ? '' : ''}?lang=${lang}`;
+        entries += `  <url>
+    <loc>${langUrl}</loc>
+${languages.map(l => `    <xhtml:link rel="alternate" hreflang="${l}" href="${siteUrl}${path}?lang=${l}"/>`).join('\n')}
+    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}${path}"/>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>
 `;
       }
+      return entries;
+    };
+
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+`;
+
+    // Add static pages
+    for (const page of staticPages) {
+      sitemap += generateUrlEntry(page.url, today, page.changefreq, page.priority);
+    }
+
+    // Add game pages
+    if (schedules) {
+      for (const schedule of schedules) {
+        const lastmod = schedule.match_at ? schedule.match_at.split('T')[0] : today;
+        const isCompleted = schedule.game_status === 'Game Finished';
+        const changefreq = isCompleted ? 'monthly' : 'hourly';
+        const priority = isCompleted ? '0.6' : '0.8';
+
+        sitemap += generateUrlEntry(`/schedule/${schedule.game_no}`, lastmod, changefreq, priority);
+      }
     }
 
     // Add team pages
     if (teams) {
       for (const team of teams) {
-        sitemap += `  <url>
-    <loc>${siteUrl}/team/${team.id}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-`;
+        sitemap += generateUrlEntry(`/team/${team.id}`, today, 'weekly', '0.7');
       }
     }
 
@@ -116,17 +118,10 @@ serve(async (req) => {
 
     if (playerError) {
       console.error('Error fetching players:', playerError);
-      // 선수 페이지 에러가 나도 전체 사이트맵이 실패하지 않도록 로그만 남김
     } else if (players) {
       for (const player of players) {
         const urlParam = player.slug || player.id;
-        sitemap += `  <url>
-    <loc>${siteUrl}/player/${urlParam}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-`;
+        sitemap += generateUrlEntry(`/player/${urlParam}`, today, 'weekly', '0.6');
       }
     }
 
