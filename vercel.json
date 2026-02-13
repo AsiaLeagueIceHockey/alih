@@ -1,4 +1,11 @@
 {
+    "redirects": [
+        {
+            "source": "/sitemap.xml",
+            "destination": "https://nvlpbdyqfzmlrjauvhxx.supabase.co/functions/v1/generate-sitemap",
+            "statusCode": 301
+        }
+    ],
     "rewrites": [
         {
             "source": "/(.*)",
