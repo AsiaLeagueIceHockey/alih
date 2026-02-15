@@ -97,6 +97,7 @@ supabase/functions/
 | `notification_tokens` | 푸시 알림 토큰 (user_id, token, platform) | v1 |
 | `alih_cheers` | 실시간 응원 카운트 | v1 |
 | `alih_comments` | 댓글 (경기/팀/선수) ⭐ NEW | v2 |
+| `alih_predictions` | 승부 예측 (경기별 결과 예측) ⭐ NEW | v6 |
 | `alih_teams` | 팀 정보 (로고, 홈페이지, SNS 등) | - |
 | `alih_schedule` | 경기 일정 + 실시간 스코어 (`live_data`) | - |
 | `alih_standings` | 리그 순위 | - |
@@ -116,6 +117,7 @@ supabase/functions/
 | `v2_comments.sql` | alih_comments (댓글) | ✅ 적용됨 |
 | `v3_fix_rls_policies.sql` | RLS 수정 (댓글 삭제, 프로필 공개) | ⚠️ **실행 필요** |
 | `v4_player_profile.sql` | 선수 프로필 확장 + player_cards | ⚠️ **실행 필요** |
+| `v6_predictions.sql` | 승부 예측 (alih_predictions) | ⚠️ **실행 필요** |
 
 **실행 방법:**
 1. Supabase Dashboard → SQL Editor
@@ -175,6 +177,21 @@ supabase/functions/
 - **디지털 카드**: 발급 후 PNG 다운로드/공유, 후원 모달
 - **후원**: 한국어 → 카카오페이, 영어/일어 → Buy Me a Coffee
 - **DB**: `player_cards` 테이블, serial_number 자동 발급
+
+### 5.9 승부 예측 (Match Prediction) ⭐ NEW
+- 경기 상세 페이지에서 4가지 옵션으로 경기 결과 예측
+  - [홈팀 정규승 | 홈팀 OT/SO승 | 어웨이 OT/SO승 | 어웨이 정규승]
+- **게임 전**: 경기 정보와 라이브 스트리밍 사이에 배치 (투표 가능)
+- **게임 중/후**: 응원하기 카드 아래에 배치 (읽기 전용)
+- **Lazy Registration**: 로그인 없이 클릭 → 로그인 모달 유도 → 로그인 후 자동 저장
+- `alih_predictions` 테이블 + `usePrediction` 훅 + `MatchPrediction` 컴포넌트
+- 다국어 지원 (한국어/일본어/영어)
+
+### 5.10 온보딩 (Onboarding) 개선 ⭐ NEW
+- **진입 조건**: 로그인 했으나 `favorite_team_ids`가 없는 신규 유저
+- **Step 1 (기본 설정)**: 언어 선택 + 응원 팀 선택 (통합)
+- **Step 2 (프로필 설정)**: 닉네임 설정 (랜덤 추천 + 중복 체크)
+- **Step 3 (알림 설정)**: 푸시 알림 권한 요청
 
 ---
 
@@ -361,6 +378,8 @@ CREATE POLICY "Users can delete own comments" ON alih_comments
 
 | 날짜 | 변경 내용 |
 |------|----------|
+| 2026-02-15 | 온보딩 3단계 개편 (닉네임 설정 추가) 👤 |
+| 2026-02-15 | 승부 예측 기능 추가 (MatchPrediction, Lazy Registration) ⭐ |
 | 2026-02-01 | 리마인더 시스템 재설계 (live_data 오염 방지) 🛠️ |
 | 2026-02-01 | 긴급: 경기 상세 크래시 및 푸시 알림 시간대(KST) 수정 🚨 |
 | 2026-02-01 | 선수 포트폴리오 & 디지털 카드 기능 추가 ⭐ |
@@ -379,5 +398,5 @@ CREATE POLICY "Users can delete own comments" ON alih_comments
 
 ---
 
-*마지막 업데이트: 2026-02-01*
+*마지막 업데이트: 2026-02-15*
 

@@ -11,6 +11,7 @@
 | `v3_fix_rls_policies.sql` | RLS 수정 (댓글 삭제, 프로필 공개) | 2026-02-01 |
 | `v4_player_profile.sql` | 선수 프로필 확장 + player_cards | 2026-02-01 |
 | `v5_fix_reminder_system.sql` | 리마인더 컬럼 분리 (Data Corruption 방지) | - |
+| `v6_predictions.sql` | 승부 예측 (alih_predictions) | - |
 
 ## 🚀 실행 방법
 
@@ -32,4 +33,5 @@
 - [x] v2_comments.sql - 프로덕션 적용됨
 - [ ] v3_fix_rls_policies.sql - **실행 필요** ⚠️
 - [ ] v4_player_profile.sql - **실행 필요** ⚠️
+- [ ] v6_predictions.sql - **실행 필요** ⚠️
 

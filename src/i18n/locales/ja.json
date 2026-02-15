@@ -266,6 +266,16 @@
         "liveCheer": "リアルタイム応援",
         "description": "ボタンを押して応援しよう！リアルタイムで反映されます。"
     },
+    "prediction": {
+        "title": "勝敗予想",
+        "regWin": "60分勝",
+        "otWin": "OT/SO勝",
+        "description": "試合結果を予想して他のファンと比べてみよう！",
+        "closed": "予想は締め切られました",
+        "loginToSave": "予想を保存してランキングに登録するにはログインしてください",
+        "voted": "参加完了！",
+        "totalVotes": "{{count}}人参加"
+    },
     "installPrompt": {
         "bannerText": "アプリでもっと快適に！",
         "bannerSubtext": "ホーム画面に追加",
@@ -287,14 +297,21 @@
         "deleteAccount": "会員退会"
     },
     "onboarding": {
-        "step1Title": "設定開始",
-        "step1Desc": "希望の言語を選択してください",
-        "step2Title": "応援チーム選択",
-        "step2Desc": "どのチームを応援しますか？",
+        "step1Title": "基本設定",
+        "step1Desc": "言語と応援チームを選択してください",
+        "step2Title": "プロフィール設定",
+        "step2Desc": "コミュニティで使用するニックネームを決めてください",
         "step3Title": "通知設定",
         "step3Desc": "応援チームの試合開始や得点情報を受け取りましょう",
         "step3Button": "通知を許可して完了",
-        "next": "次へ"
+        "next": "次へ",
+        "nicknameLabel": "ニックネーム",
+        "nicknamePlaceholder": "ニックネーム入力 (例: IceHockeyFan)",
+        "nicknameTaken": "既に使用されているニックネームです",
+        "nicknameAvailable": "使用可能なニックネームです",
+        "checking": "確認中...",
+        "selectLanguage": "言語選択",
+        "selectTeam": "応援チーム選択"
     },
     "search": {
         "placeholder": "選手名、または背番号で検索..."

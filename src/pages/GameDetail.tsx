@@ -12,6 +12,7 @@ import { AlihTeam } from "@/hooks/useTeams";
 import { useScheduleByGameNo, ScheduleGame } from "@/hooks/useSchedules";
 import SEO from "@/components/SEO";
 import CheerBattle from "@/components/game/CheerBattle";
+import MatchPrediction from "@/components/game/MatchPrediction";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
@@ -554,6 +555,16 @@ const GameDetail = () => {
             </div>
           </Card>
 
+          {/* 승부 예측 - 게임 전에만 여기에 표시 (경기 정보와 라이브 스트리밍 사이) */}
+          {!isInProgress && !isFinishedWithLiveData && (
+            <MatchPrediction
+              scheduleId={scheduleData.id}
+              homeTeam={{ id: homeTeam.id, name: homeTeam.name, english_name: homeTeam.english_name, japanese_name: homeTeam.japanese_name, logo: homeTeam.logo }}
+              awayTeam={{ id: awayTeam.id, name: awayTeam.name, english_name: awayTeam.english_name, japanese_name: awayTeam.japanese_name, logo: awayTeam.logo }}
+              disabled={false}
+            />
+          )}
+
           {/* 라이브 스트리밍 */}
           <Card className="p-4 mb-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -588,6 +599,16 @@ const GameDetail = () => {
             awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
             isLive={isInProgress}
           />
+
+          {/* 승부 예측 - 게임 중/후에는 응원하기 아래에 표시 */}
+          {(isInProgress || isFinishedWithLiveData) && (
+            <MatchPrediction
+              scheduleId={scheduleData.id}
+              homeTeam={{ id: homeTeam.id, name: homeTeam.name, english_name: homeTeam.english_name, japanese_name: homeTeam.japanese_name, logo: homeTeam.logo }}
+              awayTeam={{ id: awayTeam.id, name: awayTeam.name, english_name: awayTeam.english_name, japanese_name: awayTeam.japanese_name, logo: awayTeam.logo }}
+              disabled={true}
+            />
+          )}
 
           {/* 댓글 섹션 */}
           <CommentSection entityType="game" entityId={scheduleData.id} />
@@ -962,6 +983,14 @@ const GameDetail = () => {
           homeTeam={{ id: homeTeam.id, name: homeTeam.name, logo: homeTeam.logo }}
           awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
           isLive={false}
+        />
+
+        {/* 승부 예측 - 완료된 경기: 응원하기 아래, 읽기 전용 */}
+        <MatchPrediction
+          scheduleId={scheduleData?.id || 0}
+          homeTeam={{ id: homeTeam.id, name: homeTeam.name, english_name: homeTeam.english_name, japanese_name: homeTeam.japanese_name, logo: homeTeam.logo }}
+          awayTeam={{ id: awayTeam.id, name: awayTeam.name, english_name: awayTeam.english_name, japanese_name: awayTeam.japanese_name, logo: awayTeam.logo }}
+          disabled={true}
         />
 
         {/* 댓글 섹션 */}

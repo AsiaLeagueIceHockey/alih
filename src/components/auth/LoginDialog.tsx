@@ -57,7 +57,11 @@ const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
             onClick={handleKakaoLogin}
             disabled={isLoading}
           >
-            <span className="w-5 h-5 mr-3 flex items-center justify-center text-lg">●</span>
+            <img 
+              src="https://nvlpbdyqfzmlrjauvhxx.supabase.co/storage/v1/object/public/alih/kakaotalk.png" 
+              alt="Kakao" 
+              className="w-5 h-5 mr-3"
+            />
             {i18n.language === 'ko' ? 'Kakao로 계속하기' : 
              i18n.language === 'ja' ? 'Kakaoで続ける' : 
              'Continue with Kakao'}

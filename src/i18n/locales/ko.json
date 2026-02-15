@@ -228,6 +228,16 @@
         "liveCheer": "실시간 응원",
         "description": "버튼을 눌러 응원하세요! 실시간으로 반영됩니다."
     },
+    "prediction": {
+        "title": "승부 예측",
+        "regWin": "정규승",
+        "otWin": "OT/SO승",
+        "description": "경기 결과를 예측하고 다른 팬들과 비교해보세요!",
+        "closed": "예측이 마감되었습니다",
+        "loginToSave": "예측을 저장하고 랭킹에 등록하려면 로그인하세요",
+        "voted": "참여 완료!",
+        "totalVotes": "{{count}}명 참여"
+    },
     "team": {
         "roster": "선수단",
         "info": {
@@ -287,14 +297,21 @@
         "deleteAccount": "회원탈퇴"
     },
     "onboarding": {
-        "step1Title": "설정 시작",
-        "step1Desc": "선호하는 언어를 선택해주세요",
-        "step2Title": "응원 팀 선택",
-        "step2Desc": "어떤 팀을 응원하시나요?",
+        "step1Title": "기본 설정",
+        "step1Desc": "언어와 응원하는 팀을 선택해주세요",
+        "step2Title": "프로필 설정",
+        "step2Desc": "커뮤니티에서 사용할 닉네임을 정해주세요",
         "step3Title": "알림 설정",
         "step3Desc": "응원하는 팀의 경기 시작과 득점 소식을 받아보세요",
         "step3Button": "알림 허용 및 완료",
-        "next": "다음"
+        "next": "다음",
+        "nicknameLabel": "닉네임",
+        "nicknamePlaceholder": "닉네임 입력 (예: IceHockeyFan)",
+        "nicknameTaken": "이미 사용 중인 닉네임입니다.",
+        "nicknameAvailable": "사용 가능한 닉네임입니다.",
+        "checking": "확인 중...",
+        "selectLanguage": "언어 선택",
+        "selectTeam": "응원 팀 선택"
     },
     "search": {
         "placeholder": "선수 이름 또는 등번호 검색..."

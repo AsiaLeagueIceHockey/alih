@@ -266,6 +266,16 @@
         "liveCheer": "Live Cheer",
         "description": "Press the button to cheer! It's reflected in real-time."
     },
+    "prediction": {
+        "title": "Match Prediction",
+        "regWin": "Reg Win",
+        "otWin": "OT/SO Win",
+        "description": "Predict the result and compare with other fans!",
+        "closed": "Predictions are closed",
+        "loginToSave": "Log in to save your prediction and join the rankings",
+        "voted": "Voted!",
+        "totalVotes": "{{count}} votes"
+    },
     "installPrompt": {
         "bannerText": "Get the app experience!",
         "bannerSubtext": "Add to Home Screen",
@@ -287,14 +297,21 @@
         "deleteAccount": "Delete Account"
     },
     "onboarding": {
-        "step1Title": "Start Setup",
-        "step1Desc": "Select your preferred language",
-        "step2Title": "Favorite Team",
-        "step2Desc": "Which team do you support?",
+        "step1Title": "Basic Setup",
+        "step1Desc": "Select your language and favorite team",
+        "step2Title": "Profile Setup",
+        "step2Desc": "Set a nickname for the community",
         "step3Title": "Notifications",
         "step3Desc": "Get updates when your team plays or scores",
         "step3Button": "Enable Notifications & Finish",
-        "next": "Next"
+        "next": "Next",
+        "nicknameLabel": "Nickname",
+        "nicknamePlaceholder": "Enter nickname (e.g. IceHockeyFan)",
+        "nicknameTaken": "Nickname is already taken",
+        "nicknameAvailable": "Nickname is available",
+        "checking": "Checking...",
+        "selectLanguage": "Select Language",
+        "selectTeam": "Favorite Team"
     },
     "search": {
         "placeholder": "Search by name or number..."
