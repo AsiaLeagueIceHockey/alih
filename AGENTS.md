@@ -183,7 +183,7 @@ supabase/functions/
   - [홈팀 정규승 | 홈팀 OT/SO승 | 어웨이 OT/SO승 | 어웨이 정규승]
 - **게임 전**: 경기 정보와 라이브 스트리밍 사이에 배치 (투표 가능)
 - **게임 중/후**: 응원하기 카드 아래에 배치 (읽기 전용)
-- **Lazy Registration**: 로그인 없이 클릭 → **"예측을 저장하려면 로그인하세요"** 메시지와 함께 로그인 모달 유도
+- **Lazy Registration**: 로그인 없이 클릭 → 로그인 모달 유도
 - **Persistence**: 비로그인 상태의 예측 선택은 로그인 성공 즉시 자동으로 DB에 저장됨 (UX 개선)
 - `alih_predictions` 테이블 + `usePrediction` 훅 + `MatchPrediction` 컴포넌트
 - 다국어 지원 (한국어/일본어/영어)

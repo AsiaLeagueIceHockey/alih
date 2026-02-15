@@ -160,7 +160,6 @@ const MatchPrediction = ({ scheduleId, homeTeam, awayTeam, disabled = false }: M
       <LoginDialog
         open={showLoginModal}
         onOpenChange={setShowLoginModal}
-        description={t('auth.predictionLoginDesc')}
       />
     </>
   );
