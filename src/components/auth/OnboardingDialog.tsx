@@ -125,9 +125,6 @@ const OnboardingDialog = () => {
         await updateProfile({ preferred_language: selectedLang });
         setStep(2);
     } else if (step === 2) {
-        // Save Team
-         await updateProfile({ favorite_team_ids: selectedTeamIds });
-         
          // Prepare Step 3 (Nickname)
          if (!nickname) {
             const randomNum = Math.floor(Math.random() * 90000) + 10000;
@@ -144,8 +141,11 @@ const OnboardingDialog = () => {
 
   const handleComplete = async () => {
     if (step === 3 && (nicknameStatus === 'available' || profile?.nickname === nickname)) {
-        // Save Nickname
-        await updateProfile({ nickname: nickname });
+        // Save Nickname AND Teams to complete onboarding
+        await updateProfile({ 
+            nickname: nickname,
+            favorite_team_ids: selectedTeamIds 
+        });
         setOpen(false);
         // Page reload or state update handled by AuthContext/App
         window.location.reload(); // Force reload to ensure all states (like InstallPrompt) pick up the completion

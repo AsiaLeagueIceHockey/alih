@@ -35,12 +35,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Colorful Kakao Icon
-const KakaoIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true" fill="currentColor">
-    <path d="M12 3C5.9 3 1 6.9 1 11.8c0 2.8 1.6 5.3 4.1 6.9-0.1 0.6-0.4 2.2-0.4 2.3 0 0.1 0 0.2 0.1 0.2 0.2 0.1 2.3-1.6 2.7-1.8 1.4 0.4 2.8 0.6 4.3 0.6 6.1 0 11-3.9 11-8.8S17.1 3 12 3z" />
-  </svg>
-);
+
 
 const UserMenu = () => {
   const { user, profile, logout, signInWithGoogle, signInWithKakao, updateProfile } = useAuth();
@@ -89,7 +84,13 @@ const UserMenu = () => {
                 className="w-full h-12 gap-2 text-base bg-[#FEE500] text-[#000000] hover:bg-[#FEE500]/90 border-[#FEE500] justify-start pl-4"
                 onClick={signInWithKakao}
               >
-                <div className="w-6 flex justify-center"><KakaoIcon /></div>
+                <div className="w-6 flex justify-center">
+                  <img 
+                    src="https://nvlpbdyqfzmlrjauvhxx.supabase.co/storage/v1/object/public/alih/kakaotalk.png" 
+                    alt="Kakao" 
+                    className="w-5 h-5"
+                  />
+                </div>
                 <span className="flex-1 text-center pr-6">{t('auth.kakao', 'Continue with Kakao')}</span>
               </Button>
             </div>
@@ -150,10 +151,10 @@ const UserMenu = () => {
             <span>{t('auth.logout', 'Log out')}</span>
           </DropdownMenuItem>
           
-          <DropdownMenuItem className="text-destructive focus:text-destructive" disabled>
+          {/* <DropdownMenuItem className="text-destructive focus:text-destructive" disabled>
             <Trash2 className="mr-2 h-4 w-4" />
             <span>{t('auth.deleteAccount', 'Delete Account')}</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
 
