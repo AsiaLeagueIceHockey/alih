@@ -7,9 +7,10 @@ import { useAuth } from '@/context/AuthContext';
 interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  description?: string;
 }
 
-const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
+const LoginDialog = ({ open, onOpenChange, description }: LoginDialogProps) => {
   const { i18n } = useTranslation();
   const { signInWithGoogle, signInWithKakao } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +36,11 @@ const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">{getTitle()}</DialogTitle>
+          {description && (
+            <p className="text-center text-sm text-destructive font-medium mt-2 whitespace-pre-wrap">
+              {description}
+            </p>
+          )}
         </DialogHeader>
         <div className="flex flex-col gap-3 mt-4">
           <Button

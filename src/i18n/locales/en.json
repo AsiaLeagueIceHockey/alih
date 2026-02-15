@@ -272,7 +272,7 @@
         "otWin": "OT/SO Win",
         "description": "Predict the result and compare with other fans!",
         "closed": "Predictions are closed",
-        "loginToSave": "Log in to save your prediction and join the rankings",
+        "loginToSave": "Login to save",
         "voted": "Voted!",
         "totalVotes": "{{count}} votes"
     },
@@ -292,6 +292,7 @@
         "loginTitle": "Login / Sign Up",
         "google": "Continue with Google",
         "kakao": "Continue with Kakao",
+        "predictionLoginDesc": "Login to save your prediction and join the ranking (Instant Login)",
         "myPage": "My Page",
         "logout": "Logout",
         "deleteAccount": "Delete Account"

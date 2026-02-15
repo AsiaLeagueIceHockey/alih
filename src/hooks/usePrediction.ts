@@ -119,12 +119,18 @@ export const usePrediction = (scheduleId: number) => {
 
   // 로그인 후 pending prediction 자동 저장
   useEffect(() => {
-    if (user && scheduleId) {
+    if (user && scheduleId && !submitMutation.isPending) {
       const pending = getPendingPrediction(scheduleId);
+      // userPrediction이 없고(아직 투표 안함), pending이 있으면 제출
       if (pending && !userPrediction) {
-        submitMutation.mutate(pending);
-        removePendingPrediction(scheduleId);
-        setPendingPredictionState(null);
+        submitMutation.mutateAsync(pending)
+          .then(() => {
+            removePendingPrediction(scheduleId);
+            setPendingPredictionState(null);
+          })
+          .catch((error) => {
+            console.error('Failed to submit pending prediction:', error);
+          });
       }
     }
   }, [user, scheduleId, userPrediction]);

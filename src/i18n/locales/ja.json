@@ -272,7 +272,7 @@
         "otWin": "OT/SO勝",
         "description": "試合結果を予想して他のファンと比べてみよう！",
         "closed": "予想は締め切られました",
-        "loginToSave": "予想を保存してランキングに登録するにはログインしてください",
+        "loginToSave": "ログインして保存",
         "voted": "参加完了！",
         "totalVotes": "{{count}}人参加"
     },
@@ -292,6 +292,7 @@
         "loginTitle": "ログイン / 新規登録",
         "google": "Googleで続ける",
         "kakao": "Kakaoで続ける",
+        "predictionLoginDesc": "予想を保存してランキングに参加するにはログインしてください（1秒ログイン）",
         "myPage": "マイページ",
         "logout": "ログアウト",
         "deleteAccount": "会員退会"
