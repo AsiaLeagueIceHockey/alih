@@ -277,8 +277,8 @@
         "english": "English"
     },
     "installPrompt": {
-        "bannerText": "앱으로 더 쾌적하게!",
-        "bannerSubtext": "홈 화면에 추가하세요",
+        "bannerText": "실시간 알림을 받아보세요!",
+        "bannerSubtext": "홈 화면에 추가하면 알림을 놓치지 않습니다",
         "installButton": "설치",
         "modalTitle": "홈 화면에 추가하기",
         "modalDescription": "Safari에서 아래 단계를 따라주세요",
@@ -297,14 +297,14 @@
         "deleteAccount": "회원탈퇴"
     },
     "onboarding": {
-        "step1Title": "기본 설정",
-        "step1Desc": "언어와 응원하는 팀을 선택해주세요",
-        "step2Title": "프로필 설정",
-        "step2Desc": "커뮤니티에서 사용할 닉네임을 정해주세요",
-        "step3Title": "알림 설정",
-        "step3Desc": "응원하는 팀의 경기 시작과 득점 소식을 받아보세요",
-        "step3Button": "알림 허용 및 완료",
+        "step1Title": "언어 설정",
+        "step1Desc": "선호하는 언어를 선택해주세요",
+        "step2Title": "응원 팀 선택",
+        "step2Desc": "어떤 팀을 응원하시나요?",
+        "step3Title": "프로필 설정",
+        "step3Desc": "사용할 닉네임을 정해주세요",
         "next": "다음",
+        "complete": "완료",
         "nicknameLabel": "닉네임",
         "nicknamePlaceholder": "닉네임 입력 (예: IceHockeyFan)",
         "nicknameTaken": "이미 사용 중인 닉네임입니다.",

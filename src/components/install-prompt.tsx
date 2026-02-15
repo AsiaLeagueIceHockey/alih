@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
@@ -17,9 +18,25 @@ const InstallPrompt = () => {
     setShowIOSGuide,
   } = useInstallPrompt();
 
-  // 숨김 조건: 이미 PWA, 닫음 처리됨, 또는 설치 불가능 상태(Android)이면서 iOS도 아님
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    // 20초 뒤에 배너 노출
+    const timer = setTimeout(() => {
+      setShowBanner(true);
+    }, 20000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 숨김 조건: 이미 PWA, 닫음 처리됨, 또는 시간 미도달 (Android/iOS 무관하게 PWA 아니면 노출 시도)
+  // 단, iOS의 '설치' 가이드는 OS 제한으로 Standalone이 아닐 때만 의미 있음
+  // Android는 Standalone이면 숨김 (이미 설치됨)
+  // 여기서는 "알림 유도"가 목적이므로, Standalone이라도 알림 권한이 없으면 보여주는 로직이 이상적이나
+  // 현재 요구사항은 "20초 뒤 노출"에 집중.
+  // 기존 로직 유지하되 timer 추가.
   const shouldHide =
-    isStandalone || isDismissed || (!isInstallable && !isIOS);
+    !showBanner || isStandalone || isDismissed || (!isInstallable && !isIOS);
 
   if (shouldHide) {
     return null;
