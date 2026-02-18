@@ -6,7 +6,48 @@
         "highlights": "Highlights",
         "players": "Players",
         "standings": "Standings",
-        "news": "News"
+        "news": "News",
+        "myCards": "My Card Collection"
+    },
+    "myCards": {
+        "collected": "{{count}} cards collected"
+    },
+    "playerDetail": {
+        "notFound": "Player not found.",
+        "seasonStats": "25-26 Season Stats",
+        "leagueRank": "#{{rank}} in Goals",
+        "draftInfo": "Draft Info",
+        "about": "About",
+        "career": "Career History",
+        "myCardTitle": "My Player Card",
+        "issueNew": "Issue New",
+        "viewMyCard": "View My Card",
+        "noCardTitle": "Get This Player's Card!",
+        "noCardDesc": "Issue a personalized card with your nickname!",
+        "issueCard": "Issue Card Now",
+        "yearSuffix": "",
+        "ageSuffix": " yrs",
+        "position": {
+            "F": "Forward",
+            "D": "Defenseman",
+            "G": "Goaltender"
+        }
+    },
+    "cardGeneration": {
+        "steps": {
+            "checking": "Checking 25-26 Season Stats...",
+            "verifying": "Verifying Team Info...",
+            "printing": "Designing Card..."
+        },
+        "generatingTitle": "Generating Card...",
+        "generatingDesc": "Please wait a moment.",
+        "errorTitle": "Error Occurred",
+        "retry": "Retry",
+        "completedTitle": "Completed!",
+        "completedDesc": "Your player card is ready.",
+        "coffeePrompt": "Enjoyed this? Buy the developer a coffee!",
+        "buyCoffee": "Buy me a coffee",
+        "close": "Close"
     },
     "seo": {
         "leagueName": "Asia League Ice Hockey"
@@ -295,7 +336,12 @@
         "predictionLoginDesc": "Login to save your prediction and join the ranking (Instant Login)",
         "myPage": "My Page",
         "logout": "Logout",
-        "deleteAccount": "Delete Account"
+        "deleteAccount": "Delete Account",
+        "loginRequired": "Login required"
+    },
+    "common": {
+        "back": "Back",
+        "browsePlayers": "Browse Players"
     },
     "onboarding": {
         "step1Title": "Language",

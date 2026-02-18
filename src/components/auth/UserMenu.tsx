@@ -13,7 +13,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon, Globe, Trash2 } from "lucide-react";
+import { LogOut, User as UserIcon, Globe, Trash2, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -141,6 +141,13 @@ const UserMenu = () => {
             <DropdownMenuItem onClick={() => setShowSettingsModal(true)}>
                <UserIcon className="mr-2 h-4 w-4" />
                <span>{t('auth.myPage', 'My Page')}</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild>
+               <a href="/my-cards" className="flex items-center cursor-pointer">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>{t('nav.myCards', 'My Cards')}</span>
+               </a>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           

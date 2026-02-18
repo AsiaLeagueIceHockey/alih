@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useTeams } from "@/hooks/useTeams";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
-import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2, Pencil, Check, X, AlertCircle, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2, Pencil, Check, X, AlertCircle, Loader2, CreditCard } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { externalSupabase } from "@/lib/supabase-external";
 
@@ -384,6 +385,12 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
             {/* Actions */}
             <div className="space-y-2">
+              <Link to="/my-cards" onClick={() => onOpenChange(false)}>
+                <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground">
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  {i18n.language === 'ko' ? "내 선수 카드" : "My Player Cards"}
+                </Button>
+              </Link>
               <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={logout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 {t('auth.logout', 'Log out')}

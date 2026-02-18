@@ -35,6 +35,7 @@ export interface Team {
   instagram_url: string;
   team_info: TeamInfo | null;
   recent_videos: RecentVideo[] | null;
+  team_color?: string;
 }
 
 export interface DraftInfo {

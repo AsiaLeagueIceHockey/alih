@@ -6,7 +6,48 @@
         "highlights": "하이라이트",
         "players": "선수",
         "standings": "순위",
-        "news": "뉴스"
+        "news": "뉴스",
+        "myCards": "나의 카드 모음"
+    },
+    "myCards": {
+        "collected": "{{count}}장의 카드 수집"
+    },
+    "playerDetail": {
+        "notFound": "선수를 찾을 수 없습니다.",
+        "seasonStats": "25-26 시즌 스탯",
+        "leagueRank": "리그 득점 {{rank}}위",
+        "draftInfo": "드래프트 정보",
+        "about": "선수 소개",
+        "career": "커리어",
+        "myCardTitle": "나의 선수 카드",
+        "issueNew": "새로 발급받기",
+        "viewMyCard": "내 카드 보기",
+        "noCardTitle": "이 선수의 카드를 발급하세요!",
+        "noCardDesc": "내 닉네임이 새겨진 선수 카드를 발급 받을 수 있어요.",
+        "issueCard": "선수 카드 발급 받기",
+        "yearSuffix": "년",
+        "ageSuffix": "세",
+        "position": {
+            "F": "포워드",
+            "D": "수비수",
+            "G": "골리"
+        }
+    },
+    "cardGeneration": {
+        "steps": {
+            "checking": "25-26 시즌 스탯 확인 중...",
+            "verifying": "팀 정보 확인 중...",
+            "printing": "카드 디자인 진행 중..."
+        },
+        "generatingTitle": "카드 발급 진행 중",
+        "generatingDesc": "잠시만 기다려주세요.",
+        "errorTitle": "오류가 발생했습니다",
+        "retry": "다시 시도",
+        "completedTitle": "발급 완료!",
+        "completedDesc": "나만의 선수 카드가 발급되었습니다.",
+        "coffeePrompt": "즐겁게 보셨나요? 개발자에게 커피 한 잔 어때요?",
+        "buyCoffee": "커피 한 잔 후원하기",
+        "close": "닫기"
     },
     "seo": {
         "leagueName": "아시아리그 아이스하키"
@@ -295,7 +336,12 @@
         "predictionLoginDesc": "예측을 저장하고 랭킹에 등록하려면 로그인하세요 (카카오/구글 1초 로그인)",
         "myPage": "마이페이지",
         "logout": "로그아웃",
-        "deleteAccount": "회원탈퇴"
+        "deleteAccount": "회원탈퇴",
+        "loginRequired": "로그인이 필요합니다"
+    },
+    "common": {
+        "back": "뒤로",
+        "browsePlayers": "선수 목록 보기"
     },
     "onboarding": {
         "step1Title": "언어 설정",

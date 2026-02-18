@@ -29,7 +29,8 @@ const News = lazy(() => import("./pages/News"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const TeamRoster = lazy(() => import("./pages/TeamRoster"));
 const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
-const PlayerCard = lazy(() => import("./pages/PlayerCard"));
+const PlayerCardWrapper = lazy(() => import("./components/player/PlayerCardWrapper"));
+const MyCards = lazy(() => import("./components/player/MyCards"));
 const InstagramScore = lazy(() => import("./pages/InstagramScore"));
 const InstagramPreview = lazy(() => import("./pages/InstagramPreview"));
 const InstagramGoals = lazy(() => import("./pages/InstagramGoals"));
@@ -196,7 +197,12 @@ const App = () => {
               } />
               <Route path="/player/:playerSlug/card" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <PlayerCard />
+                  <PlayerCardWrapper />
+                </Suspense>
+              } />
+              <Route path="/my-cards" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <MyCards />
                 </Suspense>
               } />
               <Route path="/news" element={

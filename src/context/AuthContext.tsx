@@ -19,6 +19,8 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithKakao: () => Promise<void>;
+  signInWithEmail: (email: string, password?: string) => Promise<void>;
+  signUpWithEmail: (email: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   isOnboardingCompleted: boolean;
@@ -132,6 +134,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const signInWithEmail = async (email: string, password?: string) => {
+    if (password) {
+      const { error } = await externalSupabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (error) throw error;
+    } else {
+      const { error } = await externalSupabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.href,
+        },
+      });
+      if (error) throw error;
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password?: string) => {
+     // Local dev only, password required
+     if (!password) throw new Error("Password required for sign up");
+     const { error } = await externalSupabase.auth.signUp({
+        email,
+        password,
+     });
+     if (error) throw error;
+  };
+
   const logout = async () => {
     await externalSupabase.auth.signOut();
     setProfile(null);
@@ -172,6 +202,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isLoading,
         signInWithGoogle,
         signInWithKakao,
+        signInWithEmail,
+        signUpWithEmail,
         logout,
         updateProfile,
         isOnboardingCompleted,

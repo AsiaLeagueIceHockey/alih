@@ -7,6 +7,7 @@ export interface AlihTeam {
   english_name: string;
   japanese_name?: string;
   logo: string;
+  team_color?: string;
 }
 
 export const useTeams = () => {

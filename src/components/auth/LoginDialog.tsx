@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,12 +7,21 @@ import { useAuth } from '@/context/AuthContext';
 interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  triggerLocation?: string;
 }
 
-const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
+const LoginDialog = ({ open, onOpenChange, triggerLocation }: LoginDialogProps) => {
   const { i18n } = useTranslation();
-  const { signInWithGoogle, signInWithKakao } = useAuth();
+  const { signInWithGoogle, signInWithKakao, signInWithEmail, signUpWithEmail } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  useEffect(() => {
+    // Show if localhost OR if we are in dev mode (import.meta.env.DEV)
+    setIsLocalhost(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || import.meta.env.DEV);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -24,6 +33,37 @@ const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
     await signInWithKakao();
   };
 
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    
+    setIsLoading(true);
+    try {
+      await signInWithEmail(email, password);
+      onOpenChange(false);
+    } catch (error) {
+      console.error(error);
+      alert('Login failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async () => {
+    if (!email || !password) return;
+    setIsLoading(true);
+    try {
+      await signUpWithEmail(email, password);
+      alert("Sign up successful! Please check your email to confirm.");
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error(error);
+      alert(`Sign up failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getTitle = () => {
     if (i18n.language === 'ko') return '로그인 / 회원가입';
     if (i18n.language === 'ja') return 'ログイン / 新規登録';
@@ -32,7 +72,7 @@ const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-background text-foreground">
         <DialogHeader>
           <DialogTitle className="text-center">{getTitle()}</DialogTitle>
         </DialogHeader>
@@ -66,6 +106,36 @@ const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
              i18n.language === 'ja' ? 'Kakaoで続ける' : 
              'Continue with Kakao'}
           </Button>
+
+          {isLocalhost && (
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-xs text-muted-foreground text-center mb-2">Dev Only (Email/Pass)</p>
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full px-3 py-2 border rounded text-sm bg-background text-foreground"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full px-3 py-2 border rounded text-sm bg-background text-foreground"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button type="button" onClick={handleEmailLogin} className="flex-1" disabled={isLoading}>
+                    Login
+                  </Button>
+                  <Button type="button" onClick={handleEmailSignUp} variant="outline" className="flex-1" disabled={isLoading}>
+                    Sign Up
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

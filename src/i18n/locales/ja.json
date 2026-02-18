@@ -5,8 +5,49 @@
         "schedule": "日程",
         "highlights": "動画",
         "players": "選手",
-        "standings": "順位",
-        "news": "ニュース"
+        "standings": "順位表",
+        "news": "ニュース",
+        "myCards": "マイカード"
+    },
+    "myCards": {
+        "collected": "{{count}}枚のカードを収集"
+    },
+    "playerDetail": {
+        "notFound": "選手が見つかりません。",
+        "seasonStats": "25-26 シーズン成績",
+        "leagueRank": "リーグ得点{{rank}}位",
+        "draftInfo": "ドラフト情報",
+        "about": "選手紹介",
+        "career": "経歴",
+        "myCardTitle": "マイプレイヤーカード",
+        "issueNew": "新しく発行",
+        "viewMyCard": "カードを見る",
+        "noCardTitle": "この選手のカードを発行しよう！",
+        "noCardDesc": "自分のニックネーム入りの選手カードを発行できます！",
+        "issueCard": "選手カードを発行する",
+        "yearSuffix": "年",
+        "ageSuffix": "歳",
+        "position": {
+            "F": "フォワード",
+            "D": "ディフェンス",
+            "G": "ゴーリー"
+        }
+    },
+    "cardGeneration": {
+        "steps": {
+            "checking": "25-26シーズン成績確認中...",
+            "verifying": "チーム情報を確認中...",
+            "printing": "カードをデザイン中..."
+        },
+        "generatingTitle": "カード発行中",
+        "generatingDesc": "少々お待ちください。",
+        "errorTitle": "エラーが発生しました",
+        "retry": "再試行",
+        "completedTitle": "発行完了！",
+        "completedDesc": "あなただけの選手カードが発行されました。",
+        "coffeePrompt": "楽しめましたか？開発者にコーヒー一杯いかがですか？",
+        "buyCoffee": "コーヒーを奢る",
+        "close": "閉じる"
     },
     "seo": {
         "leagueName": "アジアリーグアイスホッケー"
@@ -295,7 +336,12 @@
         "predictionLoginDesc": "予想を保存してランキングに参加するにはログインしてください（1秒ログイン）",
         "myPage": "マイページ",
         "logout": "ログアウト",
-        "deleteAccount": "会員退会"
+        "deleteAccount": "会員退会",
+        "loginRequired": "ログインが必要です"
+    },
+    "common": {
+        "back": "戻る",
+        "browsePlayers": "選手一覧を見る"
     },
     "onboarding": {
         "step1Title": "言語設定",

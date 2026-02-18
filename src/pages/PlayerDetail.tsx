@@ -1,23 +1,38 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { externalSupabase } from "@/lib/supabase-external";
-import { Loader2, ChevronLeft, Instagram, Calendar, MapPin, Ruler, Weight, Trophy } from "lucide-react";
+import { Loader2, ChevronLeft, Instagram, Calendar, MapPin, Ruler, Weight, Trophy, CreditCard, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import SEO from "@/components/SEO";
 import CommentSection from "@/components/comments/CommentSection";
-import { Player, Team, CareerHistory } from "@/types/team";
+import { Player, Team, CareerHistory, PlayerCard as PlayerCardType } from "@/types/team";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format, differenceInYears } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
+import CardGenerationOverlay from "@/components/player/CardGenerationOverlay";
+import PlayerCard from "@/components/player/PlayerCard";
+import LoginDialog from "@/components/auth/LoginDialog";
+import CardDetailModal from "@/components/player/CardDetailModal";
 
 const PlayerDetail = () => {
   const { playerSlug } = useParams<{ playerSlug: string }>();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
+  // State for card generation
+  const [showGenerationOverlay, setShowGenerationOverlay] = useState(false);
+  const [showCardDetail, setShowCardDetail] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  
   // Detect if the param is a numeric ID (legacy support) or a slug
   const isNumericId = playerSlug && /^\d+$/.test(playerSlug);
 
@@ -46,7 +61,7 @@ const PlayerDetail = () => {
 
   // 팀 정보 조회
   const { data: team } = useQuery({
-    queryKey: ['team-for-player', player?.team_id],
+    queryKey: ['team-detail-v2', player?.team_id],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_teams')
@@ -80,6 +95,40 @@ const PlayerDetail = () => {
     staleTime: 1000 * 60 * 60,
   });
 
+  // 내 보유 카드 조회
+  const { data: myCard, refetch: refetchMyCard } = useQuery({
+    queryKey: ['my-player-card', player?.id, user?.id],
+    queryFn: async () => {
+      if (!user || !player) return null;
+      const { data, error } = await externalSupabase
+        .from('player_cards')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('player_id', player.id)
+        .maybeSingle(); // Use maybeSingle to avoid 406 on no rows
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data as PlayerCardType | null;
+    },
+    enabled: !!player && !!user,
+  });
+
+  // Handle Issue Card Click
+  const handleIssueCardClick = () => {
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
+    setShowGenerationOverlay(true);
+  };
+
+  const handleCardGenerated = (card: PlayerCardType) => {
+    // Invalidate queries to refresh card status
+    queryClient.invalidateQueries({ queryKey: ['my-player-card'] });
+    refetchMyCard();
+    // Overlay will show success state, user closes it manually
+  };
+
   // 다국어 선수명
   const getLocalizedPlayerName = () => {
     if (!player) return '';
@@ -91,14 +140,11 @@ const PlayerDetail = () => {
     }
   };
 
+
   // 포지션 라벨
   const getPositionLabel = (pos: string) => {
-    const positions: Record<string, Record<string, string>> = {
-      'F': { ko: '포워드', en: 'Forward', ja: 'フォワード' },
-      'D': { ko: '수비수', en: 'Defenseman', ja: 'ディフェンス' },
-      'G': { ko: '골리', en: 'Goaltender', ja: 'ゴーリー' },
-    };
-    return positions[pos]?.[currentLang] || pos;
+    // @ts-ignore
+    return t(`playerDetail.position.${pos}`, pos); 
   };
 
   // 나이 계산
@@ -119,7 +165,7 @@ const PlayerDetail = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <p className="text-muted-foreground">
-          {currentLang === 'ko' ? '선수를 찾을 수 없습니다.' : 'Player not found.'}
+          {t('playerDetail.notFound')}
         </p>
         <Link to="/">
           <Button variant="outline">
@@ -212,7 +258,7 @@ const PlayerDetail = () => {
                   {getAge() && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {getAge()}{currentLang === 'ko' ? '세' : ' yrs'}
+                      {getAge()}{t('playerDetail.ageSuffix')}
                     </span>
                   )}
                   {player.height_cm && (
@@ -238,7 +284,7 @@ const PlayerDetail = () => {
           {/* Stats Dashboard */}
           <Card className="p-4">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-              📊 {currentLang === 'ko' ? '25-26 시즌 스탯' : currentLang === 'ja' ? '25-26 シーズン成績' : '25-26 Season Stats'}
+              📊 {t('playerDetail.seasonStats')}
             </h2>
             
             <div className="grid grid-cols-6 gap-2 text-center">
@@ -319,11 +365,7 @@ const PlayerDetail = () => {
               <div className="mt-4 p-3 bg-primary/10 rounded-lg flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <span className="font-medium">
-                  {currentLang === 'ko' 
-                    ? `리그 득점 ${goalRank}위` 
-                    : currentLang === 'ja'
-                      ? `リーグ得点${goalRank}位`
-                      : `#${goalRank} in Goals`}
+                  {t('playerDetail.leagueRank', { rank: goalRank })}
                 </span>
               </div>
             )}
@@ -362,12 +404,12 @@ const PlayerDetail = () => {
           {player.draft_info && (
             <Card className="p-4">
               <h2 className="text-lg font-bold mb-3">
-                🏒 {currentLang === 'ko' ? '드래프트 정보' : 'Draft Info'}
+                🏒 {t('playerDetail.draftInfo')}
               </h2>
               <div className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">{player.draft_info.year}</span>
                 {' '}
-                {currentLang === 'ko' ? '년' : ''} 
+                {t('playerDetail.yearSuffix')} 
                 {' '}
                 {player.draft_info.team}
                 {' - '}
@@ -380,7 +422,7 @@ const PlayerDetail = () => {
           {player.bio_markdown && (
             <Card className="p-4">
               <h2 className="text-lg font-bold mb-3">
-                📜 {currentLang === 'ko' ? '선수 소개' : currentLang === 'ja' ? '選手紹介' : 'About'}
+                📜 {t('playerDetail.about')}
               </h2>
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 {/* TODO: react-markdown 추가 시 마크다운 렌더링 */}
@@ -395,7 +437,7 @@ const PlayerDetail = () => {
           {player.career_history && player.career_history.length > 0 && (
             <Card className="p-4">
               <h2 className="text-lg font-bold mb-3">
-                📋 {currentLang === 'ko' ? '커리어' : 'Career History'}
+                📋 {t('playerDetail.career')}
               </h2>
               <div className="space-y-2">
                 {player.career_history.map((career: CareerHistory, idx: number) => (
@@ -417,22 +459,48 @@ const PlayerDetail = () => {
             </Card>
           )}
 
-          {/* Digital Card CTA */}
-          {/* <Card className="p-6 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <h3 className="text-lg font-bold mb-2">
-              🎴 {currentLang === 'ko' ? '나만의 선수 카드 발급받기' : 'Get Your Digital Player Card'}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {currentLang === 'ko' 
-                ? '팬 한정 디지털 카드를 발급받고 공유하세요!' 
-                : 'Get your exclusive fan card and share it!'}
-            </p>
-            <Link to={`/player/${player.slug || player.id}/card`}>
-              <Button size="lg" className="w-full">
-                {currentLang === 'ko' ? '카드 발급하기' : 'Generate Card'}
-              </Button>
-            </Link>
-          </Card> */}
+          {/* Digital Card CTA / View My Card */}
+          <Card className="p-6 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            {myCard ? (
+               // 이미 카드가 있는 경우: 보기 버튼
+               <>
+                  <h3 className="text-lg font-bold mb-2">
+                    {t('playerDetail.myCardTitle')}
+                  </h3>
+                  <div className="flex gap-3 justify-center mt-4">
+                     <Button 
+                        variant="outline" 
+                        className="flex-1 bg-background/50 border-primary/20 hover:bg-background/80"
+                        onClick={handleIssueCardClick}
+                     >
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        {t('playerDetail.issueNew')}
+                     </Button>
+                     <Button 
+                        className="flex-1"
+                        onClick={() => setShowCardDetail(true)}
+                     >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        {t('playerDetail.viewMyCard')}
+                     </Button>
+                  </div>
+               </>
+            ) : (
+               // 카드가 없는 경우: 발급 버튼
+               <>
+                  <h3 className="text-lg font-bold mb-2">
+                     {t('playerDetail.noCardTitle')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                     {t('playerDetail.noCardDesc')}
+                  </p>
+                  <Button size="lg" className="w-full sm:w-auto px-8 py-6 text-lg shadow-lg shadow-primary/20 animate-pulse hover:animate-none transition-all" onClick={handleIssueCardClick}>
+                     <CreditCard className="w-5 h-5 mr-2" />
+                     {t('playerDetail.issueCard')}
+                  </Button>
+               </>
+            )}
+          </Card>
 
           <Separator />
 
@@ -440,6 +508,39 @@ const PlayerDetail = () => {
           <CommentSection entityType="player" entityId={player.id} />
         </div>
       </div>
+
+      {/* Card Generation Overlay */}
+      {player && (
+         <CardGenerationOverlay 
+            isOpen={showGenerationOverlay} 
+            onClose={() => setShowGenerationOverlay(false)} 
+            player={player}
+            team={team || null}
+            onSuccess={handleCardGenerated}
+            onViewCard={() => {
+               setShowGenerationOverlay(false);
+               setShowCardDetail(true);
+            }}
+         />
+      )}
+
+      {/* View My Card Modal */}
+      {player && myCard && (
+        <CardDetailModal
+          isOpen={showCardDetail}
+          onClose={() => setShowCardDetail(false)}
+          card={myCard}
+          player={player}
+          team={team || null}
+        />
+      )}
+
+      {/* Login Dialog */}
+      <LoginDialog 
+        open={showLoginDialog} 
+        onOpenChange={setShowLoginDialog} 
+        triggerLocation="player-card"
+      />
     </>
   );
 };
