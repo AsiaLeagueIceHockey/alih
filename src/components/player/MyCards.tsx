@@ -144,7 +144,7 @@ const MyCards = () => {
                   >
                      {/* Custom Header for Selected State */}
                      {isSelected && (
-                        <div className="flex items-center justify-between px-4 py-3 border-b bg-background/80 backdrop-blur-md z-50">
+                         <div className="flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b bg-background/80 backdrop-blur-md z-50">
                            <Button 
                               variant="ghost" 
                               size="icon" 

@@ -207,6 +207,11 @@
         "collapse": "閉じる",
         "expand": "もっと見る"
     },
+    "share": {
+        "instagram": "インスタグラムでシェア",
+        "downloaded": "画像が保存されました！ストーリーでシェアしてください！",
+        "failed": "画像の生成に失敗しました。"
+    },
     "error": {
         "loadFailed": "読み込みに失敗しました",
         "checkConsole": "コンソールを確認してください",
@@ -341,7 +346,8 @@
     },
     "common": {
         "back": "戻る",
-        "browsePlayers": "選手一覧を見る"
+        "browsePlayers": "選手一覧を見る",
+        "generating": "生成中..."
     },
     "onboarding": {
         "step1Title": "言語設定",

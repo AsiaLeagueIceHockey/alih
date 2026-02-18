@@ -96,8 +96,9 @@ const CardGenerationOverlay = ({ isOpen, onClose, player, team, onSuccess, onVie
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm overscroll-y-contain"
       >
+        <div className="min-h-full w-full flex items-center justify-center p-4">
         <div className="w-full max-w-md relative">
           {step !== 'completed' && (
              <Button 
@@ -214,6 +215,7 @@ const CardGenerationOverlay = ({ isOpen, onClose, player, team, onSuccess, onVie
                </div>
             </motion.div>
           )}
+        </div>
         </div>
       </motion.div>
     </AnimatePresence>

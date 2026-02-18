@@ -14,9 +14,14 @@ interface CardDetailModalProps {
   team: Team | null;
 }
 
+import InstagramShareButton from "./InstagramShareButton";
+
 const CardDetailModal = ({ isOpen, onClose, card, player, team }: CardDetailModalProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  
+  // Unique ID for this card instance to capture
+  const cardId = `share-card-${card.id}`;
 
   if (!isOpen) return null;
 
@@ -32,8 +37,8 @@ const CardDetailModal = ({ isOpen, onClose, card, player, team }: CardDetailModa
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] bg-background flex flex-col"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b bg-background/80 backdrop-blur-md z-50">
+        {/* Header - Safe Area Fixed */}
+        <div className="flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b bg-background/80 backdrop-blur-md z-50">
            <Button 
               variant="ghost" 
               size="icon" 
@@ -46,15 +51,21 @@ const CardDetailModal = ({ isOpen, onClose, card, player, team }: CardDetailModa
         </div>
 
         {/* Card Container */}
-        <div className="flex-1 flex items-center justify-center p-6 pb-24 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 pb-24 overflow-y-auto w-full">
             <PlayerCard 
+               id={cardId}
                player={player} 
                team={team} 
                cardData={card} 
                showRotateHint={true}
                ownerName={user?.user_metadata?.nickname || ( user?.email ? user.email.split('@')[0] : undefined )}
-               className="w-full max-w-sm aspect-[2/3] shadow-2xl"
+               className="w-full max-w-sm aspect-[2/3] shadow-2xl mb-12"
             />
+            
+            {/* Share Button (Temporarily Hidden per User Request) */}
+            {/* <div className="w-full max-w-sm px-4">
+               <InstagramShareButton cardElementId={cardId} className="w-full h-12 text-lg font-bold shadow-lg" />
+            </div> */}
         </div>
       </motion.div>
     </AnimatePresence>

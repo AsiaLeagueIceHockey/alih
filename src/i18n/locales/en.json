@@ -33,6 +33,12 @@
             "G": "Goaltender"
         }
     },
+    "share": {
+        "instagram": "Share",
+        "downloaded": "Image saved! Share it on your Story!",
+        "failed": "Failed to generate image."
+    },
+    "season": "Season",
     "cardGeneration": {
         "steps": {
             "checking": "Checking 25-26 Season Stats...",
@@ -341,7 +347,8 @@
     },
     "common": {
         "back": "Back",
-        "browsePlayers": "Browse Players"
+        "browsePlayers": "Browse Players",
+        "generating": "Generating..."
     },
     "onboarding": {
         "step1Title": "Language",

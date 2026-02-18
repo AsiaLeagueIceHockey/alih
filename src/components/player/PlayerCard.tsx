@@ -16,9 +16,10 @@ interface PlayerCardProps {
   onFlip?: () => void;
   showRotateHint?: boolean;
   ownerName?: string;
+  id?: string; // ID for DOM selection (e.g. for screenshot/GIF generation)
 }
 
-const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFlipped, onFlip, showRotateHint = true, ownerName }: PlayerCardProps) => {
+const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFlipped, onFlip, showRotateHint = true, ownerName, id }: PlayerCardProps) => {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
   const [internalFlipped, setInternalFlipped] = useState(false);
@@ -62,15 +63,19 @@ const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFl
 
   return (
     <div 
-      className={cn("perspective-1000 w-full max-w-[320px] aspect-[2/3] mx-auto cursor-pointer group", className)}
+      id={id}
+      className={`relative perspective-1000 group cursor-pointer ${className}`}
       onClick={handleFlip}
     >
       <div className={cn(
-        "relative w-full h-full transition-all duration-700 transform-style-3d shadow-2xl rounded-xl",
+        "w-full h-full relative preserve-3d transition-transform duration-500 transform-style-3d shadow-2xl rounded-xl",
         isFlipped ? "rotate-y-180" : ""
       )}>
         {/* === FRONT === */}
-        <Card className="absolute inset-0 w-full h-full backface-hidden overflow-hidden border-0 bg-background flex flex-col">
+        <Card 
+            className="absolute inset-0 w-full h-full backface-hidden overflow-hidden border-0 bg-background flex flex-col items-stretch"
+            style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
+        >
            {/* Background Image / Texture */}
            <div className="absolute inset-0 z-0">
              {player.photo_url ? (
@@ -155,7 +160,9 @@ const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFl
           className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 overflow-hidden border-0 flex flex-col justify-between p-6 text-white"
           style={{ 
             backgroundColor: team?.team_color || '#1e293b', // Default to slate-800 if no color
-            color: team?.team_color === '#C0C0C0' ? 'black' : 'white' // Silver gets black text
+            color: team?.team_color === '#C0C0C0' ? 'black' : 'white', // Silver gets black text
+            WebkitBackfaceVisibility: 'hidden', 
+            backfaceVisibility: 'hidden' 
           }}
         >
            {/* Team Background Pattern/Texture could go here */}

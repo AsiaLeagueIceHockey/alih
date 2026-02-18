@@ -124,3 +124,4 @@ Before finalizing any task:
 2. [ ] Ensure no hardcoded strings exist (use i18n).
 3. [ ] Verify responsive design for mobile (PWA).
 4. [ ] Test core flows if logic was changed.
+5. [ ] **Verify Imports**: Check for duplicate imports or identifiers, especially when pasting code blocks.
