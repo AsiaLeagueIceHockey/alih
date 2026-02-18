@@ -74,7 +74,11 @@ const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFl
         {/* === FRONT === */}
         <Card 
             className="absolute inset-0 w-full h-full backface-hidden overflow-hidden border-0 bg-background flex flex-col items-stretch"
-            style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
+            style={{ 
+              WebkitBackfaceVisibility: 'hidden', 
+              backfaceVisibility: 'hidden',
+              zIndex: isFlipped ? 0 : 1 
+            }}
         >
            {/* Background Image / Texture */}
            <div className="absolute inset-0 z-0">
@@ -162,7 +166,8 @@ const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFl
             backgroundColor: team?.team_color || '#1e293b', // Default to slate-800 if no color
             color: team?.team_color === '#C0C0C0' ? 'black' : 'white', // Silver gets black text
             WebkitBackfaceVisibility: 'hidden', 
-            backfaceVisibility: 'hidden' 
+            backfaceVisibility: 'hidden',
+            zIndex: isFlipped ? 1 : 0
           }}
         >
            {/* Team Background Pattern/Texture could go here */}
