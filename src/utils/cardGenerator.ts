@@ -1,17 +1,59 @@
-import h2c from "html2canvas";
+import { toPng } from 'html-to-image';
+
+/**
+ * Helper: Converts all images in a DOM element to Base64 in-place.
+ * This bypasses CORS strictness in SVG <foreignObject> rendering.
+ */
+async function convertImagesToBase64(element: HTMLElement) {
+    const images = Array.from(element.querySelectorAll('img'));
+    
+    // Process all images in parallel
+    await Promise.all(images.map(async (img) => {
+        const src = img.src || img.getAttribute('src');
+        if (!src || src.startsWith('data:')) return; // Already base64 or empty
+
+        try {
+            // Fetch blob with CORS
+            const response = await fetch(src, { 
+                mode: 'cors', 
+                credentials: 'omit', // Important for public Supabase buckets often
+                cache: 'no-cache'
+            });
+            
+            if (!response.ok) throw new Error(`Failed to fetch ${src}`);
+
+            const blob = await response.blob();
+            
+            // Convert to Base64
+            await new Promise<void>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (reader.result) {
+                        img.src = reader.result as string;
+                        img.srcset = ''; // Clear srcset to prioritize base64 src
+                        img.crossOrigin = null; // Remove CORS attribute from data-uri image
+                        resolve();
+                    } else {
+                        reject(new Error('Empty result from FileReader'));
+                    }
+                };
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(blob);
+            });
+        } catch (err) {
+            console.warn('Base64 conversion failed for:', src, err);
+            // On failure, keep original src and hope for the best (usually fails silently in canvas)
+        }
+    }));
+}
 
 /**
  * Generates a shareable image from a PlayerCard element.
- *
- * FINAL APPROACH:
- * - html2canvas (Canvas drawImage) correctly handles cross-origin images with useCORS:true
- * - html-to-image (SVG foreignObject) CANNOT render cross-origin images - abandoned
- *
- * 3D CSS issue workaround:
- * - Clone ONLY the visible face element (front or back Card)
- * - Strip all 3D / absolute-positioning CSS from the clone
- * - Place it in an off-screen container matching the card's rendered size
- * - Capture it with html2canvas — never touch the original element
+ * 
+ * FINAL FINAL APPROACH:
+ * - Use `html-to-image` (SVG foreignObject) for pixel-perfect layout fidelity.
+ * - PRE-FETCH all images and convert to Base64 to solve CORS issues.
+ * - Capture ONLY the visible face by cloning and stripping 3D transforms.
  */
 export const generateShareImage = async (elementId: string): Promise<Blob | null> => {
     const originalElement = document.getElementById(elementId);
@@ -32,185 +74,114 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
             return null;
         }
 
-        // 2. Get the actual rendered card dimensions
+        // 2. Get dimensions
         const rect = originalElement.getBoundingClientRect();
         const captureWidth = Math.round(rect.width);
         const captureHeight = Math.round(rect.height);
 
-        // 3. Deep-clone the visible face only
+        // 3. Deep-clone the visible face
         const faceClone = visibleFace.cloneNode(true) as HTMLElement;
 
-        // 4. Set crossOrigin=anonymous on all img tags in the clone
-        //    so html2canvas can draw them via Canvas without tainting it
-        Array.from(faceClone.querySelectorAll('img')).forEach((img) => {
-            img.crossOrigin = 'anonymous';
-        });
-
-        // 5. Flatten all 3D / absolute positioning from the clone
-        
-        //    IMPORTANT: Do NOT use cssText, it wipes out inline styles like backgroundColor!
-        //    We use setProperty to override layout-affecting properties only.
+        // 4. Flatten 3D styles and reset positioning
+        // We use setProperty with !important to override Tailwind classes reliably
         faceClone.style.setProperty('position', 'relative', 'important');
         faceClone.style.setProperty('transform', 'none', 'important');
         faceClone.style.setProperty('transition', 'none', 'important');
         faceClone.style.setProperty('backface-visibility', 'visible', 'important');
-        (faceClone.style as any)['WebkitBackfaceVisibility'] = 'visible';
-        
-        // Force dimensions to match rendered size
+        faceClone.style.setProperty('margin', '0', 'important');
         faceClone.style.setProperty('width', `${captureWidth}px`, 'important');
         faceClone.style.setProperty('height', `${captureHeight}px`, 'important');
         
-        // Reset positioning that might interfere
-        faceClone.style.setProperty('top', 'auto', 'important');
-        faceClone.style.setProperty('left', 'auto', 'important');
-        faceClone.style.setProperty('right', 'auto', 'important');
-        faceClone.style.setProperty('bottom', 'auto', 'important');
-        faceClone.style.setProperty('inset', 'auto', 'important');
-        faceClone.style.setProperty('z-index', 'auto', 'important');
-        faceClone.style.setProperty('margin', '0', 'important');
-
-        // Strip Tailwind classes that fight our inline styles
+        // Remove 3D utility classes that interferes with flat rendering
         ['absolute', 'inset-0', 'rotate-y-180', 'backface-hidden'].forEach(cls => {
             faceClone.classList.remove(cls);
         });
 
-        // Hide the rotate hint icon inside the clone
-        const rotateHintInClone = faceClone.querySelector('.animate-pulse') as HTMLElement | null;
-        if (rotateHintInClone) rotateHintInClone.style.display = 'none';
+        // Hide UI elements not needed for capture (like rotate hint)
+        const rotateHint = faceClone.querySelector('.animate-pulse');
+        if (rotateHint) (rotateHint as HTMLElement).style.display = 'none';
 
-        // FIX 1: Geometry Freezing - Force images to match exact rendered dimensions
-        // This prevents the "stretched image" issue by bypassing CSS aspect ratio calculations
-        const originalImages = visibleFace.querySelectorAll('img');
-        const clonedImages = faceClone.querySelectorAll('img');
-        originalImages.forEach((img, index) => {
-             const rect = img.getBoundingClientRect();
-             const clone = clonedImages[index];
-             if (clone) {
-                 clone.style.width = `${rect.width}px`;
-                 clone.style.height = `${rect.height}px`;
-                 clone.style.objectFit = 'cover'; // Mostly cover, logo might need contain but geometry freeze handles the box size
-                 if (img.classList.contains('object-contain')) {
-                     clone.style.objectFit = 'contain';
-                 }
-                 clone.style.maxWidth = 'none'; // reset
-                 clone.style.maxHeight = 'none'; // reset
-             }
-        });
+        // 5. Mount to offscreen container (required for html-to-image to render)
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.top = '-9999px';
+        wrapper.style.left = '-9999px';
+        wrapper.style.width = `${captureWidth}px`;
+        wrapper.style.height = `${captureHeight}px`;
+        wrapper.style.overflow = 'hidden'; // Clip slight overflows
+        wrapper.appendChild(faceClone);
+        document.body.appendChild(wrapper);
 
-        // FIX 2: Prevent vertical stretching on Back Face (disable flex-grow)
-        const flexGrowers = faceClone.querySelectorAll('.flex-1');
-        flexGrowers.forEach((el) => {
-            (el as HTMLElement).style.flex = '0 0 auto';
-            (el as HTMLElement).style.height = 'auto';
-            // Also force gap for inner elements if it's the number container
-            if (el.textContent?.includes('#')) { 
-                 (el as HTMLElement).style.gap = '0px'; 
-                 // Fix potentially huge line-height on the number
-                 const bigText = el.querySelector('.text-8xl');
-                 if (bigText) (bigText as HTMLElement).style.lineHeight = '1';
-                 const nameText = el.querySelector('.text-xl');
-                 if (nameText) (nameText as HTMLElement).style.marginBottom = '20px';
-            }
-        });
+        // 6. Convert all images in clone to Base64 (Essential for CORS support in SVG)
+        await convertImagesToBase64(faceClone);
 
-        // FIX 3: Front Face Layout (Badge overlap)
-        // Find the container that holds Badge and Number
-        const badge = faceClone.querySelector('.rounded-full.border') as HTMLElement;
-        if (badge) {
-            // Fix Badge Alignment
-            badge.style.display = 'inline-flex';
-            badge.style.alignItems = 'center';
-            badge.style.justifyContent = 'center';
-            badge.style.lineHeight = '0';
-            
-            // Fix Badge Container Structure
-            const badgeContainer = badge.parentElement;
-            if (badgeContainer) {
-                badgeContainer.style.display = 'flex';
-                badgeContainer.style.alignItems = 'center';
-                badgeContainer.style.gap = '12px'; // Force gap between Badge and Number
-                badgeContainer.style.marginBottom = '8px'; // Force space below Badge row
-            }
+        // Wait a tiny bit for DOM update
+        await new Promise(r => setTimeout(r, 100));
 
-            // Fix Name overlap (find the name element, usually next sibling or close)
-            // It's the big text container below the badge row
-            // We can try to find it by class text-5xl
-            const nameEl = faceClone.querySelector('.text-5xl') as HTMLElement;
-            if (nameEl) {
-                nameEl.style.display = 'block';
-                nameEl.style.marginTop = '10px';
-                nameEl.style.position = 'relative'; // Ensure z-index works if needed
-            }
-        }
-
-        // 6. Mount clone in an off-screen container
-        const offscreen = document.createElement('div');
-        offscreen.style.cssText = `
-            position: fixed;
-            top: -99999px;
-            left: -99999px;
-            width: ${captureWidth}px;
-            height: ${captureHeight}px;
-            overflow: hidden;
-        `;
-        offscreen.appendChild(faceClone);
-        document.body.appendChild(offscreen);
-
-        // Wait for fonts & images to settle
-        await document.fonts.ready;
-        await new Promise(r => setTimeout(r, 1000));
-
-        // 7. Capture with html2canvas (handles cross-origin images correctly)
-        const cardCanvas = await h2c(offscreen, {
-            backgroundColor: null,
-            scale: 3,
-            useCORS: true,
-            allowTaint: false,
-            logging: false,
+        // 7. Generate PNG via html-to-image
+        // Use a higher pixel ratio for crisp text
+        const dataUrl = await toPng(faceClone, {
+            quality: 1.0,
+            pixelRatio: 3,
             width: captureWidth,
             height: captureHeight,
+            skipAutoScale: true,
+            filter: (node) => {
+                // Exclude any known problem elements if needed
+                return true; 
+            }
         });
 
-        // 8. Remove off-screen element
-        document.body.removeChild(offscreen);
+        // 8. Cleanup DOM
+        document.body.removeChild(wrapper);
 
-        // 9. Compose final 1080×1620 share image
+        if (!dataUrl) {
+            console.error('Failed to generate PNG data URL');
+            return null;
+        }
+
+        // 9. Load the captured card image
+        const cardImg = new Image();
+        cardImg.src = dataUrl;
+        await new Promise((resolve) => { cardImg.onload = resolve; });
+
+        // 10. Compose Final Image (1080x1620)
         const FINAL_WIDTH = 1080;
         const FINAL_HEIGHT = 1620;
-        const finalCanvas = document.createElement('canvas');
-        finalCanvas.width = FINAL_WIDTH;
-        finalCanvas.height = FINAL_HEIGHT;
-        const ctx = finalCanvas.getContext('2d')!;
+        const canvas = document.createElement('canvas');
+        canvas.width = FINAL_WIDTH;
+        canvas.height = FINAL_HEIGHT;
+        const ctx = canvas.getContext('2d')!;
 
-        // Dark radial gradient background
-        const gradient = ctx.createRadialGradient(
+        // Background
+        const grad = ctx.createRadialGradient(
             FINAL_WIDTH / 2, FINAL_HEIGHT / 2, 0,
             FINAL_WIDTH / 2, FINAL_HEIGHT / 2, FINAL_WIDTH
         );
-        gradient.addColorStop(0, '#1b1b1f');
-        gradient.addColorStop(1, '#000000');
-        ctx.fillStyle = gradient;
+        grad.addColorStop(0, '#1b1b1f');
+        grad.addColorStop(1, '#000000');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, FINAL_WIDTH, FINAL_HEIGHT);
 
-        // Card placement — 87% width, centered, shifted up for watermark
-        const cardAspect = captureWidth / captureHeight;
-        const targetCardWidth = FINAL_WIDTH * 0.87;
-        const targetCardHeight = targetCardWidth / cardAspect;
-        const cardX = (FINAL_WIDTH - targetCardWidth) / 2;
-        const cardY = (FINAL_HEIGHT - targetCardHeight) / 2 - 40;
+        // Layout calcs
+        const targetWidth = FINAL_WIDTH * 0.87;
+        const scaleFactor = targetWidth / cardImg.width;
+        const targetHeight = cardImg.height * scaleFactor;
+        const x = (FINAL_WIDTH - targetWidth) / 2;
+        const y = (FINAL_HEIGHT - targetHeight) / 2 - 40;
 
-        // Drop shadow
+        // Shadow
         ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.65)';
-        ctx.shadowBlur = 100;
-        ctx.shadowOffsetY = 50;
-        ctx.fillStyle = 'rgba(0,0,0,0.01)';
-        ctx.fillRect(cardX + 20, cardY + 20, targetCardWidth - 40, targetCardHeight - 40);
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur = 80;
+        ctx.shadowOffsetY = 40;
+        ctx.fillRect(x + 30, y + 30, targetWidth - 60, targetHeight - 60);
         ctx.restore();
 
-        ctx.drawImage(cardCanvas, cardX, cardY, targetCardWidth, targetCardHeight);
+        // Draw Card
+        ctx.drawImage(cardImg, x, y, targetWidth, targetHeight);
 
-        // Watermark pill
+        // Watermark
         const wmY = FINAL_HEIGHT - 80;
         const wmCenterX = FINAL_WIDTH / 2;
         const pillWidth = 220;
@@ -220,12 +191,7 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         ctx.save();
         ctx.fillStyle = 'rgba(20, 20, 20, 0.85)';
         ctx.beginPath();
-        ctx.moveTo(wmCenterX - pillWidth / 2 + pillRadius, wmY - pillHeight / 2);
-        ctx.lineTo(wmCenterX + pillWidth / 2 - pillRadius, wmY - pillHeight / 2);
-        ctx.arc(wmCenterX + pillWidth / 2 - pillRadius, wmY, pillRadius, -Math.PI / 2, Math.PI / 2);
-        ctx.lineTo(wmCenterX - pillWidth / 2 + pillRadius, wmY + pillHeight / 2);
-        ctx.arc(wmCenterX - pillWidth / 2 + pillRadius, wmY, pillRadius, Math.PI / 2, -Math.PI / 2);
-        ctx.closePath();
+        ctx.roundRect(wmCenterX - pillWidth / 2, wmY - pillHeight / 2, pillWidth, pillHeight, pillRadius);
         ctx.fill();
 
         ctx.fillStyle = '#0095f6';
@@ -241,11 +207,11 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         ctx.restore();
 
         return new Promise((resolve) => {
-            finalCanvas.toBlob((blob) => resolve(blob), 'image/png', 1.0);
+            canvas.toBlob((blob) => resolve(blob), 'image/png', 1.0);
         });
 
     } catch (error) {
-        console.error('Error generating share image:', error);
+        console.error('Error generating share image (html-to-image):', error);
         return null;
     }
 };
