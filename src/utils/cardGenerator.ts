@@ -78,42 +78,70 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         const rotateHintInClone = faceClone.querySelector('.animate-pulse') as HTMLElement | null;
         if (rotateHintInClone) rotateHintInClone.style.display = 'none';
 
-        // FIX 1: Ensure images maintain aspect ratio (prevent "stretched logo/player")
-        faceClone.querySelectorAll('img').forEach((img) => {
-            img.style.objectFit = 'contain';
-            img.style.height = 'auto';
-            img.style.maxWidth = '100%';
-            // If it's the player photo (usually has 'object-cover'), let's force expected formatting
-            if (img.classList.contains('object-cover')) {
-                 img.style.objectFit = 'cover';
-                 img.style.height = '100%';
-            }
+        // FIX 1: Geometry Freezing - Force images to match exact rendered dimensions
+        // This prevents the "stretched image" issue by bypassing CSS aspect ratio calculations
+        const originalImages = visibleFace.querySelectorAll('img');
+        const clonedImages = faceClone.querySelectorAll('img');
+        originalImages.forEach((img, index) => {
+             const rect = img.getBoundingClientRect();
+             const clone = clonedImages[index];
+             if (clone) {
+                 clone.style.width = `${rect.width}px`;
+                 clone.style.height = `${rect.height}px`;
+                 clone.style.objectFit = 'cover'; // Mostly cover, logo might need contain but geometry freeze handles the box size
+                 if (img.classList.contains('object-contain')) {
+                     clone.style.objectFit = 'contain';
+                 }
+                 clone.style.maxWidth = 'none'; // reset
+                 clone.style.maxHeight = 'none'; // reset
+             }
         });
 
         // FIX 2: Prevent vertical stretching on Back Face (disable flex-grow)
-        // The back face uses `flex-1` on the number container, which html2canvas miscalculates => huge gap.
         const flexGrowers = faceClone.querySelectorAll('.flex-1');
         flexGrowers.forEach((el) => {
             (el as HTMLElement).style.flex = '0 0 auto';
             (el as HTMLElement).style.height = 'auto';
+            // Also force gap for inner elements if it's the number container
+            if (el.textContent?.includes('#')) { 
+                 (el as HTMLElement).style.gap = '0px'; 
+                 // Fix potentially huge line-height on the number
+                 const bigText = el.querySelector('.text-8xl');
+                 if (bigText) (bigText as HTMLElement).style.lineHeight = '1';
+                 const nameText = el.querySelector('.text-xl');
+                 if (nameText) (nameText as HTMLElement).style.marginBottom = '20px';
+            }
         });
 
-        // FIX 3: Force Badge alignment (html2canvas often misaligns inline-flex)
-        const badges = faceClone.querySelectorAll('.rounded-full.border'); 
-        badges.forEach((b: Element) => {
-            const badge = b as HTMLElement;
+        // FIX 3: Front Face Layout (Badge overlap)
+        // Find the container that holds Badge and Number
+        const badge = faceClone.querySelector('.rounded-full.border') as HTMLElement;
+        if (badge) {
+            // Fix Badge Alignment
             badge.style.display = 'inline-flex';
             badge.style.alignItems = 'center';
             badge.style.justifyContent = 'center';
-            badge.style.lineHeight = '0'; // Adjusted from 1 to 0 for tighter centering in some fonts
-            // Manually center text if needed
-            const badgeText = badge.textContent;
-            if (badgeText && badgeText.length <= 2) {
-                 badge.style.padding = '0';
-                 badge.style.width = '24px'; // Fixed width for single letter badge
-                 badge.style.height = '24px';
+            badge.style.lineHeight = '0';
+            
+            // Fix Badge Container Structure
+            const badgeContainer = badge.parentElement;
+            if (badgeContainer) {
+                badgeContainer.style.display = 'flex';
+                badgeContainer.style.alignItems = 'center';
+                badgeContainer.style.gap = '12px'; // Force gap between Badge and Number
+                badgeContainer.style.marginBottom = '8px'; // Force space below Badge row
             }
-        });
+
+            // Fix Name overlap (find the name element, usually next sibling or close)
+            // It's the big text container below the badge row
+            // We can try to find it by class text-5xl
+            const nameEl = faceClone.querySelector('.text-5xl') as HTMLElement;
+            if (nameEl) {
+                nameEl.style.display = 'block';
+                nameEl.style.marginTop = '10px';
+                nameEl.style.position = 'relative'; // Ensure z-index works if needed
+            }
+        }
 
         // 6. Mount clone in an off-screen container
         const offscreen = document.createElement('div');
