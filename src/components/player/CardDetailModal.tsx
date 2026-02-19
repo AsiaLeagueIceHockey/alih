@@ -62,10 +62,10 @@ const CardDetailModal = ({ isOpen, onClose, card, player, team }: CardDetailModa
                className="w-full max-w-sm aspect-[2/3] shadow-2xl mb-12"
             />
             
-            {/* Share Button (Temporarily Hidden per User Request) */}
-            {/* <div className="w-full max-w-sm px-4">
+            {/* Share Button */}
+            <div className="w-full max-w-sm px-4">
                <InstagramShareButton cardElementId={cardId} className="w-full h-12 text-lg font-bold shadow-lg" />
-            </div> */}
+            </div>
         </div>
       </motion.div>
     </AnimatePresence>

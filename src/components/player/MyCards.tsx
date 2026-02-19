@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import PageHeader from "@/components/PageHeader";
+import InstagramShareButton from "@/components/player/InstagramShareButton";
 
 interface ExtendedCard extends PlayerCardType {
   player: Player;
@@ -165,12 +166,13 @@ const MyCards = () => {
                         className={`
                            relative transition-all duration-300
                            ${isSelected 
-                              ? 'flex-1 flex items-center justify-center p-6 pb-24 overflow-y-auto' // Centered in full screen
+                              ? 'flex-1 flex flex-col items-center justify-center p-6 pb-24 overflow-y-auto' // Centered in full screen
                               : 'shadow-lg hover:shadow-xl cursor-pointer'
                            }
                         `}
                      >
                         <PlayerCard 
+                           id={isSelected ? `share-card-mycards-${card.id}` : undefined}
                            player={card.player} 
                            team={teamData} 
                            cardData={card} 
@@ -180,6 +182,14 @@ const MyCards = () => {
                            // Prevent flipping when not selected is clicked (because it triggers selection)
                            onFlip={!isSelected ? () => {} : undefined}
                         />
+                        {isSelected && (
+                           <div className="w-full max-w-sm px-4 mt-6">
+                              <InstagramShareButton 
+                                 cardElementId={`share-card-mycards-${card.id}`} 
+                                 className="w-full h-12 text-lg font-bold shadow-lg" 
+                              />
+                           </div>
+                        )}
                      </div>
                   </motion.div>
                );

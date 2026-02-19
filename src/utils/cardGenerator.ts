@@ -1,26 +1,15 @@
-import h2c from "html2canvas";
-import { Player, Team, PlayerCard } from "@/types/team";
+import { toBlob } from "html-to-image";
 
-interface GenerateShareImageOptions {
-  cardElementId: string; // We still need the element to clone styles/images from? 
-                         // Actually, capturing the *existing* DOM is easier than re-rendering from scratch
-                         // BUT, we want a specific 9:16 layout.
-                         // So we should probably mount a temporary invisible component? 
-                         // Or, we can just "fake" it by capturing the card twice (front/back) 
-                         // and composing them on a canvas.
-  
-  // New approach: Pass the data needed to render (or just use the existing card element to capture images)
-  // Let's try capturing the existing card element (Front) and then forcing it to flip (Back) and capturing again?
-  // That might be jarring for the user.
-  
-  // Better: Create a hidden container off-screen with the desired layout, populated with the card data.
-  // However, reusing the complex PlayerCard component inside a hidden div is tricky with React.
-  
-  // Alternative: Take the existing card element, clone it deeply.
-  // Mount the clone in a hidden container 1080x1920.
-  // duplicate the clone for the back.
-}
-
+/**
+ * Generates a shareable image from a PlayerCard element.
+ *
+ * APPROACH:
+ * 1. Detect which face (front/back) is currently visible
+ * 2. Temporarily flatten 3D transforms so html-to-image can render correctly
+ * 3. Capture using html-to-image (SVG foreignObject — much better CSS support)
+ * 4. Immediately restore all original styles
+ * 5. Compose the final 1080×1620 share image
+ */
 export const generateShareImage = async (elementId: string): Promise<Blob | null> => {
     const originalElement = document.getElementById(elementId);
     if (!originalElement) {
@@ -28,174 +17,174 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         return null;
     }
 
+    // Collect all elements we will temporarily modify
+    const innerContainer = originalElement.querySelector('.preserve-3d') as HTMLElement | null;
+    const isFlipped = innerContainer?.classList.contains('rotate-y-180') ?? false;
+    const faces = innerContainer ? Array.from(innerContainer.children) as HTMLElement[] : [];
+    const frontFace = faces[0] as HTMLElement | undefined;
+    const backFace = faces[1] as HTMLElement | undefined;
+    const rotateHint = originalElement.querySelector('.animate-pulse') as HTMLElement | null;
+
+    // Save original inline style strings for perfect restoration
+    const savedStyles = {
+        outer: originalElement.getAttribute('style') ?? '',
+        inner: innerContainer?.getAttribute('style') ?? '',
+        front: frontFace?.getAttribute('style') ?? '',
+        back: backFace?.getAttribute('style') ?? '',
+    };
+
+    const restoreStyles = () => {
+        const setOrRemove = (el: HTMLElement | null | undefined, s: string) => {
+            if (!el) return;
+            if (s) el.setAttribute('style', s); else el.removeAttribute('style');
+        };
+        setOrRemove(originalElement, savedStyles.outer);
+        setOrRemove(innerContainer, savedStyles.inner);
+        setOrRemove(frontFace, savedStyles.front);
+        setOrRemove(backFace, savedStyles.back);
+        if (rotateHint) rotateHint.style.visibility = 'visible';
+    };
+
     try {
-        // 1. Determine which side is visible
-        // In PlayerCard.tsx, the inner container has 'rotate-y-180' when flipped.
-        // Structure: div#id > div.preserve-3d.rotate-y-180 (if flipped)
-        const innerContainer = originalElement.querySelector('.preserve-3d');
-        const isFlipped = innerContainer?.classList.contains('rotate-y-180');
+        // ── STEP 1: Flatten 3D for capture ──────────────────────────────────────
+        // Hide UI-only rotate hint
+        if (rotateHint) rotateHint.style.visibility = 'hidden';
 
-        // 2. Clone the card for manipulation
-        const clone = originalElement.cloneNode(true) as HTMLElement;
-        clone.style.transform = 'none';
-        clone.style.transition = 'none';
-        
-        // Internal Capture Size: High resolution to prevent layout shifts/blur
-        // 2:3 Ratio -> 800w x 1200h
-        const CAPTURE_WIDTH = 800;
-        const CAPTURE_HEIGHT = 1200;
-        
-        clone.style.width = `${CAPTURE_WIDTH}px`; 
-        clone.style.height = `${CAPTURE_HEIGHT}px`; 
-        
-        const cloneInner = clone.querySelector('.preserve-3d') as HTMLElement;
-        if (cloneInner) {
-            cloneInner.style.transition = 'none';
-            cloneInner.style.transform = 'none';
-            cloneInner.classList.remove('rotate-y-180'); // Reset container flip
+        // Remove perspective from outer wrapper
+        originalElement.style.perspective = 'none';
+
+        // Flatten the 3D container
+        if (innerContainer) {
+            innerContainer.style.setProperty('transform', 'none', 'important');
+            innerContainer.style.setProperty('transition', 'none', 'important');
+            innerContainer.style.setProperty('transform-style', 'flat', 'important');
         }
-
-        // 3. Isolate the target face
-        const faces = cloneInner ? Array.from(cloneInner.children) as HTMLElement[] : [];
 
         if (isFlipped) {
-            // Find the back face
-            const backFace = faces.find(el => el.classList.contains('rotate-y-180')) || faces[1];
+            // Show back, hide front
+            if (frontFace) {
+                frontFace.style.setProperty('display', 'none', 'important');
+            }
             if (backFace) {
-                backFace.style.transform = 'none'; // Un-rotate the back face
-                backFace.classList.remove('rotate-y-180');
-                backFace.style.zIndex = '100'; // Ensure it's on top
-                
-                // Hide others
-                faces.forEach(f => {
-                    if (f !== backFace) f.style.opacity = '0';
-                });
+                backFace.style.setProperty('transform', 'none', 'important');
+                backFace.style.setProperty('backface-visibility', 'visible', 'important');
+                (backFace.style as any)['WebkitBackfaceVisibility'] = 'visible';
+                backFace.style.setProperty('z-index', '10', 'important');
             }
         } else {
-            // Front face logic
-             const backFace = faces.find(el => el.classList.contains('rotate-y-180')) || faces[1];
-             if (backFace) {
-                 backFace.style.display = 'none'; // Just hide the back entirely
-             }
+            // Show front, hide back
+            if (backFace) {
+                backFace.style.setProperty('display', 'none', 'important');
+            }
+            if (frontFace) {
+                frontFace.style.setProperty('backface-visibility', 'visible', 'important');
+                (frontFace.style as any)['WebkitBackfaceVisibility'] = 'visible';
+                frontFace.style.setProperty('z-index', '10', 'important');
+            }
         }
-        
-        // Mount clone to stage
-        const stage = document.createElement('div');
-        stage.style.position = 'fixed';
-        stage.style.top = '-9999px';
-        stage.style.left = '-9999px';
-        // Stage with some buffer
-        stage.style.width = `${CAPTURE_WIDTH + 100}px`; 
-        stage.style.height = `${CAPTURE_HEIGHT + 100}px`;
-        stage.appendChild(clone);
-        document.body.appendChild(stage);
-        
-        // Wait for styles/fonts to settle
-        await document.fonts.ready;
-        await new Promise(r => setTimeout(r, 300));
 
-        // Capture the Card (Clean Source)
-        const cardCanvas = await h2c(clone, {
-            backgroundColor: null,
-            scale: 2, 
-            useCORS: true,
-            logging: false,
+        // Brief pause for browser to reflow
+        await new Promise(r => setTimeout(r, 50));
+
+        // ── STEP 2: Capture with html-to-image ──────────────────────────────────
+        const rect = originalElement.getBoundingClientRect();
+        const captureWidth = Math.round(rect.width);
+        const captureHeight = Math.round(rect.height);
+
+        const cardBlob = await toBlob(originalElement, {
+            pixelRatio: 3,
+            width: captureWidth,
+            height: captureHeight,
+            style: {
+                transform: 'none',
+                transition: 'none',
+            },
         });
-        
-        document.body.removeChild(stage);
 
+        // ── STEP 3: Immediately restore original styles ──────────────────────────
+        restoreStyles();
 
-        // --- 4. Compose Final Share Image (2:3 Ratio) ---
-        // Target: 1080 x 1620 (Standard Poster/Card Ratio)
+        if (!cardBlob) throw new Error('html-to-image returned null blob');
+
+        // Convert blob to ImageBitmap for drawing on canvas
+        const cardBitmap = await createImageBitmap(cardBlob);
+
+        // ── STEP 4: Compose final 1080×1620 image ───────────────────────────────
         const FINAL_WIDTH = 1080;
-        const FINAL_HEIGHT = 1620; // 2:3 Aspect Ratio
-        
-        const container = document.createElement('div');
-        container.style.position = 'fixed';
-        container.style.top = '-9999px';
-        container.style.left = '-9999px';
-        container.style.width = `${FINAL_WIDTH}px`;
-        container.style.height = `${FINAL_HEIGHT}px`;
-        container.style.background = '#09090b'; 
-        container.style.background = 'radial-gradient(circle at center, #1b1b1f 0%, #000000 100%)';
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.alignItems = 'center';
-        container.style.justifyContent = 'center';
-        // Prevent any flex shrinking
-        container.style.flexShrink = '0';
-        
-        document.body.appendChild(container);
+        const FINAL_HEIGHT = 1620;
 
-        // Add Card Image
-        // We want the card to fill most of the image, leaving just enough room for the watermark.
-        // Card is 2:3. Container is 2:3.
-        // Scale card down slightly (e.g. 90%) to have a nice border
-        const cardImg = new Image();
-        cardImg.src = cardCanvas.toDataURL('image/png');
-        cardImg.style.width = '940px'; // Approx 87% of width
-        cardImg.style.height = 'auto'; // Maintain aspect ratio
-        cardImg.style.borderRadius = '36px';
-        cardImg.style.boxShadow = '0 60px 120px rgba(0,0,0,0.7)';
-        // Shift card up slightly to make room for watermark bottom
-        cardImg.style.marginBottom = '60px'; 
-        container.appendChild(cardImg);
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = FINAL_WIDTH;
+        finalCanvas.height = FINAL_HEIGHT;
+        const ctx = finalCanvas.getContext('2d')!;
 
-        // Instagram Style Watermark
-        const watermark = document.createElement('div');
-        watermark.style.position = 'absolute';
-        watermark.style.bottom = '50px'; // Closer to bottom edge
-        watermark.style.left = '50%';
-        watermark.style.transform = 'translateX(-50%)'; // Perfect centering
-        
-        watermark.style.display = 'flex';
-        watermark.style.alignItems = 'center';
-        watermark.style.padding = '12px 24px';
-        watermark.style.background = 'rgba(20, 20, 20, 0.85)'; // Slightly more transparent/darker
-        watermark.style.backdropFilter = 'blur(10px)';
-        watermark.style.borderRadius = '30px';
-        watermark.style.gap = '12px';
-        watermark.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-        // watermark.style.border = '1px solid rgba(255,255,255,0.1)';
-        
-        const blueDot = document.createElement('div');
-        blueDot.style.width = '12px';
-        blueDot.style.height = '12px';
-        blueDot.style.borderRadius = '50%';
-        blueDot.style.background = '#0095f6';
-        watermark.appendChild(blueDot);
+        // Dark radial gradient background
+        const gradient = ctx.createRadialGradient(
+            FINAL_WIDTH / 2, FINAL_HEIGHT / 2, 0,
+            FINAL_WIDTH / 2, FINAL_HEIGHT / 2, FINAL_WIDTH
+        );
+        gradient.addColorStop(0, '#1b1b1f');
+        gradient.addColorStop(1, '#000000');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, FINAL_WIDTH, FINAL_HEIGHT);
 
-        const text = document.createElement('span');
-        text.innerText = '@alhockey_fans';
-        text.style.color = '#ffffff';
-        text.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-        text.style.fontSize = '20px';
-        text.style.fontWeight = '600';
-        text.style.letterSpacing = '0.5px';
-        watermark.appendChild(text);
+        // Card placement — 87% width, centered, shifted up for watermark
+        const cardAspect = captureWidth / captureHeight;
+        const targetCardWidth = FINAL_WIDTH * 0.87;
+        const targetCardHeight = targetCardWidth / cardAspect;
+        const cardX = (FINAL_WIDTH - targetCardWidth) / 2;
+        const cardY = (FINAL_HEIGHT - targetCardHeight) / 2 - 40;
 
-        container.appendChild(watermark);
+        // Subtle drop shadow
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.65)';
+        ctx.shadowBlur = 100;
+        ctx.shadowOffsetY = 50;
+        ctx.fillStyle = 'rgba(0,0,0,0.01)';
+        ctx.fillRect(cardX + 20, cardY + 20, targetCardWidth - 40, targetCardHeight - 40);
+        ctx.restore();
 
-        // Final Capture
-        const finalCanvas = await h2c(container, {
-            scale: 1,
-            width: FINAL_WIDTH,
-            height: FINAL_HEIGHT,
-            useCORS: true,
-            logging: false,
-        });
+        // Draw the captured card
+        ctx.drawImage(cardBitmap, cardX, cardY, targetCardWidth, targetCardHeight);
 
-        document.body.removeChild(container);
+        // Watermark pill at bottom
+        const wmY = FINAL_HEIGHT - 80;
+        const wmCenterX = FINAL_WIDTH / 2;
+        const pillWidth = 220;
+        const pillHeight = 44;
+        const pillRadius = pillHeight / 2;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(20, 20, 20, 0.85)';
+        ctx.beginPath();
+        ctx.moveTo(wmCenterX - pillWidth / 2 + pillRadius, wmY - pillHeight / 2);
+        ctx.lineTo(wmCenterX + pillWidth / 2 - pillRadius, wmY - pillHeight / 2);
+        ctx.arc(wmCenterX + pillWidth / 2 - pillRadius, wmY, pillRadius, -Math.PI / 2, Math.PI / 2);
+        ctx.lineTo(wmCenterX - pillWidth / 2 + pillRadius, wmY + pillHeight / 2);
+        ctx.arc(wmCenterX - pillWidth / 2 + pillRadius, wmY, pillRadius, Math.PI / 2, -Math.PI / 2);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#0095f6';
+        ctx.beginPath();
+        ctx.arc(wmCenterX - 80, wmY, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '600 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('@alhockey_fans', wmCenterX - 64, wmY);
+        ctx.restore();
 
         return new Promise((resolve) => {
-            finalCanvas.toBlob((blob) => {
-                resolve(blob);
-            }, 'image/png', 1.0);
+            finalCanvas.toBlob((blob) => resolve(blob), 'image/png', 1.0);
         });
 
     } catch (error) {
-        console.error("Error generating share image:", error);
+        // Always restore original styles even on error
+        restoreStyles();
+        console.error('Error generating share image:', error);
         return null;
     }
 };
-

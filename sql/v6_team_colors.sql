@@ -14,7 +14,7 @@ ALTER TABLE alih_teams ADD COLUMN IF NOT EXISTS team_color TEXT;
 -- But let's set a specific one if known. For now, let's leave HL Anyang as NULL or set to red?
 -- User: "HL안양: 현재 색상 코드 유지" -> I will set it to the team's red color for consistency #ce0e2d
 UPDATE alih_teams
-SET team_color = '#009FEF
+SET team_color = '#009FEF'
 WHERE english_name ILIKE '%Anyang%';
 
 -- Red Eagles Hokkaido (레드이글스 홋카이도) - #E60012
