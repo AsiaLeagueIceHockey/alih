@@ -63,14 +63,13 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
     }
 
     try {
-        // 1. Detect which face is visible
+        // 1. Force capture of Back Face (Index 1) as requested
         const innerContainer = originalElement.querySelector('.preserve-3d');
-        const isFlipped = innerContainer?.classList.contains('rotate-y-180') ?? false;
         const faces = innerContainer ? Array.from(innerContainer.children) as HTMLElement[] : [];
-        const visibleFace = isFlipped ? faces[1] : faces[0];
+        const visibleFace = faces[1]; // Always capture the back face
 
         if (!visibleFace) {
-            console.error('Could not find visible card face');
+            console.error('Could not find back face element');
             return null;
         }
 
