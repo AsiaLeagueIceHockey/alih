@@ -44,7 +44,9 @@ const InstagramShareButton = ({ cardElementId, className }: InstagramShareButton
         URL.revokeObjectURL(url);
         toast.success(t('share.downloaded', 'Image downloaded! Share it on your Story!'));
       }
-    } catch (error) {
+    } catch (error: any) {
+      // AbortError = user cancelled the share sheet — not a failure
+      if (error?.name === 'AbortError') return;
       console.error("Share failed:", error);
       toast.error(t('share.failed', 'Failed to generate image'));
     } finally {
@@ -61,7 +63,7 @@ const InstagramShareButton = ({ cardElementId, className }: InstagramShareButton
         {isGenerating ? (
             <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {t('common.generating', 'Generating...')}
+                {t('common.saving', '저장 중...')}
             </>
         ) : (
             <>

@@ -205,7 +205,7 @@ const PlayerCard = ({ player, team, cardData, className, isFlipped: controlledFl
               <div className="mt-auto pt-4 border-t border-white/20 flex justify-between items-end">
                  <div className="text-xs">
                     <div className="opacity-60 mb-0.5">OWNER</div>
-                    <div className="font-bold truncate max-w-[120px]">
+                    <div className="font-bold">
                        {ownerName || (cardData ? 'Collector' : 'You?')}
                     </div>
                  </div>

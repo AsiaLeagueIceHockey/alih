@@ -1,14 +1,49 @@
 import { toBlob } from "html-to-image";
 
 /**
+ * Pre-fetches an image URL and returns a data URL (base64).
+ * Required for html-to-image which cannot load cross-origin images via SVG foreignObject.
+ */
+const fetchImageAsDataUrl = async (url: string): Promise<string | null> => {
+    try {
+        const res = await fetch(url, { mode: 'cors' });
+        const blob = await res.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+        });
+    } catch {
+        return null;
+    }
+};
+
+/**
+ * Replaces all <img> src attributes in the element with data URLs.
+ * This is necessary because html-to-image (SVG foreignObject) cannot load
+ * cross-origin images — they just render as black/empty.
+ */
+const inlineImages = async (el: HTMLElement) => {
+    const imgs = Array.from(el.querySelectorAll('img')) as HTMLImageElement[];
+    await Promise.all(
+        imgs.map(async (img) => {
+            const src = img.getAttribute('src');
+            if (!src || src.startsWith('data:')) return;
+            const dataUrl = await fetchImageAsDataUrl(src);
+            if (dataUrl) img.setAttribute('src', dataUrl);
+        })
+    );
+};
+
+/**
  * Generates a shareable image from a PlayerCard element.
  *
  * APPROACH:
  * 1. Detect which face (front/back) is currently visible
- * 2. Temporarily flatten 3D transforms so html-to-image can render correctly
- * 3. Capture using html-to-image (SVG foreignObject — much better CSS support)
- * 4. Immediately restore all original styles
- * 5. Compose the final 1080×1620 share image
+ * 2. Pre-inline all cross-origin images as data URLs (fixes blank photo issue)
+ * 3. Temporarily flatten 3D transforms for html-to-image
+ * 4. Capture, then restore — with transition:none to prevent flip animation on restore
  */
 export const generateShareImage = async (elementId: string): Promise<Blob | null> => {
     const originalElement = document.getElementById(elementId);
@@ -17,7 +52,6 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         return null;
     }
 
-    // Collect all elements we will temporarily modify
     const innerContainer = originalElement.querySelector('.preserve-3d') as HTMLElement | null;
     const isFlipped = innerContainer?.classList.contains('rotate-y-180') ?? false;
     const faces = innerContainer ? Array.from(innerContainer.children) as HTMLElement[] : [];
@@ -34,6 +68,10 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
     };
 
     const restoreStyles = () => {
+        // Apply transition:none FIRST to prevent the flip animation from playing during restore
+        if (innerContainer) {
+            innerContainer.style.setProperty('transition', 'none', 'important');
+        }
         const setOrRemove = (el: HTMLElement | null | undefined, s: string) => {
             if (!el) return;
             if (s) el.setAttribute('style', s); else el.removeAttribute('style');
@@ -43,17 +81,21 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         setOrRemove(frontFace, savedStyles.front);
         setOrRemove(backFace, savedStyles.back);
         if (rotateHint) rotateHint.style.visibility = 'visible';
+        // Re-apply transition:none after style restore so the flip doesn't animate
+        if (innerContainer) {
+            innerContainer.style.setProperty('transition', 'none', 'important');
+            // Re-enable transition after one frame
+            requestAnimationFrame(() => {
+                if (innerContainer) innerContainer.style.removeProperty('transition');
+            });
+        }
     };
 
     try {
-        // ── STEP 1: Flatten 3D for capture ──────────────────────────────────────
-        // Hide UI-only rotate hint
+        // ── STEP 1: Flatten 3D ──────────────────────────────────────────────────
         if (rotateHint) rotateHint.style.visibility = 'hidden';
-
-        // Remove perspective from outer wrapper
         originalElement.style.perspective = 'none';
 
-        // Flatten the 3D container
         if (innerContainer) {
             innerContainer.style.setProperty('transform', 'none', 'important');
             innerContainer.style.setProperty('transition', 'none', 'important');
@@ -61,32 +103,28 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         }
 
         if (isFlipped) {
-            // Show back, hide front
-            if (frontFace) {
-                frontFace.style.setProperty('display', 'none', 'important');
-            }
+            if (frontFace) frontFace.style.setProperty('display', 'none', 'important');
             if (backFace) {
                 backFace.style.setProperty('transform', 'none', 'important');
                 backFace.style.setProperty('backface-visibility', 'visible', 'important');
-                (backFace.style as any)['WebkitBackfaceVisibility'] = 'visible';
+                (backFace.style as any).WebkitBackfaceVisibility = 'visible';
                 backFace.style.setProperty('z-index', '10', 'important');
             }
         } else {
-            // Show front, hide back
-            if (backFace) {
-                backFace.style.setProperty('display', 'none', 'important');
-            }
+            if (backFace) backFace.style.setProperty('display', 'none', 'important');
             if (frontFace) {
                 frontFace.style.setProperty('backface-visibility', 'visible', 'important');
-                (frontFace.style as any)['WebkitBackfaceVisibility'] = 'visible';
+                (frontFace.style as any).WebkitBackfaceVisibility = 'visible';
                 frontFace.style.setProperty('z-index', '10', 'important');
             }
         }
 
-        // Brief pause for browser to reflow
+        // ── STEP 2: Pre-inline cross-origin images (prevents blank photos) ──────
+        await inlineImages(originalElement);
+
         await new Promise(r => setTimeout(r, 50));
 
-        // ── STEP 2: Capture with html-to-image ──────────────────────────────────
+        // ── STEP 3: Capture ─────────────────────────────────────────────────────
         const rect = originalElement.getBoundingClientRect();
         const captureWidth = Math.round(rect.width);
         const captureHeight = Math.round(rect.height);
@@ -95,24 +133,19 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
             pixelRatio: 3,
             width: captureWidth,
             height: captureHeight,
-            style: {
-                transform: 'none',
-                transition: 'none',
-            },
+            style: { transform: 'none', transition: 'none' },
+            // CORS-fetched images already inlined as data URLs above
         });
 
-        // ── STEP 3: Immediately restore original styles ──────────────────────────
+        // ── STEP 4: Restore styles (no flip animation) ──────────────────────────
         restoreStyles();
 
         if (!cardBlob) throw new Error('html-to-image returned null blob');
-
-        // Convert blob to ImageBitmap for drawing on canvas
         const cardBitmap = await createImageBitmap(cardBlob);
 
-        // ── STEP 4: Compose final 1080×1620 image ───────────────────────────────
+        // ── STEP 5: Compose final 1080×1620 share image ─────────────────────────
         const FINAL_WIDTH = 1080;
         const FINAL_HEIGHT = 1620;
-
         const finalCanvas = document.createElement('canvas');
         finalCanvas.width = FINAL_WIDTH;
         finalCanvas.height = FINAL_HEIGHT;
@@ -128,14 +161,14 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, FINAL_WIDTH, FINAL_HEIGHT);
 
-        // Card placement — 87% width, centered, shifted up for watermark
+        // Card placement
         const cardAspect = captureWidth / captureHeight;
         const targetCardWidth = FINAL_WIDTH * 0.87;
         const targetCardHeight = targetCardWidth / cardAspect;
         const cardX = (FINAL_WIDTH - targetCardWidth) / 2;
         const cardY = (FINAL_HEIGHT - targetCardHeight) / 2 - 40;
 
-        // Subtle drop shadow
+        // Drop shadow
         ctx.save();
         ctx.shadowColor = 'rgba(0,0,0,0.65)';
         ctx.shadowBlur = 100;
@@ -144,10 +177,9 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         ctx.fillRect(cardX + 20, cardY + 20, targetCardWidth - 40, targetCardHeight - 40);
         ctx.restore();
 
-        // Draw the captured card
         ctx.drawImage(cardBitmap, cardX, cardY, targetCardWidth, targetCardHeight);
 
-        // Watermark pill at bottom
+        // Watermark pill
         const wmY = FINAL_HEIGHT - 80;
         const wmCenterX = FINAL_WIDTH / 2;
         const pillWidth = 220;
@@ -182,7 +214,6 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         });
 
     } catch (error) {
-        // Always restore original styles even on error
         restoreStyles();
         console.error('Error generating share image:', error);
         return null;
