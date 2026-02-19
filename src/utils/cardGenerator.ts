@@ -1,49 +1,17 @@
-import { toBlob } from "html-to-image";
-
-/**
- * Pre-fetches an image URL and returns a data URL (base64).
- * Required for html-to-image which cannot load cross-origin images via SVG foreignObject.
- */
-const fetchImageAsDataUrl = async (url: string): Promise<string | null> => {
-    try {
-        const res = await fetch(url, { mode: 'cors' });
-        const blob = await res.blob();
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-        });
-    } catch {
-        return null;
-    }
-};
-
-/**
- * Replaces all <img> src attributes in the element with data URLs.
- * This is necessary because html-to-image (SVG foreignObject) cannot load
- * cross-origin images — they just render as black/empty.
- */
-const inlineImages = async (el: HTMLElement) => {
-    const imgs = Array.from(el.querySelectorAll('img')) as HTMLImageElement[];
-    await Promise.all(
-        imgs.map(async (img) => {
-            const src = img.getAttribute('src');
-            if (!src || src.startsWith('data:')) return;
-            const dataUrl = await fetchImageAsDataUrl(src);
-            if (dataUrl) img.setAttribute('src', dataUrl);
-        })
-    );
-};
+import h2c from "html2canvas";
 
 /**
  * Generates a shareable image from a PlayerCard element.
  *
- * APPROACH:
- * 1. Detect which face (front/back) is currently visible
- * 2. Pre-inline all cross-origin images as data URLs (fixes blank photo issue)
- * 3. Temporarily flatten 3D transforms for html-to-image
- * 4. Capture, then restore — with transition:none to prevent flip animation on restore
+ * FINAL APPROACH:
+ * - html2canvas (Canvas drawImage) correctly handles cross-origin images with useCORS:true
+ * - html-to-image (SVG foreignObject) CANNOT render cross-origin images - abandoned
+ *
+ * 3D CSS issue workaround:
+ * - Clone ONLY the visible face element (front or back Card)
+ * - Strip all 3D / absolute-positioning CSS from the clone
+ * - Place it in an off-screen container matching the card's rendered size
+ * - Capture it with html2canvas — never touch the original element
  */
 export const generateShareImage = async (elementId: string): Promise<Blob | null> => {
     const originalElement = document.getElementById(elementId);
@@ -52,98 +20,92 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         return null;
     }
 
-    const innerContainer = originalElement.querySelector('.preserve-3d') as HTMLElement | null;
-    const isFlipped = innerContainer?.classList.contains('rotate-y-180') ?? false;
-    const faces = innerContainer ? Array.from(innerContainer.children) as HTMLElement[] : [];
-    const frontFace = faces[0] as HTMLElement | undefined;
-    const backFace = faces[1] as HTMLElement | undefined;
-    const rotateHint = originalElement.querySelector('.animate-pulse') as HTMLElement | null;
-
-    // Save original inline style strings for perfect restoration
-    const savedStyles = {
-        outer: originalElement.getAttribute('style') ?? '',
-        inner: innerContainer?.getAttribute('style') ?? '',
-        front: frontFace?.getAttribute('style') ?? '',
-        back: backFace?.getAttribute('style') ?? '',
-    };
-
-    const restoreStyles = () => {
-        // Apply transition:none FIRST to prevent the flip animation from playing during restore
-        if (innerContainer) {
-            innerContainer.style.setProperty('transition', 'none', 'important');
-        }
-        const setOrRemove = (el: HTMLElement | null | undefined, s: string) => {
-            if (!el) return;
-            if (s) el.setAttribute('style', s); else el.removeAttribute('style');
-        };
-        setOrRemove(originalElement, savedStyles.outer);
-        setOrRemove(innerContainer, savedStyles.inner);
-        setOrRemove(frontFace, savedStyles.front);
-        setOrRemove(backFace, savedStyles.back);
-        if (rotateHint) rotateHint.style.visibility = 'visible';
-        // Re-apply transition:none after style restore so the flip doesn't animate
-        if (innerContainer) {
-            innerContainer.style.setProperty('transition', 'none', 'important');
-            // Re-enable transition after one frame
-            requestAnimationFrame(() => {
-                if (innerContainer) innerContainer.style.removeProperty('transition');
-            });
-        }
-    };
-
     try {
-        // ── STEP 1: Flatten 3D ──────────────────────────────────────────────────
-        if (rotateHint) rotateHint.style.visibility = 'hidden';
-        originalElement.style.perspective = 'none';
+        // 1. Detect which face is visible
+        const innerContainer = originalElement.querySelector('.preserve-3d');
+        const isFlipped = innerContainer?.classList.contains('rotate-y-180') ?? false;
+        const faces = innerContainer ? Array.from(innerContainer.children) as HTMLElement[] : [];
+        const visibleFace = isFlipped ? faces[1] : faces[0];
 
-        if (innerContainer) {
-            innerContainer.style.setProperty('transform', 'none', 'important');
-            innerContainer.style.setProperty('transition', 'none', 'important');
-            innerContainer.style.setProperty('transform-style', 'flat', 'important');
+        if (!visibleFace) {
+            console.error('Could not find visible card face');
+            return null;
         }
 
-        if (isFlipped) {
-            if (frontFace) frontFace.style.setProperty('display', 'none', 'important');
-            if (backFace) {
-                backFace.style.setProperty('transform', 'none', 'important');
-                backFace.style.setProperty('backface-visibility', 'visible', 'important');
-                (backFace.style as any).WebkitBackfaceVisibility = 'visible';
-                backFace.style.setProperty('z-index', '10', 'important');
-            }
-        } else {
-            if (backFace) backFace.style.setProperty('display', 'none', 'important');
-            if (frontFace) {
-                frontFace.style.setProperty('backface-visibility', 'visible', 'important');
-                (frontFace.style as any).WebkitBackfaceVisibility = 'visible';
-                frontFace.style.setProperty('z-index', '10', 'important');
-            }
-        }
-
-        // ── STEP 2: Pre-inline cross-origin images (prevents blank photos) ──────
-        await inlineImages(originalElement);
-
-        await new Promise(r => setTimeout(r, 50));
-
-        // ── STEP 3: Capture ─────────────────────────────────────────────────────
+        // 2. Get the actual rendered card dimensions
         const rect = originalElement.getBoundingClientRect();
         const captureWidth = Math.round(rect.width);
         const captureHeight = Math.round(rect.height);
 
-        const cardBlob = await toBlob(originalElement, {
-            pixelRatio: 3,
-            width: captureWidth,
-            height: captureHeight,
-            style: { transform: 'none', transition: 'none' },
-            // CORS-fetched images already inlined as data URLs above
+        // 3. Deep-clone the visible face only
+        const faceClone = visibleFace.cloneNode(true) as HTMLElement;
+
+        // 4. Set crossOrigin=anonymous on all img tags in the clone
+        //    so html2canvas can draw them via Canvas without tainting it
+        Array.from(faceClone.querySelectorAll('img')).forEach((img) => {
+            img.crossOrigin = 'anonymous';
         });
 
-        // ── STEP 4: Restore styles (no flip animation) ──────────────────────────
-        restoreStyles();
+        // 5. Flatten all 3D / absolute positioning from the clone
+        //    (the face was `absolute inset-0 backface-hidden [rotate-y-180]`)
+        faceClone.style.cssText = `
+            position: relative !important;
+            transform: none !important;
+            transition: none !important;
+            backface-visibility: visible !important;
+            -webkit-backface-visibility: visible !important;
+            width: ${captureWidth}px !important;
+            height: ${captureHeight}px !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            inset: auto !important;
+            z-index: auto !important;
+            display: flex !important;
+        `;
 
-        if (!cardBlob) throw new Error('html-to-image returned null blob');
-        const cardBitmap = await createImageBitmap(cardBlob);
+        // Strip Tailwind classes that fight our inline styles
+        ['absolute', 'inset-0', 'rotate-y-180', 'backface-hidden'].forEach(cls => {
+            faceClone.classList.remove(cls);
+        });
 
-        // ── STEP 5: Compose final 1080×1620 share image ─────────────────────────
+        // Hide the rotate hint icon inside the clone
+        const rotateHintInClone = faceClone.querySelector('.animate-pulse') as HTMLElement | null;
+        if (rotateHintInClone) rotateHintInClone.style.display = 'none';
+
+        // 6. Mount clone in an off-screen container
+        const offscreen = document.createElement('div');
+        offscreen.style.cssText = `
+            position: fixed;
+            top: -99999px;
+            left: -99999px;
+            width: ${captureWidth}px;
+            height: ${captureHeight}px;
+            overflow: hidden;
+        `;
+        offscreen.appendChild(faceClone);
+        document.body.appendChild(offscreen);
+
+        // Wait for fonts & images to settle
+        await document.fonts.ready;
+        await new Promise(r => setTimeout(r, 200));
+
+        // 7. Capture with html2canvas (handles cross-origin images correctly)
+        const cardCanvas = await h2c(offscreen, {
+            backgroundColor: null,
+            scale: 3,
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            width: captureWidth,
+            height: captureHeight,
+        });
+
+        // 8. Remove off-screen element
+        document.body.removeChild(offscreen);
+
+        // 9. Compose final 1080×1620 share image
         const FINAL_WIDTH = 1080;
         const FINAL_HEIGHT = 1620;
         const finalCanvas = document.createElement('canvas');
@@ -161,7 +123,7 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, FINAL_WIDTH, FINAL_HEIGHT);
 
-        // Card placement
+        // Card placement — 87% width, centered, shifted up for watermark
         const cardAspect = captureWidth / captureHeight;
         const targetCardWidth = FINAL_WIDTH * 0.87;
         const targetCardHeight = targetCardWidth / cardAspect;
@@ -177,7 +139,7 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         ctx.fillRect(cardX + 20, cardY + 20, targetCardWidth - 40, targetCardHeight - 40);
         ctx.restore();
 
-        ctx.drawImage(cardBitmap, cardX, cardY, targetCardWidth, targetCardHeight);
+        ctx.drawImage(cardCanvas, cardX, cardY, targetCardWidth, targetCardHeight);
 
         // Watermark pill
         const wmY = FINAL_HEIGHT - 80;
@@ -214,7 +176,6 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         });
 
     } catch (error) {
-        restoreStyles();
         console.error('Error generating share image:', error);
         return null;
     }
