@@ -62,7 +62,6 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
             bottom: auto !important;
             inset: auto !important;
             z-index: auto !important;
-            display: flex !important;
         `;
 
         // Strip Tailwind classes that fight our inline styles
@@ -73,6 +72,16 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         // Hide the rotate hint icon inside the clone
         const rotateHintInClone = faceClone.querySelector('.animate-pulse') as HTMLElement | null;
         if (rotateHintInClone) rotateHintInClone.style.display = 'none';
+
+        // Force Badge alignment (html2canvas often misaligns inline-flex)
+        const badges = faceClone.querySelectorAll('.rounded-full.border'); 
+        badges.forEach((b: Element) => {
+            const badge = b as HTMLElement;
+            badge.style.display = 'inline-flex';
+            badge.style.alignItems = 'center';
+            badge.style.justifyContent = 'center';
+            badge.style.lineHeight = '1';
+        });
 
         // 6. Mount clone in an off-screen container
         const offscreen = document.createElement('div');
@@ -89,7 +98,7 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
 
         // Wait for fonts & images to settle
         await document.fonts.ready;
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 500));
 
         // 7. Capture with html2canvas (handles cross-origin images correctly)
         const cardCanvas = await h2c(offscreen, {
