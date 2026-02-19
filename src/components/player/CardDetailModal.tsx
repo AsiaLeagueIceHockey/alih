@@ -18,7 +18,7 @@ import InstagramShareButton from "./InstagramShareButton";
 
 const CardDetailModal = ({ isOpen, onClose, card, player, team }: CardDetailModalProps) => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   
   // Unique ID for this card instance to capture
   const cardId = `share-card-${card.id}`;
@@ -58,7 +58,7 @@ const CardDetailModal = ({ isOpen, onClose, card, player, team }: CardDetailModa
                team={team} 
                cardData={card} 
                showRotateHint={true}
-               ownerName={user?.user_metadata?.nickname || ( user?.email ? user.email.split('@')[0] : undefined )}
+               ownerName={profile?.nickname || user?.user_metadata?.full_name || user?.user_metadata?.name || ( user?.email ? user.email.split('@')[0] : undefined )}
                className="w-full max-w-sm aspect-[2/3] shadow-2xl mb-12"
             />
             

@@ -18,7 +18,7 @@ interface ExtendedCard extends PlayerCardType {
 }
 
 const MyCards = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const currentLang = i18n.language;
@@ -177,7 +177,7 @@ const MyCards = () => {
                            team={teamData} 
                            cardData={card} 
                            showRotateHint={isSelected} // Only show hint in full view
-                           ownerName={user?.user_metadata?.nickname || ( user?.email ? user.email.split('@')[0] : undefined )}
+                           ownerName={profile?.nickname || user?.user_metadata?.full_name || user?.user_metadata?.name || ( user?.email ? user.email.split('@')[0] : undefined )}
                            className={isSelected ? "w-full max-w-sm aspect-[2/3] shadow-2xl" : "w-full aspect-[2/3]"}
                            // Prevent flipping when not selected is clicked (because it triggers selection)
                            onFlip={!isSelected ? () => {} : undefined}
