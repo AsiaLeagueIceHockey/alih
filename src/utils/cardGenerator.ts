@@ -48,21 +48,25 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
 
         // 5. Flatten all 3D / absolute positioning from the clone
         //    (the face was `absolute inset-0 backface-hidden [rotate-y-180]`)
-        faceClone.style.cssText = `
-            position: relative !important;
-            transform: none !important;
-            transition: none !important;
-            backface-visibility: visible !important;
-            -webkit-backface-visibility: visible !important;
-            width: ${captureWidth}px !important;
-            height: ${captureHeight}px !important;
-            top: auto !important;
-            left: auto !important;
-            right: auto !important;
-            bottom: auto !important;
-            inset: auto !important;
-            z-index: auto !important;
-        `;
+        //    IMPORTANT: Do NOT use cssText, it wipes out inline styles like backgroundColor!
+        faceClone.style.setProperty('position', 'relative', 'important');
+        faceClone.style.setProperty('transform', 'none', 'important');
+        faceClone.style.setProperty('transition', 'none', 'important');
+        faceClone.style.setProperty('backface-visibility', 'visible', 'important');
+        (faceClone.style as any)['WebkitBackfaceVisibility'] = 'visible';
+        
+        // Force dimensions to match rendered size
+        faceClone.style.setProperty('width', `${captureWidth}px`, 'important');
+        faceClone.style.setProperty('height', `${captureHeight}px`, 'important');
+        
+        // Reset positioning that might interfere
+        faceClone.style.setProperty('top', 'auto', 'important');
+        faceClone.style.setProperty('left', 'auto', 'important');
+        faceClone.style.setProperty('right', 'auto', 'important');
+        faceClone.style.setProperty('bottom', 'auto', 'important');
+        faceClone.style.setProperty('inset', 'auto', 'important');
+        faceClone.style.setProperty('z-index', 'auto', 'important');
+        faceClone.style.setProperty('margin', '0', 'important');
 
         // Strip Tailwind classes that fight our inline styles
         ['absolute', 'inset-0', 'rotate-y-180', 'backface-hidden'].forEach(cls => {
@@ -98,7 +102,7 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
 
         // Wait for fonts & images to settle
         await document.fonts.ready;
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 1000));
 
         // 7. Capture with html2canvas (handles cross-origin images correctly)
         const cardCanvas = await h2c(offscreen, {
