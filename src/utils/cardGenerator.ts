@@ -48,60 +48,8 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
 
         // 5. Flatten all 3D / absolute positioning from the clone
         
-        // Helper to copy critical computed styles
-        const copyComputedStyles = (source: HTMLElement, target: HTMLElement) => {
-            const computed = window.getComputedStyle(source);
-            
-            // Layout & Flex
-            target.style.display = computed.display;
-            target.style.flexDirection = computed.flexDirection;
-            target.style.justifyContent = computed.justifyContent;
-            target.style.alignItems = computed.alignItems;
-            target.style.flexWrap = computed.flexWrap;
-            target.style.gap = computed.gap;
-            
-            // Spacing
-            target.style.margin = computed.margin;
-            target.style.padding = computed.padding;
-            
-            // Image specifics - CRITICAL for aspect ratio
-            if (source.tagName === 'IMG') {
-                target.style.objectFit = computed.objectFit;
-                target.style.objectPosition = computed.objectPosition;
-                target.style.width = computed.width;
-                target.style.height = computed.height;
-            }
-            
-            // Text & Color
-            target.style.textAlign = computed.textAlign;
-            target.style.lineHeight = computed.lineHeight;
-            target.style.fontSize = computed.fontSize;
-            target.style.fontWeight = computed.fontWeight;
-            target.style.color = computed.color;
-            
-            // Background
-            if (computed.backgroundColor !== 'rgba(0, 0, 0, 0)' && computed.backgroundColor !== 'transparent') {
-                target.style.backgroundColor = computed.backgroundColor;
-            }
-        };
-
-        const recursiveCopy = (source: HTMLElement, target: HTMLElement) => {
-            copyComputedStyles(source, target);
-            const sourceChildren = Array.from(source.children) as HTMLElement[];
-            const targetChildren = Array.from(target.children) as HTMLElement[];
-            
-            sourceChildren.forEach((child, index) => {
-                if (targetChildren[index]) {
-                    recursiveCopy(child, targetChildren[index]);
-                }
-            });
-        };
-
-        // Apply computed styles recursively BEFORE resetting positioning
-        recursiveCopy(visibleFace, faceClone);
-
         //    IMPORTANT: Do NOT use cssText, it wipes out inline styles like backgroundColor!
-        //    Now we allow setProperty to override the copied computed styles ONLY for positioning resets
+        //    We use setProperty to override layout-affecting properties only.
         faceClone.style.setProperty('position', 'relative', 'important');
         faceClone.style.setProperty('transform', 'none', 'important');
         faceClone.style.setProperty('transition', 'none', 'important');
@@ -130,14 +78,41 @@ export const generateShareImage = async (elementId: string): Promise<Blob | null
         const rotateHintInClone = faceClone.querySelector('.animate-pulse') as HTMLElement | null;
         if (rotateHintInClone) rotateHintInClone.style.display = 'none';
 
-        // Force Badge alignment logic (still good to keep as a safety net, though recursiveCopy might fix it)
+        // FIX 1: Ensure images maintain aspect ratio (prevent "stretched logo/player")
+        faceClone.querySelectorAll('img').forEach((img) => {
+            img.style.objectFit = 'contain';
+            img.style.height = 'auto';
+            img.style.maxWidth = '100%';
+            // If it's the player photo (usually has 'object-cover'), let's force expected formatting
+            if (img.classList.contains('object-cover')) {
+                 img.style.objectFit = 'cover';
+                 img.style.height = '100%';
+            }
+        });
+
+        // FIX 2: Prevent vertical stretching on Back Face (disable flex-grow)
+        // The back face uses `flex-1` on the number container, which html2canvas miscalculates => huge gap.
+        const flexGrowers = faceClone.querySelectorAll('.flex-1');
+        flexGrowers.forEach((el) => {
+            (el as HTMLElement).style.flex = '0 0 auto';
+            (el as HTMLElement).style.height = 'auto';
+        });
+
+        // FIX 3: Force Badge alignment (html2canvas often misaligns inline-flex)
         const badges = faceClone.querySelectorAll('.rounded-full.border'); 
         badges.forEach((b: Element) => {
             const badge = b as HTMLElement;
             badge.style.display = 'inline-flex';
             badge.style.alignItems = 'center';
             badge.style.justifyContent = 'center';
-            badge.style.lineHeight = '1';
+            badge.style.lineHeight = '0'; // Adjusted from 1 to 0 for tighter centering in some fonts
+            // Manually center text if needed
+            const badgeText = badge.textContent;
+            if (badgeText && badgeText.length <= 2) {
+                 badge.style.padding = '0';
+                 badge.style.width = '24px'; // Fixed width for single letter badge
+                 badge.style.height = '24px';
+            }
         });
 
         // 6. Mount clone in an off-screen container
