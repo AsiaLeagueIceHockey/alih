@@ -25,6 +25,9 @@
     -   KR/EN Locale: Shows KR->JP flights when home team is Japanese.
     -   JA Locale: Shows JP->KR flights when home team is HL Anyang.
 4.  **UI Integration**: Integrated the banner into `GameDetail.tsx` right below the main match card.
+    -   **Visibility Fix**: Ensures banner is also shown for live and finished games (below the period summary score table).
+5.  **PWA Compatibility**:
+    -   Changed the external URL trigger from a standard `<a>` tag to an `onClick` event with `window.open(url, '_blank', 'noopener,noreferrer')` to prevent iOS PWA from opening a blank internal WebView.
 
 ## Next Steps
 -   **Instagram Integration**: Implement specific sharing functionality for Instagram Stories, including generating a dynamic asset (GIF/Video) of the card flipping.

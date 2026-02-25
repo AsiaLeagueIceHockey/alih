@@ -48,11 +48,15 @@ export const FlightAffiliateBanner = ({ homeTeam }: FlightAffiliateBannerProps) 
                    : currentLang === 'en' || currentLang === 'en-US' ? 'Book Now'
                    : '예약하기';
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // In iOS PWA, window.open often forces the external Safari/App to open instead of the internal WebView
+    window.open(destination.url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
-    <a
-      href={destination.url}
-      target="_blank"
-      rel="noopener noreferrer"
+    <div
+      onClick={handleClick}
       className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-6 hover:shadow-md transition-shadow cursor-pointer group"
     >
       <div className="flex items-center gap-3 w-full">
@@ -66,6 +70,6 @@ export const FlightAffiliateBanner = ({ homeTeam }: FlightAffiliateBannerProps) 
           </span>
         </div>
       </div>
-    </a>
+    </div>
   );
 };

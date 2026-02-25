@@ -997,6 +997,9 @@ const GameDetail = () => {
           disabled={true}
         />
 
+        {/* 제휴 배너 (항공권 등) */}
+        <FlightAffiliateBanner homeTeam={homeTeam} />
+
         {/* 댓글 섹션 */}
         <CommentSection entityType="game" entityId={scheduleData?.id || 0} />
 
