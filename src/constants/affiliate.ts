@@ -32,12 +32,12 @@ export const AFFILIATE_LINKS: Record<string, AffiliateDestination> = {
     cityJa: '東京',
     url: 'https://www.trip.com/t/fUGEnOmseT2'
   },
-  // 고베
+  // 고베 (잔여 시즌 오사카에서 진행됨)
   'STARS': {
-    cityKo: '고베',
-    cityEn: 'Kobe',
-    cityJa: '神戸',
-    url: 'https://www.trip.com/t/AFVzkWmseT2'
+    cityKo: '오사카',
+    cityEn: 'OSAKA',
+    cityJa: '大阪',
+    url: 'https://www.trip.com/t/8Ejojn8ueT2'
   },
   // 서울
   'HL ANYANG': {
