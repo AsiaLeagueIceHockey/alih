@@ -13,6 +13,7 @@ import { useScheduleByGameNo, ScheduleGame } from "@/hooks/useSchedules";
 import SEO from "@/components/SEO";
 import CheerBattle from "@/components/game/CheerBattle";
 import MatchPrediction from "@/components/game/MatchPrediction";
+import { FlightAffiliateBanner } from "@/components/game/FlightAffiliateBanner";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
@@ -554,6 +555,9 @@ const GameDetail = () => {
               <p>{scheduleData.match_place}</p>
             </div>
           </Card>
+
+          {/* 제휴 배너 (항공권 등) */}
+          <FlightAffiliateBanner homeTeam={homeTeam} />
 
           {/* 승부 예측 - 게임 전에만 여기에 표시 (경기 정보와 라이브 스트리밍 사이) */}
           {!isInProgress && !isFinishedWithLiveData && (

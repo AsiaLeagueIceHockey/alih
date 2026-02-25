@@ -15,5 +15,16 @@
     -   Fixed card flipping logic and animation glitches.
     -   Linked card generation completion directly to the full-screen card view.
 
+# Agent Work Summary - Trip.com Affiliate Banner
+
+## Completed Tasks
+1.  **Component Creation**: Created `FlightAffiliateBanner` component to display Trip.com flight deals for away games.
+    -   Displays simplified UI without "Powered by Trip.com" or external booking button based on user feedback.
+2.  **Affiliate Mapping**: Created `src/constants/affiliate.ts` mapping team English names to Trip.com destination tracking URLs.
+3.  **Localization Logic**:
+    -   KR/EN Locale: Shows KR->JP flights when home team is Japanese.
+    -   JA Locale: Shows JP->KR flights when home team is HL Anyang.
+4.  **UI Integration**: Integrated the banner into `GameDetail.tsx` right below the main match card.
+
 ## Next Steps
 -   **Instagram Integration**: Implement specific sharing functionality for Instagram Stories, including generating a dynamic asset (GIF/Video) of the card flipping.
