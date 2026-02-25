@@ -40,9 +40,9 @@ export const FlightAffiliateBanner = ({ homeTeam }: FlightAffiliateBannerProps) 
                  : destination.cityKo;
 
   // Localized Text
-  const title = currentLang === 'ja' ? `直に観に行く！${cityName}行き航空券セール`
-              : currentLang === 'en' || currentLang === 'en-US' ? `Watch Live! ${cityName} Flights Deals`
-              : `직관하러 가기! ${cityName} 항공권 특가`;
+  const title = currentLang === 'ja' ? `直に観に行く！${cityName}行き航空券が気になるなら？`
+              : currentLang === 'en' || currentLang === 'en-US' ? `Watch Live! Curious about flights to ${cityName}?`
+              : `직관하러 가기! ${cityName} 항공권 궁금하다면?`;
               
   const buttonText = currentLang === 'ja' ? '予約する'
                    : currentLang === 'en' || currentLang === 'en-US' ? 'Book Now'
