@@ -981,6 +981,9 @@ const GameDetail = () => {
           </div>
         </Card>
 
+        {/* 제휴 배너 (항공권 등) */}
+        <FlightAffiliateBanner homeTeam={homeTeam} />
+
         {/* 응원 배틀 */}
         <CheerBattle
           gameNo={gameNo || ''}
@@ -996,9 +999,6 @@ const GameDetail = () => {
           awayTeam={{ id: awayTeam.id, name: awayTeam.name, english_name: awayTeam.english_name, japanese_name: awayTeam.japanese_name, logo: awayTeam.logo }}
           disabled={true}
         />
-
-        {/* 제휴 배너 (항공권 등) */}
-        <FlightAffiliateBanner homeTeam={homeTeam} />
 
         {/* 댓글 섹션 */}
         <CommentSection entityType="game" entityId={scheduleData?.id || 0} />
