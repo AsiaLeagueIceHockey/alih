@@ -17,7 +17,7 @@ async function convertImagesToBase64(element: HTMLElement) {
             const response = await fetch(src, { 
                 mode: 'cors', 
                 credentials: 'omit', // Important for public Supabase buckets often
-                cache: 'no-cache'
+                cache: 'force-cache'
             });
             
             if (!response.ok) throw new Error(`Failed to fetch ${src}`);

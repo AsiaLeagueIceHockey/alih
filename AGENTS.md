@@ -14,6 +14,8 @@
     -   Simplified navigation (removed "Fold", added "X" and "Back").
     -   Fixed card flipping logic and animation glitches.
     -   Linked card generation completion directly to the full-screen card view.
+18. **Optimization**:
+    -   Resolved Supabase Cached Egress spike by removing `no-cache` on card generation and instructing 1-year cache headers for images.
 
 # Agent Work Summary - Trip.com Affiliate Banner
 
