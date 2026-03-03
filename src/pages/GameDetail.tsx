@@ -1278,7 +1278,7 @@ const GameDetail = () => {
         </Card>
 
         <Card className="p-4 mb-6">
-          <h3 className="font-semibold mb-3">{t('gameDetail.glossary')}</h3>
+          <h3 className="font-semibold mb-3">{t('gameDetail.glossaryLabel')}</h3>
           <div className="space-y-3 text-sm">
             <div>
               <p className="font-medium">SOG (Shot on Goal)</p>
