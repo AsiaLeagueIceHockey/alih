@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { externalSupabase } from "@/lib/supabase-external";
-import { Loader2, ChevronLeft, Instagram, Calendar, MapPin, Ruler, Weight, Trophy, CreditCard, RotateCcw } from "lucide-react";
+import { Loader2, ChevronLeft, Instagram, User, MapPin, ArrowUp, Weight, Trophy, CreditCard, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ const PlayerDetail = () => {
   const [showGenerationOverlay, setShowGenerationOverlay] = useState(false);
   const [showCardDetail, setShowCardDetail] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [isCareerExpanded, setIsCareerExpanded] = useState(false);
   
   // Detect if the param is a numeric ID (legacy support) or a slug
   const isNumericId = playerSlug && /^\d+$/.test(playerSlug);
@@ -152,6 +153,36 @@ const PlayerDetail = () => {
     if (!player?.birth_date) return null;
     return differenceInYears(new Date(), new Date(player.birth_date));
   };
+  
+  // 캡틴/어시스턴트 뱃지 포함 팀명 렌더링
+  const renderTeamName = (teamName: string) => {
+    // Matches something like: Team Name"C" or Team Name"A" or Team Name(C)
+    const captainMatch = teamName.match(/^(.*?)[("']([AC])[)"']$/);
+    
+    if (captainMatch) {
+      const cleanName = captainMatch[1].trim();
+      const type = captainMatch[2];
+      const isCaptain = type === 'C';
+      
+      return (
+        <div className="flex items-center gap-2">
+          <div className="font-medium">{cleanName}</div>
+          <Badge className={`
+            h-5 w-5 p-0 flex items-center justify-center text-[11px] font-black rounded 
+            ${isCaptain 
+              ? "bg-red-600 hover:bg-red-600 text-white border-none" 
+              : "bg-blue-600 hover:bg-blue-600 text-white border-none"}
+            shadow-sm
+          `}>
+            {type}
+          </Badge>
+        </div>
+      );
+    }
+    
+    return <div className="font-medium">{teamName}</div>;
+  };
+
 
   if (isLoadingPlayer) {
     return (
@@ -257,13 +288,13 @@ const PlayerDetail = () => {
                 <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
                   {getAge() && (
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
+                      <User className="w-3.5 h-3.5" />
                       {getAge()}{t('playerDetail.ageSuffix')}
                     </span>
                   )}
                   {player.height_cm && (
                     <span className="flex items-center gap-1">
-                      <Ruler className="w-3.5 h-3.5" />
+                      <ArrowUp className="w-3.5 h-3.5" />
                       {player.height_cm}cm
                     </span>
                   )}
@@ -436,26 +467,39 @@ const PlayerDetail = () => {
           {/* Career History */}
           {player.career_history && player.career_history.length > 0 && (
             <Card className="p-4">
-              <h2 className="text-lg font-bold mb-3">
-                📋 {t('playerDetail.career')}
-              </h2>
-              <div className="space-y-2">
-                {player.career_history.map((career: CareerHistory, idx: number) => (
-                  <div key={idx} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-                    <div>
-                      <div className="font-medium">{career.team}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {career.league} • {career.season}
-                      </div>
-                    </div>
-                    {career.pts !== undefined && (
-                      <Badge variant="secondary">
-                        {career.g}G {career.a}A ({career.pts}P)
-                      </Badge>
-                    )}
-                  </div>
-                ))}
+              <div 
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setIsCareerExpanded(!isCareerExpanded)}
+              >
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  📋 {t('playerDetail.career')}
+                </h2>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isCareerExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
               </div>
+
+              {isCareerExpanded && (
+                <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {player.career_history
+                    .filter((career: CareerHistory) => !(career.season === '25-26' && career.league === 'Asia League'))
+                    .map((career: CareerHistory, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center py-2 border-b border-border last:border-0">
+                      <div>
+                        {renderTeamName(career.team)}
+                        <div className="text-xs text-muted-foreground">
+                          {career.league} • {career.season}
+                        </div>
+                      </div>
+                      {(career.pts !== undefined || career.g !== undefined) && (
+                        <Badge variant="secondary">
+                          {career.g}G {career.a}A ({career.pts ?? career.tp}P)
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           )}
 
