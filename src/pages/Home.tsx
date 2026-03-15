@@ -18,6 +18,7 @@ import SEO from "@/components/SEO";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { isPlayoffGame } from "@/lib/game-utils";
 
 interface TeamStanding {
   rank: number;
@@ -275,7 +276,11 @@ const Home = () => {
               {inProgressGames.map((game) => (
                 <Card
                   key={game.id}
-                  className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
+                  className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
+                    isPlayoffGame(game.match_at) 
+                      ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5" 
+                      : "shadow-card-glow border-primary/20"
+                  }`}
                   onClick={() => navigate(`/schedule/${game.game_no}`, {
                     state: {
                       homeTeam: getTeamById(game.home_alih_team_id),
@@ -285,9 +290,16 @@ const Home = () => {
                   })}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                      </Badge>
+                      {isPlayoffGame(game.match_at) && (
+                        <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold">
+                          {t('game.playoff')}
+                        </Badge>
+                      )}
+                    </div>
                     <Badge className="text-xs bg-destructive animate-pulse">
                       진행 중
                     </Badge>
@@ -357,7 +369,11 @@ const Home = () => {
             </Card>
           ) : nextGames.length === 1 ? (
             <Card
-              className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
+              className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
+                isPlayoffGame(nextGames[0].match_at)
+                  ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
+                  : "shadow-card-glow border-primary/20"
+              }`}
               onClick={() => navigate(`/schedule/${nextGames[0].game_no}`, {
                 state: {
                   homeTeam: getTeamById(nextGames[0].home_alih_team_id),
@@ -367,9 +383,16 @@ const Home = () => {
               })}
             >
               <div className="flex items-center justify-between mb-2">
-                <Badge variant="secondary" className="text-xs">
-                  {format(new Date(nextGames[0].match_at), 'PPP p', { locale: getDateLocale() })}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {format(new Date(nextGames[0].match_at), 'PPP p', { locale: getDateLocale() })}
+                  </Badge>
+                  {isPlayoffGame(nextGames[0].match_at) && (
+                    <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold">
+                      {t('game.playoff')}
+                    </Badge>
+                  )}
+                </div>
                 <Badge className={`text-xs ${getGameStatus(nextGames[0]) === t('game.status.inProgress') ? "bg-destructive animate-pulse" : "bg-accent"}`}>
                   {getGameStatus(nextGames[0])}
                 </Badge>
@@ -423,7 +446,11 @@ const Home = () => {
                 {nextGames.map((game) => (
                   <CarouselItem key={game.id}>
                     <Card
-                      className="p-4 shadow-card-glow border-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
+                      className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
+                        isPlayoffGame(game.match_at)
+                          ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
+                          : "shadow-card-glow border-primary/20"
+                      }`}
                       onClick={() => navigate(`/schedule/${game.game_no}`, {
                         state: {
                           homeTeam: getTeamById(game.home_alih_team_id),
@@ -433,9 +460,16 @@ const Home = () => {
                       })}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {format(new Date(game.match_at), 'PPP p', { locale: getDateLocale() })}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {format(new Date(game.match_at), 'PPP p', { locale: getDateLocale() })}
+                          </Badge>
+                          {isPlayoffGame(game.match_at) && (
+                            <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold">
+                              {t('game.playoff')}
+                            </Badge>
+                          )}
+                        </div>
                         <Badge className={`text-xs ${getGameStatus(game) === t('game.status.inProgress') ? "bg-destructive animate-pulse" : "bg-accent"}`}>
                           {getGameStatus(game)}
                         </Badge>

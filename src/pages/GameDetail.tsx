@@ -19,6 +19,7 @@ import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
 import { CommentSection } from "@/components/comments";
+import { isPlayoffGame } from "@/lib/game-utils";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -327,6 +328,8 @@ const GameDetail = () => {
     return t('game.status.scheduled');
   };
 
+  const isPlayoff = isPlayoffGame(matchDate);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -455,7 +458,11 @@ const GameDetail = () => {
         />
 
         {/* 헤더 */}
-        <div className="bg-gradient-to-b from-primary/10 to-background pt-[calc(1rem+env(safe-area-inset-top))] pb-4">
+        <div className={`pt-[calc(1rem+env(safe-area-inset-top))] pb-4 ${
+          isPlayoff 
+            ? "bg-gradient-to-b from-slate-400/10 to-background border-b border-slate-400/20" 
+            : "bg-gradient-to-b from-primary/10 to-background"
+        }`}>
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <div className="w-10" /> {/* Spacer */}
@@ -494,7 +501,11 @@ const GameDetail = () => {
 
         <div className="container mx-auto px-4 -mt-4">
           {/* 1. 팀 정보 및 스코어 */}
-          <Card className="p-6 mb-6">
+          <Card className={`p-6 mb-6 overflow-hidden ${
+            isPlayoff 
+              ? "border-slate-300/50 shadow-lg shadow-slate-500/5 bg-gradient-to-br from-background via-background to-slate-400/5" 
+              : ""
+          }`}>
             <div className="flex items-start justify-between mb-6">
               <Link
                 to={`/team/${homeTeam.id}`}
@@ -532,6 +543,11 @@ const GameDetail = () => {
                     >
                       {gameStatus}
                     </Badge>
+                    {isPlayoff && (
+                      <Badge className="mt-1 text-[10px] bg-slate-200 text-slate-900 font-bold h-4">
+                        {t('game.playoff')}
+                      </Badge>
+                    )}
                   </>
                 )}
               </div>
@@ -904,7 +920,11 @@ const GameDetail = () => {
         structuredData={structuredData}
       />
       {/* 헤더 */}
-      <div className="bg-gradient-to-b from-primary/10 to-background pt-[calc(1rem+env(safe-area-inset-top))] pb-4">
+      <div className={`pt-[calc(1rem+env(safe-area-inset-top))] pb-4 ${
+        isPlayoff 
+          ? "bg-gradient-to-b from-slate-400/10 to-background border-b border-slate-400/20" 
+          : "bg-gradient-to-b from-primary/10 to-background"
+      }`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
             <div className="w-10" /> {/* Spacer */}
@@ -940,7 +960,11 @@ const GameDetail = () => {
 
       {/* 메인 스코어보드 */}
       <div className="container mx-auto px-4 -mt-4">
-        <Card className="p-6 mb-6">
+        <Card className={`p-6 mb-6 overflow-hidden relative ${
+          isPlayoff 
+            ? "border-slate-300/50 shadow-lg shadow-slate-500/5 bg-gradient-to-br from-background via-background to-slate-400/5" 
+            : ""
+        }`}>
           <div className="flex items-start justify-between mb-6">
             {/* 홈팀 */}
             <Link
@@ -959,6 +983,11 @@ const GameDetail = () => {
                 <span className="text-4xl font-bold">{awayScore}</span>
               </div>
               <Badge variant="outline" className="mt-2">{t('gameDetail.final')}</Badge>
+              {isPlayoff && (
+                <Badge className="mt-1 text-[10px] bg-slate-200 text-slate-900 font-bold h-4">
+                  {t('game.playoff')}
+                </Badge>
+              )}
             </div>
 
             {/* 어웨이팀 */}

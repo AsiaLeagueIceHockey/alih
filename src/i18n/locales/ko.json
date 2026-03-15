@@ -97,7 +97,8 @@
         "noHighlights": "하이라이트가 없습니다",
         "noNews": "뉴스가 없습니다",
         "loadError": "불러오는데 실패했습니다",
-        "loading": "로딩 중..."
+        "loading": "로딩 중...",
+        "playoff": "플레이오프"
     },
     "section": {
         "inProgress": "진행 중인 경기",

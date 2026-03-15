@@ -97,7 +97,8 @@
         "noNews": "ニュースがありません",
         "loadError": "読み込みに失敗しました",
         "loading": "読み込み中...",
-        "pending": "未定"
+        "pending": "未定",
+        "playoff": "プレーオフ"
     },
     "section": {
         "inProgress": "進行中の試合",

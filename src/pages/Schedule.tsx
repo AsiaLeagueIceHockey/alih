@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
+import { isPlayoffGame } from "@/lib/game-utils";
 
 // Month data (raw values only, labels come from translations)
 const MONTHS_DATA = [
@@ -238,7 +239,11 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
               return (
                 <Card 
                   key={game.id} 
-                  className="p-4 border-border relative cursor-pointer hover:border-primary/50 transition-colors"
+                  className={`p-4 relative cursor-pointer hover:border-primary/50 transition-all ${
+                    isPlayoffGame(game.match_at)
+                      ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
+                      : "border-border"
+                  }`}
                   onClick={() => {
                     navigate(`/schedule/${game.game_no}`, { 
                       state: { 
@@ -281,6 +286,11 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                       <span className="text-muted-foreground ml-2">
                         {format(matchDate, 'HH:mm', { locale: getDateLocale() })}
                       </span>
+                      {isPlayoffGame(game.match_at) && (
+                        <Badge className="ml-2 text-[10px] h-4 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold border-none">
+                          {t('game.playoff')}
+                        </Badge>
+                      )}
                     </div>
                   </div>
 

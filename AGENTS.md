@@ -31,5 +31,18 @@
 5.  **PWA Compatibility**:
     -   Changed the external URL trigger from a standard `<a>` tag to an `onClick` event with `window.open(url, '_blank', 'noopener,noreferrer')` to prevent iOS PWA from opening a blank internal WebView.
 
+# Agent Work Summary - Playoff Schedule & Visual Enhancements
+
+## Completed Tasks
+1.  **Schedule Implementation**: Created `sql/v7_playoff_schedule.sql` to insert playoff matches with standardized English venue names (`TOMAKOMAI`, `ANYANG`).
+2.  **Playoff Logic**: Implemented `isPlayoffGame` utility in `src/lib/game-utils.ts` to identify games within the Mar 19 - Apr 5, 2026 window.
+3.  **Premium UI Design**:
+    -   Implemented a **Premium Silver Theme** using a slate/zinc/silver palette for playoff games.
+    -   Added thematic glow effects and borders to match cards on Home and Schedule pages.
+4.  **Component Enhancements**:
+    -   **Home & Schedule**: Integrated "Playoff" badges and subtle metallic styling for playoff match cards.
+    -   **Game Detail**: Updated the header with a silver gradient and positioned the "Playoff" badge below the match status for better hierarchy.
+5.  **Internationalization (i18n)**: Added translations for "Playoff" in Korean ("플레이오프") and Japanese ("プレーオフ").
+
 ## Next Steps
 -   **Instagram Integration**: Implement specific sharing functionality for Instagram Stories, including generating a dynamic asset (GIF/Video) of the card flipping.
