@@ -290,12 +290,12 @@ const Home = () => {
                   })}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {new Date(game.match_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} · {new Date(game.match_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Badge variant="secondary" className="text-[10px] truncate">
+                        {format(new Date(game.match_at), 'MMM d, p', { locale: getDateLocale() })}
                       </Badge>
                       {isPlayoffGame(game.match_at) && (
-                        <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold">
+                        <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                           {t('game.playoff')}
                         </Badge>
                       )}
@@ -383,12 +383,12 @@ const Home = () => {
               })}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {format(new Date(nextGames[0].match_at), 'PPP p', { locale: getDateLocale() })}
+                <div className="flex items-center gap-2 min-w-0">
+                  <Badge variant="secondary" className="text-[10px] truncate">
+                    {format(new Date(nextGames[0].match_at), 'MMM d, p', { locale: getDateLocale() })}
                   </Badge>
                   {isPlayoffGame(nextGames[0].match_at) && (
-                    <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold">
+                    <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                       {t('game.playoff')}
                     </Badge>
                   )}
@@ -460,12 +460,12 @@ const Home = () => {
                       })}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {format(new Date(game.match_at), 'PPP p', { locale: getDateLocale() })}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Badge variant="secondary" className="text-[10px] truncate">
+                            {format(new Date(game.match_at), 'MMM d, p', { locale: getDateLocale() })}
                           </Badge>
                           {isPlayoffGame(game.match_at) && (
-                            <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold">
+                            <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                               {t('game.playoff')}
                             </Badge>
                           )}

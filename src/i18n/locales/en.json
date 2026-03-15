@@ -103,7 +103,8 @@
         "noNews": "No news available",
         "loadError": "Failed to load",
         "loading": "Loading...",
-        "pending": "TBD"
+        "pending": "TBD",
+        "playoff": "PLAYOFF"
     },
     "section": {
         "inProgress": "Games in Progress",
