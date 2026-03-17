@@ -448,7 +448,7 @@ const GameDetail = () => {
     };
 
     return (
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background pb-10">
         <SEO
           title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${isFinishedWithLiveData ? t('page.gameDetail.gameResult') : isInProgress ? t('page.gameDetail.liveGame') : t('page.gameDetail.gameInfo')} | ${t('seo.leagueName')}`}
           description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
@@ -911,7 +911,7 @@ const GameDetail = () => {
   const [homeScore, awayScore] = gameDetail.game_summary.total.score.split(' : ');
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO
         title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${t('page.gameDetail.gameResult')} | ${t('seo.leagueName')}`}
         description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}

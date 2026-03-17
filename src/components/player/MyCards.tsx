@@ -49,7 +49,7 @@ const MyCards = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background pb-10">
          <PageHeader title={t('nav.myCards', 'My Cards')} />
          <div className="flex flex-col items-center justify-center py-20 gap-4">
             <CreditCard className="w-12 h-12 text-muted-foreground" />
@@ -61,7 +61,7 @@ const MyCards = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background pb-10">
          <PageHeader title={t('nav.myCards', 'My Cards')} />
          <div className="flex justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -72,7 +72,7 @@ const MyCards = () => {
 
   if (!cards || cards.length === 0) {
     return (
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background pb-10">
          <PageHeader title={t('nav.myCards', 'My Cards')} />
          <div className="flex flex-col items-center justify-center py-20 gap-4 text-center px-4">
             <div className="w-20 h-20 bg-secondary/50 rounded-full flex items-center justify-center mb-4">

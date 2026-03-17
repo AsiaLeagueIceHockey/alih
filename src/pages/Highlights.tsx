@@ -109,7 +109,7 @@ const Highlights = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO 
         title="아시아리그 하이라이트 - 경기 영상, 골 장면 모음 | 2025-26 시즌"
         description="아시아리그 아이스하키 2025-26 시즌 하이라이트 영상 모음. 최신 경기 하이라이트, 골 장면, 베스트 세이브를 팀별로 확인하세요. HL안양, 홋카이도 레드이글스 등 모든 팀 영상 제공."

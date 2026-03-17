@@ -17,7 +17,7 @@ const Game = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO 
         title={currentTab === 'schedule' ? t('page.schedule.title') : t('page.highlights.title')}
         description={t('page.schedule.subtitle')}

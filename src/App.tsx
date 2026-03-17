@@ -16,6 +16,7 @@ import { AuthProvider } from "./context/AuthContext";
 import OnboardingDialog from "./components/auth/OnboardingDialog";
 import { handleInAppBrowser } from "./utils/in-app";
 import InAppGuide from "./components/common/InAppGuide";
+import SiteFooter from "./components/SiteFooter";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -37,6 +38,8 @@ const InstagramGoals = lazy(() => import("./pages/InstagramGoals"));
 const InstagramWeeklyStats = lazy(() => import("./pages/InstagramWeeklyStats"));
 const InstagramStandings = lazy(() => import("./pages/InstagramStandings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
 
 // Admin pages
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -82,6 +85,14 @@ const ConditionalInstallPrompt = () => {
     return null;
   }
   return <InstallPrompt />;
+};
+
+const ConditionalSiteFooter = () => {
+  const location = useLocation();
+  if (location.pathname.startsWith('/instagram') || location.pathname.startsWith('/admin')) {
+    return null;
+  }
+  return <SiteFooter />;
 };
 
 const App = () => {
@@ -210,6 +221,16 @@ const App = () => {
                   <News />
                 </Suspense>
               } />
+              <Route path="/privacy" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Privacy />
+                </Suspense>
+              } />
+              <Route path="/terms" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <Terms />
+                </Suspense>
+              } />
               {/* 어드민 페이지 */}
               <Route path="/admin/test-push" element={
                 <Suspense fallback={<LoadingFallback />}>
@@ -227,6 +248,7 @@ const App = () => {
                 </Suspense>
               } />
             </Routes>
+            <ConditionalSiteFooter />
             <ConditionalInstallPrompt />
             <ConditionalBottomNav />
             <OnboardingDialog />

@@ -193,7 +193,7 @@ const Standings = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO 
         title="아시아리그 순위 - 팀 순위표, 선수 스탯 | 2025-26 시즌"
         description="아시아리그 아이스하키 2025-26 시즌 팀 순위표와 개인 기록 확인. 승점, 승패, 골득실, 득점왕, 어시스트왕, 포인트 리더 등 상세 스탯 제공. HL안양, 홋카이도 레드이글스 순위 실시간 업데이트."

@@ -140,7 +140,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO 
         title="아시아리그 경기 일정 - 2025-26 시즌 전체 일정 및 결과"
         description="아시아리그 아이스하키 2025-26 시즌 전체 경기 일정, 월별 일정, 팀별 일정을 확인하세요. 실시간 경기 결과, 경기장 정보, 하이라이트 영상까지 한 번에. HL안양, 홋카이도 레드이글스 등 전 팀 경기 일정 제공."

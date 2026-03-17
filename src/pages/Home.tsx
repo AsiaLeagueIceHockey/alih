@@ -249,7 +249,7 @@ const Home = () => {
   const combinedStructuredData = [structuredData, breadcrumbData];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO
         title="아시아리그 아이스하키 - 경기 일정, 실시간 스코어, 하이라이트 | 2025-26 시즌"
         description="아시아리그 아이스하키 2025-26 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요. HL안양, 홋카이도 레드이글스, 도호쿠 프리블레이즈 등 전 팀 정보 제공."

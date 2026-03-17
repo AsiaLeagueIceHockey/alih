@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface LoginDialogProps {
   open: boolean;
@@ -68,6 +69,24 @@ const LoginDialog = ({ open, onOpenChange, triggerLocation }: LoginDialogProps) 
     if (i18n.language === 'ko') return '로그인 / 회원가입';
     if (i18n.language === 'ja') return 'ログイン / 新規登録';
     return 'Login / Sign Up';
+  };
+
+  const getLegalNotice = () => {
+    if (i18n.language === 'ko') return '계속하면 개인정보처리방침 및 서비스 이용약관에 동의하는 것으로 간주됩니다.';
+    if (i18n.language === 'ja') return '続行すると、プライバシーポリシーと利用規約に同意したものとみなされます。';
+    return 'By continuing, you acknowledge the Privacy Policy and Terms of Service.';
+  };
+
+  const getPrivacyLabel = () => {
+    if (i18n.language === 'ko') return '개인정보처리방침';
+    if (i18n.language === 'ja') return 'プライバシーポリシー';
+    return 'Privacy Policy';
+  };
+
+  const getTermsLabel = () => {
+    if (i18n.language === 'ko') return '서비스 이용약관';
+    if (i18n.language === 'ja') return '利用規約';
+    return 'Terms of Service';
   };
 
   return (
@@ -136,6 +155,18 @@ const LoginDialog = ({ open, onOpenChange, triggerLocation }: LoginDialogProps) 
               </div>
             </div>
           )}
+
+          <div className="pt-2 text-center text-xs leading-5 text-muted-foreground">
+            <p>{getLegalNotice()}</p>
+            <div className="mt-2 flex items-center justify-center gap-3">
+              <Link className="underline underline-offset-4" to="/privacy" onClick={() => onOpenChange(false)}>
+                {getPrivacyLabel()}
+              </Link>
+              <Link className="underline underline-offset-4" to="/terms" onClick={() => onOpenChange(false)}>
+                {getTermsLabel()}
+              </Link>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -99,7 +99,7 @@ const News = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-10">
       <SEO 
         title="아시아리그 뉴스 - 최신 소식, 경기 분석, 선수 인터뷰 | 2025-26 시즌"
         description="아시아리그 아이스하키 2025-26 시즌 최신 뉴스, 경기 분석, 선수 인터뷰, 팀 소식을 실시간으로 확인. 한국어, 일본어, 영어 뉴스 제공. HL안양, 홋카이도 레드이글스 등 모든 팀 소식."

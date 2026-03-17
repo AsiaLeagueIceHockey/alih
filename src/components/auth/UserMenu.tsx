@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SettingsDialog from "./SettingsDialog";
+import { Link } from "react-router-dom";
 
 const languages = [
   { code: 'ko', label: '한국어', flag: '🇰🇷' },
@@ -52,6 +53,26 @@ const UserMenu = () => {
   const displayName = profile?.nickname || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || "User";
   const nicknameInitial = displayName[0].toUpperCase();
   const currentLang = languages.find(lang => lang.code === i18n.language) || languages[0];
+
+  const legalCopy = {
+    ko: {
+      notice: "계속하면 개인정보처리방침 및 서비스 이용약관에 동의하는 것으로 간주됩니다.",
+      privacy: "개인정보처리방침",
+      terms: "서비스 이용약관",
+    },
+    ja: {
+      notice: "続行すると、プライバシーポリシーと利用規約に同意したものとみなされます。",
+      privacy: "プライバシーポリシー",
+      terms: "利用規約",
+    },
+    en: {
+      notice: "By continuing, you acknowledge the Privacy Policy and Terms of Service.",
+      privacy: "Privacy Policy",
+      terms: "Terms of Service",
+    },
+  } as const;
+
+  const legalText = legalCopy[i18n.language === "ja" ? "ja" : i18n.language === "en" ? "en" : "ko"];
 
   if (!user) {
     return (
@@ -93,6 +114,17 @@ const UserMenu = () => {
                 </div>
                 <span className="flex-1 text-center pr-6">{t('auth.kakao', 'Continue with Kakao')}</span>
               </Button>
+              <div className="pt-1 text-center text-xs leading-5 text-muted-foreground">
+                <p>{legalText.notice}</p>
+                <div className="mt-2 flex items-center justify-center gap-3">
+                  <Link className="underline underline-offset-4" to="/privacy" onClick={() => setShowLoginModal(false)}>
+                    {legalText.privacy}
+                  </Link>
+                  <Link className="underline underline-offset-4" to="/terms" onClick={() => setShowLoginModal(false)}>
+                    {legalText.terms}
+                  </Link>
+                </div>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
