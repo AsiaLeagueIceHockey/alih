@@ -10,6 +10,7 @@ import { Check, Bell, ChevronRight, Loader2, X, Globe, Users } from "lucide-reac
 import { useNotifications } from "@/hooks/use-notifications";
 import { externalSupabase } from "@/lib/supabase-external";
 import { debounce } from "lodash";
+import { Link } from "react-router-dom";
 
 const languages = [
   { code: 'ko', label: '한국어', flag: '🇰🇷' },
@@ -32,6 +33,24 @@ const OnboardingDialog = () => {
   // Nickname states
   const [nickname, setNickname] = useState("");
   const [nicknameStatus, setNicknameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+
+  const legalCopy = {
+    ko: {
+      notice: "가입을 완료하면",
+      privacy: "개인정보처리방침",
+      terms: "서비스 이용약관",
+    },
+    ja: {
+      notice: "登録を完了すると、",
+      privacy: "プライバシーポリシー",
+      terms: "利用規約",
+    },
+    en: {
+      notice: "By completing sign-up, you agree to the",
+      privacy: "Privacy Policy",
+      terms: "Terms of Service",
+    },
+  } as const;
 
   useEffect(() => {
     // Force open if logged in but onboarding incomplete
@@ -153,6 +172,8 @@ const OnboardingDialog = () => {
   };
 
   if (!user) return null;
+
+  const legalText = legalCopy[i18n.language === "ja" ? "ja" : i18n.language === "en" ? "en" : "ko"];
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -278,6 +299,18 @@ const OnboardingDialog = () => {
                   {nicknameStatus === 'taken' && (
                     <span className="text-xs text-destructive">{t('onboarding.nicknameTaken')}</span>
                   )}
+                </div>
+
+                <div className="pt-2 text-center text-[11px] leading-4 text-muted-foreground">
+                  <span>{legalText.notice} </span>
+                  <Link className="underline underline-offset-2" to="/privacy" onClick={() => setOpen(false)}>
+                    {legalText.privacy}
+                  </Link>
+                  <span> · </span>
+                  <Link className="underline underline-offset-2" to="/terms" onClick={() => setOpen(false)}>
+                    {legalText.terms}
+                  </Link>
+                  {i18n.language !== "ko" && <span>.</span>}
                 </div>
               </div>
             </div>
