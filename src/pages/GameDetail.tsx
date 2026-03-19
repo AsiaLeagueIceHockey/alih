@@ -171,6 +171,14 @@ const GameDetail = () => {
     }
   };
 
+  const getDateFormat = () => {
+    switch (currentLang) {
+      case 'ja': return "MMM d日, HH:mm";
+      case 'en': return "MMM d, HH:mm";
+      default: return "MMM d일, HH:mm";
+    }
+  };
+
   // Collapsible roster state
   const [homeRosterOpen, setHomeRosterOpen] = useState(false);
   const [awayRosterOpen, setAwayRosterOpen] = useState(false);
@@ -563,10 +571,10 @@ const GameDetail = () => {
 
             <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
               <p className="font-medium">
-                {format(matchDateObj, 'PPP', { locale: getDateLocale() })}
+                {format(matchDateObj, currentLang === 'en' ? 'MMM d' : 'MMM d' + (currentLang === 'ja' ? '日' : '일'), { locale: getDateLocale() })}
               </p>
               <p>
-                {format(matchDateObj, 'p', { locale: getDateLocale() })}
+                {format(matchDateObj, 'HH:mm', { locale: getDateLocale() })}
               </p>
               <p>{scheduleData.match_place}</p>
             </div>

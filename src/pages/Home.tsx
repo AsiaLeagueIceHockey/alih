@@ -67,6 +67,14 @@ const Home = () => {
       default: return ko;
     }
   };
+
+  const getDateFormat = () => {
+    switch (currentLang) {
+      case 'ja': return "MMM d日, HH:mm";
+      case 'en': return "MMM d, HH:mm";
+      default: return "MMM d일, HH:mm";
+    }
+  };
   
   const [selectedHighlight, setSelectedHighlight] = useState<{ url: string; title: string } | null>(null);
   const [nextGamesApi, setNextGamesApi] = useState<CarouselApi>();
@@ -292,7 +300,7 @@ const Home = () => {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <Badge variant="secondary" className="text-[10px] truncate">
-                        {format(new Date(game.match_at), 'MMM d, p', { locale: getDateLocale() })}
+                        {format(new Date(game.match_at), getDateFormat(), { locale: getDateLocale() })}
                       </Badge>
                       {isPlayoffGame(game.match_at) && (
                         <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
@@ -385,7 +393,7 @@ const Home = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <Badge variant="secondary" className="text-[10px] truncate">
-                    {format(new Date(nextGames[0].match_at), 'MMM d, p', { locale: getDateLocale() })}
+                    {format(new Date(nextGames[0].match_at), getDateFormat(), { locale: getDateLocale() })}
                   </Badge>
                   {isPlayoffGame(nextGames[0].match_at) && (
                     <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
