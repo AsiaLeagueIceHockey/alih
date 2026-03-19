@@ -14,6 +14,9 @@ export interface ScheduleGame {
   highlight_title: string | null;
   game_status: string | null;
   live_url: string | null;
+  season_phase?: string | null;
+  source_popup_id?: number | null;
+  source_game_no?: number | null;
   live_data: {
     shots: {
       '1p': { home: number; away: number };

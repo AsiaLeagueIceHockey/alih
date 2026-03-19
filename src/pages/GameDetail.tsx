@@ -336,7 +336,7 @@ const GameDetail = () => {
     return t('game.status.scheduled');
   };
 
-  const isPlayoff = isPlayoffGame(matchDate);
+  const isPlayoff = isPlayoffGame(matchDate, scheduleData?.season_phase);
 
   if (isLoading) {
     return (

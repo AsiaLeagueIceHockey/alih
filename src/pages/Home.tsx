@@ -285,7 +285,7 @@ const Home = () => {
                 <Card
                   key={game.id}
                   className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
-                    isPlayoffGame(game.match_at) 
+                    isPlayoffGame(game.match_at, game.season_phase) 
                       ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5" 
                       : "shadow-card-glow border-primary/20"
                   }`}
@@ -302,7 +302,7 @@ const Home = () => {
                       <Badge variant="secondary" className="text-[10px] truncate">
                         {format(new Date(game.match_at), getDateFormat(), { locale: getDateLocale() })}
                       </Badge>
-                      {isPlayoffGame(game.match_at) && (
+                      {isPlayoffGame(game.match_at, game.season_phase) && (
                         <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                           {t('game.playoff')}
                         </Badge>
@@ -378,7 +378,7 @@ const Home = () => {
           ) : nextGames.length === 1 ? (
             <Card
               className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
-                isPlayoffGame(nextGames[0].match_at)
+                isPlayoffGame(nextGames[0].match_at, nextGames[0].season_phase)
                   ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
                   : "shadow-card-glow border-primary/20"
               }`}
@@ -395,7 +395,7 @@ const Home = () => {
                   <Badge variant="secondary" className="text-[10px] truncate">
                     {format(new Date(nextGames[0].match_at), getDateFormat(), { locale: getDateLocale() })}
                   </Badge>
-                  {isPlayoffGame(nextGames[0].match_at) && (
+                  {isPlayoffGame(nextGames[0].match_at, nextGames[0].season_phase) && (
                     <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                       {t('game.playoff')}
                     </Badge>
@@ -455,7 +455,7 @@ const Home = () => {
                   <CarouselItem key={game.id}>
                     <Card
                       className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
-                        isPlayoffGame(game.match_at)
+                        isPlayoffGame(game.match_at, game.season_phase)
                           ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
                           : "shadow-card-glow border-primary/20"
                       }`}
@@ -472,7 +472,7 @@ const Home = () => {
                           <Badge variant="secondary" className="text-[10px] truncate">
                             {format(new Date(game.match_at), 'MMM d, p', { locale: getDateLocale() })}
                           </Badge>
-                          {isPlayoffGame(game.match_at) && (
+                          {isPlayoffGame(game.match_at, game.season_phase) && (
                             <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                               {t('game.playoff')}
                             </Badge>

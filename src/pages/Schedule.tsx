@@ -240,7 +240,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                 <Card 
                   key={game.id} 
                   className={`p-4 relative cursor-pointer hover:border-primary/50 transition-all ${
-                    isPlayoffGame(game.match_at)
+                    isPlayoffGame(game.match_at, game.season_phase)
                       ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
                       : "border-border"
                   }`}
@@ -286,7 +286,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                       <span className="text-muted-foreground ml-2">
                         {format(matchDate, 'HH:mm', { locale: getDateLocale() })}
                       </span>
-                      {isPlayoffGame(game.match_at) && (
+                      {isPlayoffGame(game.match_at, game.season_phase) && (
                         <Badge className="ml-2 text-[10px] h-4 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold border-none">
                           {t('game.playoff')}
                         </Badge>
