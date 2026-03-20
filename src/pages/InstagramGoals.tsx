@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
+import { isPlayoffGame } from "@/lib/game-utils";
+import { getInstagramTheme } from "@/lib/instagram-theme";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -22,6 +24,7 @@ interface ScheduleData {
   match_at: string;
   match_place: string;
   game_status: string | null;
+  season_phase?: string | null;
 }
 
 interface RosterPlayer {
@@ -133,6 +136,8 @@ const InstagramGoals = () => {
     day: 'numeric',
     weekday: 'short',
   });
+  const isPlayoff = isPlayoffGame(scheduleData.match_at, scheduleData.season_phase);
+  const theme = getInstagramTheme(isPlayoff);
 
   // 선수 이름 찾기 헬퍼
   const getPlayerName = (playerNo: number, teamId: number): string => {
@@ -185,7 +190,7 @@ const InstagramGoals = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       {/* 4:5 인스타그램 컨테이너 (1080x1350) */}
       <div 
-        className="relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-hidden"
+        className={theme.frameClass}
         style={{ 
           width: '1080px', 
           height: '1350px',
@@ -196,9 +201,9 @@ const InstagramGoals = () => {
       >
         {/* 배경 장식 */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/30 via-transparent to-transparent" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-          <div className="absolute top-1/4 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className={theme.topGlowClass} />
+          <div className={theme.bottomGlowClass} />
+          <div className={theme.sideGlowClass} />
         </div>
 
         {/* 컨텐츠 */}
@@ -206,18 +211,23 @@ const InstagramGoals = () => {
           
           {/* Header */}
           <div className="text-center mb-6">
-            <p className="text-primary/80 text-xl tracking-[0.3em] font-light mb-2">
+            <p className={`${theme.headerEyebrowClass} text-xl tracking-[0.3em] font-light mb-2`}>
               ASIA LEAGUE ICE HOCKEY
             </p>
             <h1 className="text-white text-4xl font-bold tracking-wider mb-4">
               GOALS & ASSISTS
             </h1>
+            {isPlayoff && (
+              <div className="mb-4">
+                <span className={theme.badgeClass}>Playoffs</span>
+              </div>
+            )}
             <p className="text-slate-300 text-xl">{formattedDate}</p>
             <p className="text-slate-400 text-lg">{scheduleData.match_place}</p>
           </div>
 
           {/* 스코어 헤더 */}
-          <div className="flex items-center justify-center gap-6 mb-8 py-4 bg-slate-800/40 backdrop-blur-sm rounded-2xl border border-slate-700/50">
+          <div className={`${theme.panelClass} flex items-center justify-center gap-6 mb-8 py-4 rounded-2xl`}>
             <div className="flex items-center gap-4">
               <img 
                 src={homeTeam.logo} 
@@ -314,7 +324,7 @@ const InstagramGoals = () => {
 
                       {/* 시간 정보 */}
                       <div className="text-right flex-shrink-0">
-                        <p className="text-primary text-xl font-bold">
+                        <p className={`${theme.accentTextClass} text-xl font-bold`}>
                           {getPeriodLabel(goal.period)}
                         </p>
                         <p className="text-slate-400 text-lg">
@@ -331,14 +341,14 @@ const InstagramGoals = () => {
           {/* Footer: 페이지 인디케이터 + 브랜딩 */}
           <div className="text-center pt-6 flex items-center justify-center gap-6">
             {showPagination && (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full px-6 py-3">
+              <div className={`${theme.panelClass} rounded-full px-6 py-3`}>
                 <span className="text-white text-xl font-bold">
                   {safeCurrentPage} / {totalPages}
                 </span>
               </div>
             )}
-            <div className="inline-flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full px-8 py-4">
-              <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+            <div className={`${theme.panelClass} inline-flex items-center gap-3 rounded-full px-8 py-4`}>
+              <div className={`w-3 h-3 rounded-full animate-pulse ${theme.footerDotClass}`} />
               <span className="text-slate-300 text-xl font-medium">
                 @alhockey_fans
               </span>

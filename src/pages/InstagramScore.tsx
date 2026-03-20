@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
+import { isPlayoffGame } from "@/lib/game-utils";
+import { getInstagramTheme } from "@/lib/instagram-theme";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -30,6 +32,7 @@ interface ScheduleData {
   match_place: string;
   game_status: string | null;
   live_data: LiveData | null;
+  season_phase?: string | null;
 }
 
 interface GameSummary {
@@ -133,6 +136,8 @@ const InstagramScore = () => {
     hour: '2-digit',
     minute: '2-digit',
   });
+  const isPlayoff = isPlayoffGame(scheduleData.match_at, scheduleData.season_phase);
+  const theme = getInstagramTheme(isPlayoff);
 
   // 피리어드별 스코어 가져오기
   const getPeriodScores = () => {
@@ -195,7 +200,7 @@ const InstagramScore = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       {/* 4:5 인스타그램 컨테이너 (1080x1350) */}
       <div 
-        className="relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-hidden"
+        className={theme.frameClass}
         style={{ 
           width: '1080px', 
           height: '1350px',
@@ -206,9 +211,9 @@ const InstagramScore = () => {
       >
         {/* 배경 장식 */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/30 via-transparent to-transparent" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-          <div className="absolute top-1/4 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className={theme.topGlowClass} />
+          <div className={theme.bottomGlowClass} />
+          <div className={theme.sideGlowClass} />
         </div>
 
         {/* 컨텐츠 */}
@@ -216,12 +221,17 @@ const InstagramScore = () => {
           
           {/* Header */}
           <div className="text-center">
-            <p className="text-primary/80 text-2xl tracking-[0.3em] font-light mb-4">
+            <p className={`${theme.headerEyebrowClass} text-2xl tracking-[0.3em] font-light mb-4`}>
               ASIA LEAGUE ICE HOCKEY
             </p>
             <h1 className="text-white text-4xl font-bold tracking-wider mb-6">
               MATCH RESULT
             </h1>
+            {isPlayoff && (
+              <div className="mb-6">
+                <span className={theme.badgeClass}>Playoffs</span>
+              </div>
+            )}
             <div className="text-slate-300 text-2xl space-y-2">
               <p>{formattedDate}</p>
               <p>{formattedTime} · {scheduleData.match_place}</p>
@@ -254,7 +264,7 @@ const InstagramScore = () => {
                   {scheduleData.away_alih_team_score ?? 0}
                 </span>
               </div>
-              <p className="text-primary text-2xl font-semibold mt-4 tracking-wider">
+              <p className={`${theme.accentTextClass} text-2xl font-semibold mt-4 tracking-wider`}>
                 FINAL
               </p>
             </div>
@@ -279,7 +289,7 @@ const InstagramScore = () => {
               {periodScores.map((period) => (
                 <div 
                   key={period.label} 
-                  className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-10 py-6 text-center"
+                  className={`${theme.panelClass} rounded-2xl px-10 py-6 text-center`}
                 >
                   <p className="text-slate-400 text-lg mb-3">{period.label}</p>
                   <p className="text-white text-3xl font-bold">
@@ -292,8 +302,8 @@ const InstagramScore = () => {
 
           {/* Footer Branding */}
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full px-8 py-4">
-              <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+            <div className={`${theme.panelClass} inline-flex items-center gap-3 rounded-full px-8 py-4`}>
+              <div className={`w-3 h-3 rounded-full animate-pulse ${theme.footerDotClass}`} />
               <span className="text-slate-300 text-xl font-medium">
                 @alhockey_fans
               </span>
