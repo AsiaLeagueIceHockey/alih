@@ -98,11 +98,14 @@
         "noNews": "뉴스가 없습니다",
         "loadError": "불러오는데 실패했습니다",
         "loading": "로딩 중...",
-        "playoff": "플레이오프"
+        "playoff": "플레이오프",
+        "finalSeries": "결승전",
+        "finalHype": "트로피를 향한 마지막 시리즈."
     },
     "section": {
         "inProgress": "진행 중인 경기",
         "nextGame": "다음 경기",
+        "finalSpotlight": "파이널 스포트라이트",
         "recentResults": "최근 결과",
         "leagueStandings": "리그 순위",
         "latestNews": "최신 뉴스",

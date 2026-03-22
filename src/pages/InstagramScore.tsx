@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
-import { isPlayoffGame } from "@/lib/game-utils";
+import { isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { getInstagramTheme } from "@/lib/instagram-theme";
 
 const externalSupabase = createClient(
@@ -33,6 +33,7 @@ interface ScheduleData {
   game_status: string | null;
   live_data: LiveData | null;
   season_phase?: string | null;
+  source_game_no?: number | null;
 }
 
 interface GameSummary {
@@ -137,7 +138,14 @@ const InstagramScore = () => {
     minute: '2-digit',
   });
   const isPlayoff = isPlayoffGame(scheduleData.match_at, scheduleData.season_phase);
-  const theme = getInstagramTheme(isPlayoff);
+  const isFinal = isFinalSeriesGame(
+    scheduleData.match_at,
+    scheduleData.season_phase,
+    scheduleData.source_game_no,
+    scheduleData.home_alih_team_id,
+    scheduleData.away_alih_team_id
+  );
+  const theme = getInstagramTheme(isPlayoff, isFinal);
 
   // 피리어드별 스코어 가져오기
   const getPeriodScores = () => {
@@ -229,7 +237,7 @@ const InstagramScore = () => {
             </h1>
             {isPlayoff && (
               <div className="mb-6">
-                <span className={theme.badgeClass}>Playoffs</span>
+                <span className={theme.badgeClass}>{isFinal ? "Finals" : "Playoffs"}</span>
               </div>
             )}
             <div className="text-slate-300 text-2xl space-y-2">

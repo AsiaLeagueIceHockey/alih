@@ -104,11 +104,14 @@
         "loadError": "Failed to load",
         "loading": "Loading...",
         "pending": "TBD",
-        "playoff": "PLAYOFF"
+        "playoff": "PLAYOFF",
+        "finalSeries": "FINAL",
+        "finalHype": "The trophy is on the line."
     },
     "section": {
         "inProgress": "Games in Progress",
         "nextGame": "Next Game",
+        "finalSpotlight": "Final Spotlight",
         "recentResults": "Recent Results",
         "leagueStandings": "League Standings",
         "latestNews": "Latest News",

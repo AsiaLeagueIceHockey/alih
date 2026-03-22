@@ -19,7 +19,7 @@ import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
 import { CommentSection } from "@/components/comments";
-import { isPlayoffGame } from "@/lib/game-utils";
+import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -168,14 +168,6 @@ const GameDetail = () => {
       case 'ja': return ja;
       case 'en': return enUS;
       default: return ko;
-    }
-  };
-
-  const getDateFormat = () => {
-    switch (currentLang) {
-      case 'ja': return "MMM d日, HH:mm";
-      case 'en': return "MMM d, HH:mm";
-      default: return "MMM d일, HH:mm";
     }
   };
 
@@ -337,6 +329,15 @@ const GameDetail = () => {
   };
 
   const isPlayoff = isPlayoffGame(matchDate, scheduleData?.season_phase);
+  const isFinal = !!scheduleData && isFinalSeriesGame(
+    scheduleData.match_at,
+    scheduleData.season_phase,
+    scheduleData.source_game_no,
+    scheduleData.home_alih_team_id,
+    scheduleData.away_alih_team_id
+  );
+  const stageBadge = isFinal ? t('game.finalSeries') : t('game.playoff');
+  const formatGameDay = (date: Date) => formatMatchDateLabel(date, currentLang, getDateLocale());
 
   if (isLoading) {
     return (
@@ -467,7 +468,9 @@ const GameDetail = () => {
 
         {/* 헤더 */}
         <div className={`pt-[calc(1rem+env(safe-area-inset-top))] pb-4 ${
-          isPlayoff 
+          isFinal
+            ? "bg-[linear-gradient(180deg,rgba(120,53,15,0.2)_0%,rgba(69,10,10,0.08)_35%,transparent_100%)] border-b border-amber-300/25"
+            : isPlayoff 
             ? "bg-gradient-to-b from-slate-400/10 to-background border-b border-slate-400/20" 
             : "bg-gradient-to-b from-primary/10 to-background"
         }`}>
@@ -510,7 +513,9 @@ const GameDetail = () => {
         <div className="container mx-auto px-4 -mt-4">
           {/* 1. 팀 정보 및 스코어 */}
           <Card className={`p-6 mb-6 overflow-hidden ${
-            isPlayoff 
+            isFinal
+              ? "border-amber-300/40 shadow-[0_22px_65px_-34px_rgba(251,191,36,0.75)] bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.16),transparent_40%),linear-gradient(135deg,rgba(69,10,10,0.14),rgba(24,24,27,0.98))]"
+              : isPlayoff 
               ? "border-slate-300/50 shadow-lg shadow-slate-500/5 bg-gradient-to-br from-background via-background to-slate-400/5" 
               : ""
           }`}>
@@ -551,9 +556,9 @@ const GameDetail = () => {
                     >
                       {gameStatus}
                     </Badge>
-                    {isPlayoff && (
-                      <Badge className="mt-1 text-[10px] bg-slate-200 text-slate-900 font-bold h-4">
-                        {t('game.playoff')}
+                    {(isPlayoff || isFinal) && (
+                      <Badge className={`mt-1 text-[10px] font-bold h-4 ${isFinal ? "bg-amber-200 text-amber-950 border border-amber-100/70" : "bg-slate-200 text-slate-900"}`}>
+                        {stageBadge}
                       </Badge>
                     )}
                   </>
@@ -571,7 +576,7 @@ const GameDetail = () => {
 
             <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
               <p className="font-medium">
-                {format(matchDateObj, currentLang === 'en' ? 'MMM d' : 'MMM d' + (currentLang === 'ja' ? '日' : '일'), { locale: getDateLocale() })}
+                {formatGameDay(matchDateObj)}
               </p>
               <p>
                 {format(matchDateObj, 'HH:mm', { locale: getDateLocale() })}
@@ -929,7 +934,9 @@ const GameDetail = () => {
       />
       {/* 헤더 */}
       <div className={`pt-[calc(1rem+env(safe-area-inset-top))] pb-4 ${
-        isPlayoff 
+        isFinal
+          ? "bg-[linear-gradient(180deg,rgba(120,53,15,0.2)_0%,rgba(69,10,10,0.08)_35%,transparent_100%)] border-b border-amber-300/25"
+          : isPlayoff 
           ? "bg-gradient-to-b from-slate-400/10 to-background border-b border-slate-400/20" 
           : "bg-gradient-to-b from-primary/10 to-background"
       }`}>
@@ -969,7 +976,9 @@ const GameDetail = () => {
       {/* 메인 스코어보드 */}
       <div className="container mx-auto px-4 -mt-4">
         <Card className={`p-6 mb-6 overflow-hidden relative ${
-          isPlayoff 
+          isFinal
+            ? "border-amber-300/40 shadow-[0_22px_65px_-34px_rgba(251,191,36,0.75)] bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.16),transparent_40%),linear-gradient(135deg,rgba(69,10,10,0.14),rgba(24,24,27,0.98))]"
+            : isPlayoff 
             ? "border-slate-300/50 shadow-lg shadow-slate-500/5 bg-gradient-to-br from-background via-background to-slate-400/5" 
             : ""
         }`}>
@@ -991,9 +1000,9 @@ const GameDetail = () => {
                 <span className="text-4xl font-bold">{awayScore}</span>
               </div>
               <Badge variant="outline" className="mt-2">{t('gameDetail.final')}</Badge>
-              {isPlayoff && (
-                <Badge className="mt-1 text-[10px] bg-slate-200 text-slate-900 font-bold h-4">
-                  {t('game.playoff')}
+              {(isPlayoff || isFinal) && (
+                <Badge className={`mt-1 text-[10px] font-bold h-4 ${isFinal ? "bg-amber-200 text-amber-950 border border-amber-100/70" : "bg-slate-200 text-slate-900"}`}>
+                  {stageBadge}
                 </Badge>
               )}
             </div>
@@ -1006,6 +1015,12 @@ const GameDetail = () => {
               <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
               <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(awayTeam, currentLang)}</p>
             </Link>
+          </div>
+
+          <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
+            <p className="font-medium">{formatGameDay(matchDateObj)}</p>
+            <p>{format(matchDateObj, 'HH:mm', { locale: getDateLocale() })}</p>
+            <p>{scheduleData.match_place}</p>
           </div>
 
           {/* 경기 정보 */}

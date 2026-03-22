@@ -18,7 +18,7 @@ import SEO from "@/components/SEO";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
-import { isPlayoffGame } from "@/lib/game-utils";
+import { formatMatchDateTimeLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 
 interface TeamStanding {
   rank: number;
@@ -68,14 +68,6 @@ const Home = () => {
     }
   };
 
-  const getDateFormat = () => {
-    switch (currentLang) {
-      case 'ja': return "MMM d日, HH:mm";
-      case 'en': return "MMM d, HH:mm";
-      default: return "MMM d일, HH:mm";
-    }
-  };
-  
   const [selectedHighlight, setSelectedHighlight] = useState<{ url: string; title: string } | null>(null);
   const [nextGamesApi, setNextGamesApi] = useState<CarouselApi>();
   const [recentGamesApi, setRecentGamesApi] = useState<CarouselApi>();
@@ -175,6 +167,30 @@ const Home = () => {
     const now = new Date();
     if (matchDateObj <= now) return t('game.status.inProgress');
     return t('game.status.scheduled');
+  };
+
+  const isFinalGame = (game: ScheduleGame) =>
+    isFinalSeriesGame(
+      game.match_at,
+      game.season_phase,
+      game.source_game_no,
+      game.home_alih_team_id,
+      game.away_alih_team_id
+    );
+
+  const formatGameDateTime = (matchAt: string) =>
+    formatMatchDateTimeLabel(new Date(matchAt), currentLang, getDateLocale());
+
+  const getStageCardClass = (game: ScheduleGame) => {
+    if (isFinalGame(game)) {
+      return "shadow-[0_22px_60px_-30px_rgba(251,191,36,0.75)] border-amber-300/45 ring-1 ring-amber-300/30 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.16),transparent_42%),linear-gradient(135deg,rgba(69,10,10,0.2),rgba(24,24,27,0.96))]";
+    }
+
+    if (isPlayoffGame(game.match_at, game.season_phase)) {
+      return "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5";
+    }
+
+    return "shadow-card-glow border-primary/20";
   };
 
   const now = new Date();
@@ -284,11 +300,7 @@ const Home = () => {
               {inProgressGames.map((game) => (
                 <Card
                   key={game.id}
-                  className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
-                    isPlayoffGame(game.match_at, game.season_phase) 
-                      ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5" 
-                      : "shadow-card-glow border-primary/20"
-                  }`}
+                  className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${getStageCardClass(game)}`}
                   onClick={() => navigate(`/schedule/${game.game_no}`, {
                     state: {
                       homeTeam: getTeamById(game.home_alih_team_id),
@@ -300,9 +312,13 @@ const Home = () => {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <Badge variant="secondary" className="text-[10px] truncate">
-                        {format(new Date(game.match_at), getDateFormat(), { locale: getDateLocale() })}
+                        {formatGameDateTime(game.match_at)}
                       </Badge>
-                      {isPlayoffGame(game.match_at, game.season_phase) && (
+                      {isFinalGame(game) ? (
+                        <Badge className="text-[10px] bg-amber-200 text-amber-950 font-bold border border-amber-100/70 flex-shrink-0">
+                          {t('game.finalSeries')}
+                        </Badge>
+                      ) : isPlayoffGame(game.match_at, game.season_phase) && (
                         <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                           {t('game.playoff')}
                         </Badge>
@@ -377,11 +393,7 @@ const Home = () => {
             </Card>
           ) : nextGames.length === 1 ? (
             <Card
-              className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
-                isPlayoffGame(nextGames[0].match_at, nextGames[0].season_phase)
-                  ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
-                  : "shadow-card-glow border-primary/20"
-              }`}
+              className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${getStageCardClass(nextGames[0])}`}
               onClick={() => navigate(`/schedule/${nextGames[0].game_no}`, {
                 state: {
                   homeTeam: getTeamById(nextGames[0].home_alih_team_id),
@@ -393,9 +405,13 @@ const Home = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <Badge variant="secondary" className="text-[10px] truncate">
-                    {format(new Date(nextGames[0].match_at), getDateFormat(), { locale: getDateLocale() })}
+                    {formatGameDateTime(nextGames[0].match_at)}
                   </Badge>
-                  {isPlayoffGame(nextGames[0].match_at, nextGames[0].season_phase) && (
+                  {isFinalGame(nextGames[0]) ? (
+                    <Badge className="text-[10px] bg-amber-200 text-amber-950 font-bold border border-amber-100/70 flex-shrink-0">
+                      {t('game.finalSeries')}
+                    </Badge>
+                  ) : isPlayoffGame(nextGames[0].match_at, nextGames[0].season_phase) && (
                     <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                       {t('game.playoff')}
                     </Badge>
@@ -454,11 +470,7 @@ const Home = () => {
                 {nextGames.map((game) => (
                   <CarouselItem key={game.id}>
                     <Card
-                      className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
-                        isPlayoffGame(game.match_at, game.season_phase)
-                          ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
-                          : "shadow-card-glow border-primary/20"
-                      }`}
+                      className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${getStageCardClass(game)}`}
                       onClick={() => navigate(`/schedule/${game.game_no}`, {
                         state: {
                           homeTeam: getTeamById(game.home_alih_team_id),
@@ -470,9 +482,13 @@ const Home = () => {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <Badge variant="secondary" className="text-[10px] truncate">
-                            {format(new Date(game.match_at), 'MMM d, p', { locale: getDateLocale() })}
+                            {formatGameDateTime(game.match_at)}
                           </Badge>
-                          {isPlayoffGame(game.match_at, game.season_phase) && (
+                          {isFinalGame(game) ? (
+                            <Badge className="text-[10px] bg-amber-200 text-amber-950 font-bold border border-amber-100/70 flex-shrink-0">
+                              {t('game.finalSeries')}
+                            </Badge>
+                          ) : isPlayoffGame(game.match_at, game.season_phase) && (
                             <Badge className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold flex-shrink-0">
                               {t('game.playoff')}
                             </Badge>

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2, Calendar, MapPin, Clock } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
-import { isPlayoffGame } from "@/lib/game-utils";
+import { isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { getInstagramTheme } from "@/lib/instagram-theme";
 
 const externalSupabase = createClient(
@@ -22,6 +22,7 @@ interface ScheduleData {
   match_place: string;
   game_status: string | null;
   season_phase?: string | null;
+  source_game_no?: number | null;
 }
 
 interface StandingData {
@@ -173,7 +174,14 @@ const InstagramPreview = () => {
     });
   };
   const isPlayoff = isPlayoffGame(baseGame.match_at, baseGame.season_phase);
-  const theme = getInstagramTheme(isPlayoff);
+  const isFinal = isFinalSeriesGame(
+    baseGame.match_at,
+    baseGame.season_phase,
+    baseGame.source_game_no,
+    baseGame.home_alih_team_id,
+    baseGame.away_alih_team_id
+  );
+  const theme = getInstagramTheme(isPlayoff, isFinal);
 
   // 과거 맞대결에서 각 팀 승리 수 계산
   const getWinCounts = () => {
@@ -231,11 +239,11 @@ const InstagramPreview = () => {
               ASIA LEAGUE ICE HOCKEY
             </p>
             <h1 className="text-white text-4xl font-bold tracking-wider">
-              SERIES PREVIEW
+              {isFinal ? "FINALS PREVIEW" : "SERIES PREVIEW"}
             </h1>
             {isPlayoff && (
               <div className="mt-4">
-                <span className={theme.badgeClass}>Playoffs</span>
+                <span className={theme.badgeClass}>{isFinal ? "Finals" : "Playoffs"}</span>
               </div>
             )}
           </div>

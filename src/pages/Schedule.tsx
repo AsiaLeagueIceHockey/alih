@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
-import { isPlayoffGame } from "@/lib/game-utils";
+import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 
 // Month data (raw values only, labels come from translations)
 const MONTHS_DATA = [
@@ -82,6 +82,15 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     return match?.[1] || null;
   };
+
+  const isFinalGame = (game: ScheduleGame) =>
+    isFinalSeriesGame(
+      game.match_at,
+      game.season_phase,
+      game.source_game_no,
+      game.home_alih_team_id,
+      game.away_alih_team_id
+    );
 
   const filteredGames = useMemo(() => {
     if (!schedules || !teams) return [];
@@ -240,7 +249,9 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                 <Card 
                   key={game.id} 
                   className={`p-4 relative cursor-pointer hover:border-primary/50 transition-all ${
-                    isPlayoffGame(game.match_at, game.season_phase)
+                    isFinalGame(game)
+                      ? "shadow-[0_20px_55px_-28px_rgba(251,191,36,0.72)] border-amber-300/45 ring-1 ring-amber-300/30 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.14),transparent_42%),linear-gradient(135deg,rgba(69,10,10,0.18),rgba(24,24,27,0.96))]"
+                      : isPlayoffGame(game.match_at, game.season_phase)
                       ? "shadow-card-glow border-slate-300/50 ring-1 ring-slate-300/20 bg-gradient-to-br from-background to-slate-400/5"
                       : "border-border"
                   }`}
@@ -281,12 +292,16 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm">
                       <span className="font-medium">
-                        {format(matchDate, 'PPP', { locale: getDateLocale() })}
+                        {formatMatchDateLabel(matchDate, currentLang, getDateLocale())}
                       </span>
                       <span className="text-muted-foreground ml-2">
                         {format(matchDate, 'HH:mm', { locale: getDateLocale() })}
                       </span>
-                      {isPlayoffGame(game.match_at, game.season_phase) && (
+                      {isFinalGame(game) ? (
+                        <Badge className="ml-2 text-[10px] h-4 bg-amber-200 text-amber-950 font-bold border border-amber-100/70">
+                          {t('game.finalSeries')}
+                        </Badge>
+                      ) : isPlayoffGame(game.match_at, game.season_phase) && (
                         <Badge className="ml-2 text-[10px] h-4 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold border-none">
                           {t('game.playoff')}
                         </Badge>

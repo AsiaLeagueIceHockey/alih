@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
-import { isPlayoffGame } from "@/lib/game-utils";
+import { isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { getInstagramTheme } from "@/lib/instagram-theme";
 
 const externalSupabase = createClient(
@@ -25,6 +25,7 @@ interface ScheduleData {
   match_place: string;
   game_status: string | null;
   season_phase?: string | null;
+  source_game_no?: number | null;
 }
 
 interface RosterPlayer {
@@ -137,7 +138,14 @@ const InstagramGoals = () => {
     weekday: 'short',
   });
   const isPlayoff = isPlayoffGame(scheduleData.match_at, scheduleData.season_phase);
-  const theme = getInstagramTheme(isPlayoff);
+  const isFinal = isFinalSeriesGame(
+    scheduleData.match_at,
+    scheduleData.season_phase,
+    scheduleData.source_game_no,
+    scheduleData.home_alih_team_id,
+    scheduleData.away_alih_team_id
+  );
+  const theme = getInstagramTheme(isPlayoff, isFinal);
 
   // 선수 이름 찾기 헬퍼
   const getPlayerName = (playerNo: number, teamId: number): string => {
@@ -219,7 +227,7 @@ const InstagramGoals = () => {
             </h1>
             {isPlayoff && (
               <div className="mb-4">
-                <span className={theme.badgeClass}>Playoffs</span>
+                <span className={theme.badgeClass}>{isFinal ? "Finals" : "Playoffs"}</span>
               </div>
             )}
             <p className="text-slate-300 text-xl">{formattedDate}</p>
