@@ -923,18 +923,33 @@ const GameDetail = () => {
 
   const [homeScore, awayScore] = gameDetail.game_summary.total.score.split(' : ');
   const completedGameVenue = gameDetail.game_info.venue || scheduleData.match_place;
+  const completedGameVenueParts = completedGameVenue
+    .split('/')
+    .map((part) => part.trim())
+    .filter(Boolean);
   const completedGameMeta = [
     {
       label: t('gameDetail.dateLabel'),
       value: formatGameDay(matchDateObj),
+      valueClassName: "mt-1 text-sm font-semibold leading-snug text-foreground/90",
     },
     {
       label: t('gameDetail.timeLabel'),
       value: format(matchDateObj, 'HH:mm', { locale: getDateLocale() }),
+      valueClassName: "mt-1 text-sm font-semibold leading-snug text-foreground/90",
     },
     {
       label: t('gameDetail.venueLabel'),
-      value: completedGameVenue,
+      value: (
+        <span className="mt-1 block text-[13px] font-semibold leading-tight text-foreground/90 sm:text-sm">
+          {completedGameVenueParts.map((part, index) => (
+            <span key={`${part}-${index}`} className="block">
+              {part}
+            </span>
+          ))}
+        </span>
+      ),
+      valueClassName: "",
     },
   ];
 
@@ -1042,9 +1057,9 @@ const GameDetail = () => {
                   <p className="text-[11px] font-medium text-muted-foreground">
                     {item.label}
                   </p>
-                  <p className="mt-1 text-sm font-semibold leading-snug text-foreground/90">
+                  <div className={item.valueClassName}>
                     {item.value}
-                  </p>
+                  </div>
                 </div>
               ))}
             </div>
