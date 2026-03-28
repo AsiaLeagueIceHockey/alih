@@ -922,6 +922,21 @@ const GameDetail = () => {
   }
 
   const [homeScore, awayScore] = gameDetail.game_summary.total.score.split(' : ');
+  const completedGameVenue = gameDetail.game_info.venue || scheduleData.match_place;
+  const completedGameMeta = [
+    {
+      label: t('gameDetail.dateLabel'),
+      value: formatGameDay(matchDateObj),
+    },
+    {
+      label: t('gameDetail.timeLabel'),
+      value: format(matchDateObj, 'HH:mm', { locale: getDateLocale() }),
+    },
+    {
+      label: t('gameDetail.venueLabel'),
+      value: completedGameVenue,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background pb-10">
@@ -1017,19 +1032,31 @@ const GameDetail = () => {
             </Link>
           </div>
 
-          <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
-            <p className="font-medium">{formatGameDay(matchDateObj)}</p>
-            <p>{format(matchDateObj, 'HH:mm', { locale: getDateLocale() })}</p>
-            <p>{scheduleData.match_place}</p>
-          </div>
+          <div className="mt-6 border-t border-border/60 pt-5">
+            <div className="grid grid-cols-3 gap-3 text-center">
+              {completedGameMeta.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-xl bg-background/40 px-3 py-3 sm:px-4"
+                >
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    {item.label}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold leading-snug text-foreground/90">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
 
-          {/* 경기 정보 */}
-          <div className="text-center space-y-1 text-sm text-muted-foreground border-t pt-4">
-            <p className="font-medium">
-              {format(matchDateObj, 'PPP', { locale: getDateLocale() })}
-            </p>
-            <p>{gameDetail.game_info.venue}</p>
-            <p>{t('gameDetail.spectators')}: {gameDetail.spectators.toLocaleString()}</p>
+            <div className="mt-4 rounded-xl bg-muted/25 px-4 py-3 text-center">
+              <p className="text-[11px] font-medium text-muted-foreground">
+                {t('gameDetail.spectators')}
+              </p>
+              <p className="mt-1 text-base font-semibold text-foreground">
+                {gameDetail.spectators.toLocaleString()}
+              </p>
+            </div>
           </div>
         </Card>
 
