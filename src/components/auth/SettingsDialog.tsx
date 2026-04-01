@@ -1,0 +1,436 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useNotifications } from "@/hooks/use-notifications";
+import { useTeams } from "@/hooks/useTeams";
+import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { Link } from "react-router-dom";
+import { Bell, BellOff, Settings, User as UserIcon, LogOut, Trash2, Pencil, Check, X, AlertCircle, Loader2, CreditCard } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { externalSupabase } from "@/lib/supabase-external";
+
+interface SettingsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
+  const { user, profile, logout, updateProfile } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { permission, hasToken, isCheckingToken, requestPermission, resubscribeToPush, refreshPermission, checkTokenInDb } = useNotifications();
+  const { data: teams } = useTeams();
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isResubscribing, setIsResubscribing] = useState(false);
+  
+  // Nickname editing state
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState('');
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+  
+  // Team editing state
+  const [isEditingTeams, setIsEditingTeams] = useState(false);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<number[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Filter favorite teams based on profile.favorite_team_ids array
+  const favoriteTeams = teams?.filter(t => profile?.favorite_team_ids?.includes(t.id));
+  
+  // Nickname editing handlers
+  const handleStartEditNickname = () => {
+    setNicknameInput(profile?.nickname || '');
+    setIsEditingNickname(true);
+  };
+  
+  const handleSaveNickname = async () => {
+    const trimmed = nicknameInput.trim();
+    if (!trimmed || trimmed.length < 2) {
+      alert(i18n.language === 'ko' ? "닉네임은 2자 이상이어야 합니다." : "Nickname must be at least 2 characters.");
+      return;
+    }
+    if (trimmed.length > 20) {
+      alert(i18n.language === 'ko' ? "닉네임은 20자 이하여야 합니다." : "Nickname must be 20 characters or less.");
+      return;
+    }
+    
+    setIsSavingNickname(true);
+    try {
+      await updateProfile({ nickname: trimmed });
+      setIsEditingNickname(false);
+    } catch (error) {
+      console.error("Error saving nickname:", error);
+      alert(i18n.language === 'ko' ? "닉네임 저장 중 오류가 발생했습니다." : "Error saving nickname.");
+    } finally {
+      setIsSavingNickname(false);
+    }
+  };
+  
+  const handleCancelEditNickname = () => {
+    setIsEditingNickname(false);
+    setNicknameInput('');
+  };
+  
+  // Initialize selected teams when entering edit mode
+  const handleStartEditTeams = () => {
+    setSelectedTeamIds(profile?.favorite_team_ids || []);
+    setIsEditingTeams(true);
+  };
+  
+  // Toggle team selection
+  const handleTeamToggle = (teamId: number) => {
+    setSelectedTeamIds(prev => 
+      prev.includes(teamId)
+        ? prev.filter(id => id !== teamId)
+        : [...prev, teamId]
+    );
+  };
+  
+  // Save team changes
+  const handleSaveTeams = async () => {
+    if (selectedTeamIds.length === 0) {
+      alert(i18n.language === 'ko' ? "최소 1개 팀을 선택해주세요." : "Please select at least one team.");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      await updateProfile({ favorite_team_ids: selectedTeamIds });
+      setIsEditingTeams(false);
+    } catch (error) {
+      console.error("Error saving teams:", error);
+      alert(i18n.language === 'ko' ? "저장 중 오류가 발생했습니다." : "Error saving changes.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Cancel editing
+  const handleCancelEditTeams = () => {
+    setIsEditingTeams(false);
+    setSelectedTeamIds([]);
+  };
+
+  useEffect(() => {
+    if (open) {
+      refreshPermission();
+      checkTokenInDb();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]); // refreshPermission, checkTokenInDb 제거하여 무한 루프 방지
+
+  // 알림 상태 계산: 권한 있고 + DB에 토큰 있어야 진정한 활성화
+  const isFullyEnabled = permission === 'granted' && hasToken === true;
+  const needsResubscribe = permission === 'granted' && hasToken === false;
+
+  const handleEnableNotifications = async () => {
+    const result = await requestPermission();
+    if (result === 'granted') {
+      alert(i18n.language === 'ko' ? "알림이 설정되었습니다." : "Notifications enabled.");
+    } else if (result === 'denied') {
+      alert(i18n.language === 'ko' ? "알림 권한이 차단되어 있습니다. 브라우저 설정에서 허용해주세요." : "Notifications blocked. Please enable in browser settings.");
+    } else if (result === 'error') {
+      alert(i18n.language === 'ko' ? "알림 설정 중 오류가 발생했습니다. 다시 시도해주세요." : "Error enabling notifications. Please try again.");
+    }
+  };
+
+  const handleResubscribe = async () => {
+    setIsResubscribing(true);
+    try {
+      const result = await resubscribeToPush();
+      if (result === 'granted') {
+        alert(i18n.language === 'ko' ? "알림이 재설정되었습니다." : "Notifications re-enabled.");
+      } else {
+        alert(i18n.language === 'ko' ? "알림 재설정 중 오류가 발생했습니다." : "Error re-enabling notifications.");
+      }
+    } finally {
+      setIsResubscribing(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+
+    try {
+      // MVP: Delete profile row (Soft Delete from user perspective)
+      // Note: This requires a DELETE policy on 'profiles' table which we will add.
+      const { error } = await externalSupabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+
+      if (error) {
+        console.error("Delete profile error:", error);
+        alert(i18n.language === 'ko' ? "회원 탈퇴 중 오류가 발생했습니다." : "Error deleting account.");
+        return;
+      }
+
+      await logout();
+      onOpenChange(false);
+      alert(i18n.language === 'ko' ? "회원 탈퇴가 완료되었습니다." : "Account deleted successfully.");
+    } catch (e) {
+      console.error(e);
+      alert(i18n.language === 'ko' ? "오류가 발생했습니다." : "An error occurred.");
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              {t('auth.myPage', 'My Page')}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="py-4 space-y-6">
+            {/* User Info */}
+            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-lg">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary border border-border">
+                {profile?.nickname?.[0]?.toUpperCase() || "U"}
+              </div>
+              <div className="flex-1">
+                {isEditingNickname ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={nicknameInput}
+                      onChange={(e) => setNicknameInput(e.target.value)}
+                      placeholder={i18n.language === 'ko' ? "닉네임 입력" : "Enter nickname"}
+                      className="h-8 text-base"
+                      maxLength={20}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveNickname();
+                        if (e.key === 'Escape') handleCancelEditNickname();
+                      }}
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 w-8 p-0"
+                      onClick={handleCancelEditNickname}
+                      disabled={isSavingNickname}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={handleSaveNickname}
+                      disabled={isSavingNickname}
+                    >
+                      {isSavingNickname ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-lg">{profile?.nickname}</p>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                      onClick={handleStartEditNickname}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                )}
+                <p className="text-sm text-muted-foreground">{profile?.email}</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Notifications */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {t('onboarding.step3Title', 'Notification Settings')}
+              </h3>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  {isCheckingToken ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  ) : isFullyEnabled ? (
+                    <Bell className="w-5 h-5 text-primary" />
+                  ) : needsResubscribe ? (
+                    <AlertCircle className="w-5 h-5 text-amber-500" />
+                  ) : (
+                    <BellOff className="w-5 h-5 text-muted-foreground" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {i18n.language === 'ko' ? "경기 알림" : "Match Alerts"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {isCheckingToken 
+                        ? (i18n.language === 'ko' ? "확인 중..." : "Checking...")
+                        : isFullyEnabled 
+                          ? (i18n.language === 'ko' ? "알림을 받고 있습니다." : "Notifications enabled.")
+                          : needsResubscribe
+                            ? (i18n.language === 'ko' ? "알림 재설정이 필요합니다." : "Re-registration required.")
+                            : (i18n.language === 'ko' ? "알림이 꺼져 있습니다." : "Notifications disabled.")}
+                    </span>
+                  </div>
+                </div>
+                {!isCheckingToken && needsResubscribe && (
+                  <Button size="sm" onClick={handleResubscribe} disabled={isResubscribing}>
+                    {isResubscribing 
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : (i18n.language === 'ko' ? "재설정" : "Re-enable")}
+                  </Button>
+                )}
+                {!isCheckingToken && !isFullyEnabled && !needsResubscribe && (
+                  <Button size="sm" onClick={handleEnableNotifications}>
+                    {i18n.language === 'ko' ? "켜기" : "Enable"}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Favorite Team */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {i18n.language === 'ko' ? "응원 팀" : "Favorite Team"}
+                </h3>
+                {!isEditingTeams ? (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleStartEditTeams}
+                    className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Pencil className="w-3.5 h-3.5 mr-1" />
+                    {i18n.language === 'ko' ? "수정" : "Edit"}
+                  </Button>
+                ) : (
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleCancelEditTeams}
+                      className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={handleSaveTeams}
+                      disabled={isSaving || selectedTeamIds.length === 0}
+                      className="h-7 px-2"
+                    >
+                      <Check className="w-3.5 h-3.5 mr-1" />
+                      {i18n.language === 'ko' ? "저장" : "Save"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              {!isEditingTeams ? (
+                // View mode - show selected teams
+                <div className="grid grid-cols-6 gap-2 p-3 border rounded-lg min-h-[60px]">
+                  {favoriteTeams && favoriteTeams.length > 0 ? (
+                    favoriteTeams.map(team => (
+                       <div key={team.id} className="flex flex-col items-center justify-center gap-1" title={getLocalizedTeamName(team, i18n.language)}>
+                          <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
+                       </div>
+                    ))
+                  ) : (
+                    <div className="col-span-6 flex items-center justify-center h-full">
+                       <span className="text-muted-foreground text-sm">
+                          {i18n.language === 'ko' ? "선택된 팀이 없습니다." : "No team selected."}
+                       </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Edit mode - show all teams with toggle
+                <div className="grid grid-cols-3 gap-2 p-3 border rounded-lg border-primary/50 bg-primary/5">
+                  {teams?.map((team) => {
+                    const isSelected = selectedTeamIds.includes(team.id);
+                    return (
+                      <div
+                        key={team.id}
+                        className={`flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer transition-all aspect-square relative ${
+                          isSelected
+                            ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                            : 'border-border hover:bg-secondary/50'
+                        }`}
+                        onClick={() => handleTeamToggle(team.id)}
+                      >
+                        <img src={team.logo} alt={team.name} className="w-8 h-8 mb-1 object-contain" />
+                        <span className="text-xs font-medium text-center leading-tight break-keep">
+                          {getLocalizedTeamName(team, i18n.language)}
+                        </span>
+                        {isSelected && <Check className="absolute top-1 right-1 w-4 h-4 text-primary" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Actions */}
+            <div className="space-y-2">
+              <Link to="/my-cards" onClick={() => onOpenChange(false)}>
+                <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground">
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  {i18n.language === 'ko' ? "내 선수 카드" : "My Player Cards"}
+                </Button>
+              </Link>
+              <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={logout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                {t('auth.logout', 'Log out')}
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t('auth.deleteAccount', 'Delete Account')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Alert */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+         <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+               <DialogTitle>{i18n.language === 'ko' ? "회원 탈퇴" : "Delete Account"}</DialogTitle>
+               <DialogDescription className="pt-2">
+                  {i18n.language === 'ko' 
+                     ? "정말로 탈퇴하시겠습니까? 계정 정보와 관심 팀 설정, 알림 설정이 모두 삭제되며 복구할 수 없습니다."
+                     : "Are you sure you want to delete your account? All data including team preferences and notification settings will be permanently lost."}
+               </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-0">
+               <DialogClose asChild>
+                  <Button variant="outline">{i18n.language === 'ko' ? "취소" : "Cancel"}</Button>
+               </DialogClose>
+               <Button variant="destructive" onClick={handleDeleteAccount}>
+                  {i18n.language === 'ko' ? "탈퇴하기" : "Delete"}
+               </Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+export default SettingsDialog;

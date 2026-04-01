@@ -1,0 +1,384 @@
+{
+    "nav": {
+        "home": "ホーム",
+        "game": "試合",
+        "schedule": "日程",
+        "highlights": "動画",
+        "players": "選手",
+        "standings": "順位表",
+        "news": "ニュース",
+        "myCards": "マイカード"
+    },
+    "myCards": {
+        "collected": "{{count}}枚のカードを収集"
+    },
+    "playerDetail": {
+        "notFound": "選手が見つかりません。",
+        "seasonStats": "25-26 シーズン成績",
+        "leagueRank": "リーグ得点{{rank}}位",
+        "draftInfo": "ドラフト情報",
+        "about": "選手紹介",
+        "career": "経歴",
+        "schoolOrigin": "出身校",
+        "myCardTitle": "マイプレイヤーカード",
+        "issueNew": "新しく発行",
+        "viewMyCard": "カードを見る",
+        "noCardTitle": "この選手のカードを発行しよう！",
+        "noCardDesc": "自分のニックネーム入りの選手カードを発行できます！",
+        "issueCard": "選手カードを発行する",
+        "yearSuffix": "年",
+        "ageSuffix": "歳",
+        "position": {
+            "F": "フォワード",
+            "D": "ディフェンス",
+            "G": "ゴーリー"
+        }
+    },
+    "cardGeneration": {
+        "steps": {
+            "checking": "25-26シーズン成績確認中...",
+            "verifying": "チーム情報を確認中...",
+            "printing": "カードをデザイン中..."
+        },
+        "generatingTitle": "カード発行中",
+        "generatingDesc": "少々お待ちください。",
+        "errorTitle": "エラーが発生しました",
+        "retry": "再試行",
+        "completedTitle": "発行完了！",
+        "completedDesc": "あなただけの選手カードが発行されました。",
+        "coffeePrompt": "楽しめましたか？開発者にコーヒー一杯いかがですか？",
+        "buyCoffee": "コーヒーを奢る",
+        "close": "閉じる"
+    },
+    "seo": {
+        "leagueName": "アジアリーグアイスホッケー"
+    },
+    "page": {
+        "home": {
+            "title": "アジアリーグアイスホッケー",
+            "subtitle": "2025-26シーズン"
+        },
+        "schedule": {
+            "title": "試合日程・結果",
+            "subtitle": "2025-26シーズン全試合"
+        },
+        "standings": {
+            "title": "順位",
+            "subtitle": "2025-26シーズン記録"
+        },
+        "highlights": {
+            "title": "ハイライト",
+            "subtitle": "最新試合動画"
+        },
+        "news": {
+            "title": "アジアリーグニュース",
+            "subtitle": "2025-26シーズン"
+        },
+        "gameDetail": {
+            "liveGame": "ライブ試合",
+            "gameInfo": "試合情報",
+            "gameResult": "試合結果"
+        },
+        "players": {
+            "subtitle": "2025-26シーズン選手"
+        }
+    },
+    "game": {
+        "status": {
+            "finished": "終了",
+            "scheduled": "予定",
+            "inProgress": "進行中"
+        },
+        "vs": "VS",
+        "games": "試合",
+        "noGames": "予定された試合がありません",
+        "noResults": "最近の結果がありません",
+        "noHighlights": "ハイライトがありません",
+        "noNews": "ニュースがありません",
+        "loadError": "読み込みに失敗しました",
+        "loading": "読み込み中...",
+        "pending": "未定",
+        "playoff": "プレーオフ",
+        "finalSeries": "ファイナル",
+        "finalHype": "トロフィーを懸けた最後のシリーズ。"
+    },
+    "section": {
+        "inProgress": "進行中の試合",
+        "nextGame": "次の試合",
+        "finalSpotlight": "ファイナルスポットライト",
+        "recentResults": "最近の結果",
+        "leagueStandings": "リーグ順位",
+        "latestNews": "最新ニュース",
+        "latestHighlight": "最新ハイライト",
+        "joinUs": "一緒に",
+        "liveStreaming": "ライブストリーミング",
+        "gameStatus": "試合状況",
+        "headToHead": "対戦成績",
+        "starPlayers": "スタープレイヤー",
+        "goals": "得点",
+        "assists": "アシスト",
+        "recentGames": "最近の試合",
+        "seasonStats": "シーズン統計",
+        "keyPlayers": "主要選手",
+        "latestVideos": "最新動画"
+    },
+    "standings": {
+        "teamRank": "チーム順位",
+        "playerStats": "個人記録",
+        "goalsRank": "得点ランキング",
+        "assistsRank": "アシストランキング",
+        "pointsRank": "ポイントランキング",
+        "headers": {
+            "rank": "#",
+            "team": "チーム",
+            "gamesPlayed": "試合",
+            "points": "勝点",
+            "regWin": "60分勝",
+            "otWin": "延長勝",
+            "pssWin": "SO勝",
+            "regLoss": "60分敗",
+            "otLoss": "延長敗",
+            "pssLoss": "SO敗",
+            "goalDiff": "得失差"
+        },
+        "explanation": {
+            "title": "📊 用語説明",
+            "ot": "OT (Overtime): 延長戦。60分の規定時間で決着がつかない場合に行われます。",
+            "pss": "PSS (Penalty Shootout): シュートアウト。延長戦でも決着がつかない場合に行われます。",
+            "pointsRule": "勝点方式: 60分勝(3点)、延長/SO勝(2点)、延長/SO敗(1点)、60分敗(0点)"
+        },
+        "playerLabels": {
+            "goal": "ゴール",
+            "assist": "アシスト",
+            "point": "ポイント"
+        }
+    },
+    "playerRanks": {
+        "goals": "得点ランキング",
+        "assists": "アシストランキング",
+        "points": "ポイントランキング"
+    },
+    "stats": {
+        "homeRecord": "ホーム成績",
+        "awayRecord": "アウェイ成績",
+        "win": "勝",
+        "loss": "敗",
+        "draw": "分",
+        "winRate": "勝率",
+        "recentGames": "直近{{count}}試合",
+        "avgGoalsFor": "平均得点",
+        "avgGoalsAgainst": "平均失点",
+        "avgGoalDiff": "平均得失差",
+        "totalGames": "全{{count}}試合基準",
+        "specialSituation": "特殊状況得点",
+        "powerPlayGoal": "パワープレイゴール",
+        "powerPlayRate": "全{{totalGoals}}ゴール中{{ppRate}}%",
+        "shortHandedGoal": "ショートハンドゴール",
+        "shortHandedDesc": "数的不利での得点",
+        "totalGoals": "全{{count}}ゴール中{{rate}}%",
+        "periodGoals": "ピリオド別得点",
+        "situation": {
+            "ppg": "PPG (パワープレイ)",
+            "shg": "SHG (ショートハンド)",
+            "ev": "EV (イーブン)"
+        }
+    },
+    "filter": {
+        "allTeams": "全チーム",
+        "all": "全て",
+        "koreanNews": "韓国語ニュース",
+        "japaneseNews": "日本語ニュース",
+        "englishNews": "英語ニュース"
+    },
+    "month": {
+        "1": "1月",
+        "2": "2月",
+        "3": "3月",
+        "4": "4月",
+        "9": "9月",
+        "10": "10月",
+        "11": "11月",
+        "12": "12月"
+    },
+    "button": {
+        "viewAllStandings": "全順位を見る",
+        "viewAllNews": "全ニュースを見る",
+        "viewAllPlayers": "全選手を見る",
+        "loadMore": "もっと見る ▼",
+        "back": "戻る",
+        "share": "共有",
+        "video": "動画",
+        "donate": "コーヒー1杯の寄付",
+        "collapse": "閉じる",
+        "expand": "もっと見る"
+    },
+    "share": {
+        "instagram": "インスタグラムでシェア",
+        "downloaded": "画像が保存されました！ストーリーでシェアしてください！",
+        "failed": "画像の生成に失敗しました。"
+    },
+    "error": {
+        "loadFailed": "読み込みに失敗しました",
+        "checkConsole": "コンソールを確認してください",
+        "noData": "該当する試合がありません",
+        "noHighlights": "該当するハイライトがありません",
+        "gameNotFound": "試合情報を読み込めません",
+        "teamNotFound": "チーム情報が見つかりません",
+        "noRecentGames": "最近の試合記録がありません",
+        "noHeadToHead": "対戦記録がありません",
+        "noPlayers": "該当する選手がいません"
+    },
+    "loading": {
+        "schedule": "日程読み込み中...",
+        "videos": "動画読み込み中..."
+    },
+    "gameDetail": {
+        "scoringRecord": "得点記録",
+        "scorer": "得点",
+        "assist": "アシスト",
+        "sog": "シュート数 (SOG)",
+        "noLiveStream": "この試合はライブストリーミングが提供されていません",
+        "liveStreamPending": "ライブストリーミングリンクは更新予定です",
+        "linkCopied": "リンクがクリップボードにコピーされました！",
+        "noH2HRecord": "対戦記録がありません",
+        "spectators": "観客数",
+        "dateLabel": "日付",
+        "timeLabel": "時間",
+        "venueLabel": "会場",
+        "gameHighlight": "試合ハイライト",
+        "periodSummary": "ピリオド別サマリー",
+        "category": "区分",
+        "goals": "得点",
+        "shotsOnGoal": "シュート数",
+        "penaltyMin": "ペナルティ(分)",
+        "penalty": "ペナルティ記録",
+        "noPenalty": "ペナルティ記録がありません",
+        "offence": "反則",
+        "roster": "選手名簿",
+        "glossaryLabel": "アイスホッケー用語解説",
+        "gameInfo": "試合情報",
+        "starPlayerDesc": "スタープレイヤーはチーム内で最も攻撃ポイントが多い選手です。",
+        "final": "最終",
+        "rosterNumber": "番号",
+        "rosterName": "名前",
+        "rosterPosition": "ポジション",
+        "assistLabel": "アシスト",
+        "glossary": {
+            "title": "スタッツ用語解説",
+            "gp": "試合数",
+            "sv_pct": "セーブ率",
+            "gaa": "平均失点 (60分基準)",
+            "saves": "セーブ数 / 被シュート数",
+            "time": "出場時間",
+            "g": "ゴール",
+            "a": "アシスト",
+            "pts": "ポイント (ゴール + アシスト)",
+            "plus_minus": "オンアイス得失点",
+            "pim": "ペナルティ (分)"
+        }
+    },
+    "team": {
+        "roster": "選手団",
+        "info": {
+            "hometown": "本拠地",
+            "homeStadium": "ホームアリーナ",
+            "founded": "創設",
+            "year": "年",
+            "championships": "優勝",
+            "times": "回",
+            "alihChampionship": "アジアリーグ優勝",
+            "intro": "チーム紹介"
+        },
+        "goalRanking": "ゴールランキング",
+        "assistRanking": "アシストランキング",
+        "teamInfo": "チーム情報",
+        "currentRank": "現在順位: {{rank}}位",
+        "officialWebsite": "公式サイト"
+    },
+    "roster": {
+        "jerseyNumber": "背番号",
+        "name": "名前",
+        "position": "ポジション",
+        "penalty": "PIM",
+        "noPlayers": "登録された選手がいません。",
+        "plusMinusDesc": "選手が氷上にいる間、5対5(または同数の状況)でチームが得点したゴールと失点したゴールの差を示します。"
+    },
+    "news": {
+        "language": {
+            "ko": "韓国語",
+            "ja": "日本語",
+            "en": "英語"
+        }
+    },
+    "language": {
+        "korean": "한국어",
+        "japanese": "日本語",
+        "english": "English"
+    },
+    "cheerBattle": {
+        "title": "応援する",
+        "liveCheer": "リアルタイム応援",
+        "description": "ボタンを押して応援しよう！リアルタイムで反映されます。"
+    },
+    "prediction": {
+        "title": "勝敗予想",
+        "regWin": "60分勝",
+        "otWin": "OT/SO勝",
+        "description": "試合結果を予想して他のファンと比べてみよう！",
+        "closed": "予想は締め切られました",
+        "loginToSave": "ログインして保存",
+        "voted": "参加完了！",
+        "totalVotes": "{{count}}人参加"
+    },
+    "installPrompt": {
+        "bannerText": "リアルタイム通知を受け取ろう！",
+        "bannerSubtext": "ホーム画面に追加して通知を見逃さない",
+        "installButton": "インストール",
+        "modalTitle": "ホーム画面に追加",
+        "modalDescription": "Safariで以下の手順に従ってください",
+        "step1": "下の共有ボタンをタップ",
+        "step2": "「ホーム画面に追加」を選択",
+        "step3": "「追加」をタップして完了",
+        "confirm": "確認"
+    },
+    "auth": {
+        "login": "ログイン",
+        "loginTitle": "ログイン / 新規登録",
+        "google": "Googleで続ける",
+        "kakao": "Kakaoで続ける",
+        "predictionLoginDesc": "予想を保存してランキングに参加するにはログインしてください（1秒ログイン）",
+        "myPage": "マイページ",
+        "logout": "ログアウト",
+        "deleteAccount": "会員退会",
+        "loginRequired": "ログインが必要です"
+    },
+    "common": {
+        "back": "戻る",
+        "browsePlayers": "選手一覧を見る",
+        "generating": "生成中..."
+    },
+    "onboarding": {
+        "step1Title": "言語設定",
+        "step1Desc": "希望の言語を選択してください",
+        "step2Title": "応援チーム選択",
+        "step2Desc": "応援するチームをすべて選択してください",
+        "step3Title": "プロフィール設定",
+        "step3Desc": "使用するニックネームを決めてください",
+        "next": "次へ",
+        "complete": "完了",
+        "nicknameLabel": "ニックネーム",
+        "nicknamePlaceholder": "ニックネーム入力 (例: IceHockeyFan)",
+        "nicknameTaken": "既に使用されているニックネームです",
+        "nicknameAvailable": "使用可能なニックネームです",
+        "checking": "確認中...",
+        "selectLanguage": "言語選択",
+        "selectTeam": "応援チーム選択"
+    },
+    "search": {
+        "placeholder": "選手名、または背番号で検索..."
+    },
+    "players": {
+        "count": "名の選手",
+        "sortedByName": "名前順"
+    }
+}
