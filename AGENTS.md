@@ -46,3 +46,14 @@
 
 ## Next Steps
 -   **Instagram Integration**: Implement specific sharing functionality for Instagram Stories, including generating a dynamic asset (GIF/Video) of the card flipping.
+
+# Agent Work Summary - Video Hub Feature
+
+## Completed Tasks
+1.  **Database Implementation**: Created `alih_videos` table via `sql/v9_videos.sql` with UUID, YouTube URL mapping, team tags, and RLS policies allowing anon read and admin write.
+2.  **UI Updates**: 
+    -   Integrated `Videos` tab into existing `/news` page to show paginated video grid with team filters.
+    -   Resolved React Query cache expiration issue (`staleTime`) to ensure freshly added admin videos appear immediately on UI.
+3.  **Video Detail Module**: Created `/videos/:videoId` showing a full-width YouTube embed, sharing tools (Web Share API fallback to clipboard), related team videos, and SEO metadata.
+4.  **Admin Manager**: Built `/admin/videos` protected by `AdminLayout` for adding/deleting YouTube links inline, assigning teams, toggling publish state, and previewing thumbnails.
+5.  **Multi-Language Support**: Added Korean, Japanese, and English strings across News & Videos contexts (`page.videos`, `tabNews`, `share`, etc).

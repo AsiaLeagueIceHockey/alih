@@ -74,6 +74,17 @@
             "title": "아시아리그 뉴스",
             "subtitle": "2025-26 소식"
         },
+        "videos": {
+            "title": "영상",
+            "subtitle": "팀 영상 콘텐츠",
+            "noVideos": "등록된 영상이 없습니다",
+            "share": "공유",
+            "linkCopied": "링크가 복사되었습니다!",
+            "relatedVideos": "관련 영상",
+            "tabNews": "뉴스",
+            "tabVideos": "영상",
+            "allTeams": "전체"
+        },
         "gameDetail": {
             "liveGame": "실시간 경기",
             "gameInfo": "경기 정보",
@@ -204,6 +215,7 @@
         "viewAllStandings": "전체 순위 보기",
         "viewAllNews": "전체 뉴스 보기",
         "viewAllPlayers": "선수단 전체 보기",
+        "viewAllVideos": "전체 영상 보기",
         "loadMore": "더 보기 ▼",
         "back": "돌아가기",
         "share": "공유",

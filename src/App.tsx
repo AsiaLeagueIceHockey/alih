@@ -27,6 +27,7 @@ const GameDetail = lazy(() => import("./pages/GameDetail"));
 const Highlights = lazy(() => import("./pages/Highlights"));
 const Standings = lazy(() => import("./pages/Standings"));
 const News = lazy(() => import("./pages/News"));
+const VideoDetail = lazy(() => import("./pages/VideoDetail"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const TeamRoster = lazy(() => import("./pages/TeamRoster"));
 const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
@@ -45,6 +46,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminPushTest = lazy(() => import("./pages/AdminPushTest"));
 const AdminComments = lazy(() => import("./pages/AdminComments"));
+const AdminVideos = lazy(() => import("./pages/AdminVideos"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -221,6 +223,11 @@ const App = () => {
                   <News />
                 </Suspense>
               } />
+              <Route path="/videos/:videoId" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <VideoDetail />
+                </Suspense>
+              } />
               <Route path="/privacy" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <Privacy />
@@ -240,6 +247,11 @@ const App = () => {
               <Route path="/admin/comments" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <AdminComments />
+                </Suspense>
+              } />
+              <Route path="/admin/videos" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <AdminVideos />
                 </Suspense>
               } />
               <Route path="*" element={

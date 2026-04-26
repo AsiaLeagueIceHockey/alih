@@ -74,6 +74,17 @@
             "title": "アジアリーグニュース",
             "subtitle": "2025-26シーズン"
         },
+        "videos": {
+            "title": "動画",
+            "subtitle": "チーム動画コンテンツ",
+            "noVideos": "登録された動画がありません",
+            "share": "共有",
+            "linkCopied": "リンクがコピーされました！",
+            "relatedVideos": "関連動画",
+            "tabNews": "ニュース",
+            "tabVideos": "動画",
+            "allTeams": "全て"
+        },
         "gameDetail": {
             "liveGame": "ライブ試合",
             "gameInfo": "試合情報",
@@ -204,6 +215,7 @@
         "viewAllStandings": "全順位を見る",
         "viewAllNews": "全ニュースを見る",
         "viewAllPlayers": "全選手を見る",
+        "viewAllVideos": "全動画を見る",
         "loadMore": "もっと見る ▼",
         "back": "戻る",
         "share": "共有",

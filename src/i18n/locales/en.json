@@ -80,6 +80,17 @@
             "title": "Asia League News",
             "subtitle": "2025-26 Season"
         },
+        "videos": {
+            "title": "Videos",
+            "subtitle": "Team Video Content",
+            "noVideos": "No videos available",
+            "share": "Share",
+            "linkCopied": "Link copied!",
+            "relatedVideos": "Related Videos",
+            "tabNews": "News",
+            "tabVideos": "Videos",
+            "allTeams": "All"
+        },
         "gameDetail": {
             "liveGame": "Live Game",
             "gameInfo": "Game Info",
@@ -210,6 +221,7 @@
         "viewAllStandings": "View All Standings",
         "viewAllNews": "View All News",
         "viewAllPlayers": "View Full Roster",
+        "viewAllVideos": "View All Videos",
         "loadMore": "Load More ▼",
         "back": "Back",
         "share": "Share",
