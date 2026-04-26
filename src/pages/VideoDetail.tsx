@@ -161,7 +161,7 @@ const VideoDetail = () => {
 
       {/* 헤더 */}
       <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-lg border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
