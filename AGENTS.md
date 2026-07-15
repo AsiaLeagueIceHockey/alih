@@ -57,3 +57,22 @@
 3.  **Video Detail Module**: Created `/videos/:videoId` showing a full-width YouTube embed, sharing tools (Web Share API fallback to clipboard), related team videos, and SEO metadata.
 4.  **Admin Manager**: Built `/admin/videos` protected by `AdminLayout` for adding/deleting YouTube links inline, assigning teams, toggling publish state, and previewing thumbnails.
 5.  **Multi-Language Support**: Added Korean, Japanese, and English strings across News & Videos contexts (`page.videos`, `tabNews`, `share`, etc).
+
+# Agent Work Summary - Supabase Disk IO & Cron Optimization
+
+## Completed Tasks
+1.  **Root Cause Analysis (Disk IO & CPU 100% Depletion)**:
+    -   Identified that the `live-game` `pg_cron` job (`jobid: 1`) was running every 1 minute (`* * * * *`), executing 1,440 times/day during the off-season when no matches occur.
+    -   Every run invoked the edge function (`net.http_post`), inserting rows into `net.http_request_queue`, `net._http_response`, and `cron.job_run_details`.
+    -   Daily log cleanup jobs (`cleanup_cron_logs` and `cleanup_http_logs`) ran `DELETE FROM ... WHERE created < now() - interval '3 days'`, generating ~1,440 dead tuples per table per day. This triggered continuous heavy `autovacuum` loops and table bloat, exhausting the daily 30-minute Disk IO burst budget (43 Mbps baseline limit) and pinning CPU at 100%.
+2.  **Emergency Recovery & Table Cleanup**:
+    -   Restarted the Supabase database instance to break existing locks and `statement timeout` (500/504 errors).
+    -   Executed `TRUNCATE TABLE net._http_response;`, `TRUNCATE TABLE net.http_request_queue;`, and `TRUNCATE TABLE cron.job_run_details;` to instantly free up disk space without creating dead tuples.
+    -   Verified database query latency dropped from `56,422ms (statement timeout)` down to `466ms (200 OK)` and confirmed full recovery of `https://alhockey.fans/`.
+3.  **Cron Schedule Optimization**:
+    -   Unscheduled the `live-game` cron job (`SELECT cron.unschedule(1);` / `SELECT cron.unschedule('live-game');`) for the off-season, reducing daily background jobs from `1,446 runs/day` to just `6 runs/day` (99.6% reduction).
+    -   Updated `cleanup_cron_logs` and `cleanup_http_logs` retention period from 3 days down to 1 day (`interval '1 day'`) to minimize future cleanup load.
+4.  **Documentation & Diagnostic Scripts**:
+    -   Created `sql/v10_cron_schedule_management.sql` containing the optimization queries and commented instructions on how to re-schedule `live-game` (`* * * * *` via `net.http_post`) when the next season begins.
+    -   Created `scripts/check_health.cjs` (`node scripts/check_health.cjs`) to quickly diagnose Supabase connectivity, latency, and status directly from the terminal.
+
