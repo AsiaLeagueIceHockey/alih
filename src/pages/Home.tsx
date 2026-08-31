@@ -285,22 +285,26 @@ const Home = () => {
         path="/"
         structuredData={combinedStructuredData}
       />
-      <PageHeader title={t('page.home.title')} subtitle={`${selectedSeason} ${t('common.season')}`} />
-
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        <section className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
-          <span className="text-sm font-medium">{t('common.season')}</span>
+      <PageHeader
+        title={t('page.home.title')}
+        subtitle={
           <Select value={selectedSeason} onValueChange={(value) => setSelectedSeason(value as typeof selectedSeason)}>
-            <SelectTrigger className="w-[130px]" aria-label={t('common.season')}>
+            <SelectTrigger
+              className="mt-2 h-8 w-[132px] border-border/70 bg-card/40 px-2.5 text-sm font-medium shadow-none focus:ring-1 focus:ring-primary/60"
+              aria-label={t('common.season')}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {availableSeasons.map((season) => (
-                <SelectItem key={season} value={season}>{season}</SelectItem>
+                <SelectItem key={season} value={season}>{`${season} ${t('common.season')}`}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </section>
+        }
+      />
+
+      <div className="container mx-auto px-4 py-6 space-y-6">
         {/* In Progress Games */}
         {inProgressGames.length > 0 && (
           <section>

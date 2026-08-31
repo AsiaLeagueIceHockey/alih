@@ -1,8 +1,9 @@
 import UserMenu from './auth/UserMenu';
+import type { ReactNode } from 'react';
 
 interface PageHeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
 }
 
 const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
