@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTeams } from "@/hooks/useTeams";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { useSeason } from "@/context/SeasonContext";
 
 interface AlihNews {
   id: number;
@@ -38,6 +39,7 @@ interface AlihVideo {
 const News = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { selectedSeason } = useSeason();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // 탭 상태: URL 파라미터로 관리 (공유 시 탭 유지)
@@ -145,7 +147,7 @@ const News = () => {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": "아시아리그 아이스하키 뉴스",
-    "description": "아시아리그 아이스하키 2025-26 시즌 최신 뉴스와 영상",
+    "description": `아시아리그 아이스하키 ${selectedSeason} 시즌 최신 뉴스와 영상`,
     "url": "https://alhockey.fans/news",
   };
 
@@ -161,8 +163,8 @@ const News = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <SEO
-        title="아시아리그 뉴스 & 영상 - 최신 소식, 팀 영상 콘텐츠 | 2025-26 시즌"
-        description="아시아리그 아이스하키 2025-26 시즌 최신 뉴스, 팀 영상, 다큐멘터리, 인터뷰를 실시간으로 확인. 한국어, 일본어, 영어 뉴스 제공."
+        title={`아시아리그 뉴스 & 영상 - 최신 소식, 팀 영상 콘텐츠 | ${selectedSeason} 시즌`}
+        description={`아시아리그 아이스하키 ${selectedSeason} 시즌 최신 뉴스, 팀 영상, 다큐멘터리, 인터뷰를 실시간으로 확인. 한국어, 일본어, 영어 뉴스 제공.`}
         keywords="아시아리그 아이스하키 뉴스, 아시아리그 영상, 아이스하키 뉴스, 팀 다큐, 스타즈 고베 영상, HL안양 뉴스, 홋카이도 레드이글스 뉴스"
         path="/news"
         structuredData={[newsStructuredData, breadcrumbData]}

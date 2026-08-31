@@ -13,6 +13,7 @@ import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { Player } from "@/types/team";
+import { useSeason } from "@/context/SeasonContext";
 
 // Player type with joined team data
 interface PlayerWithTeam extends Player {
@@ -49,13 +50,15 @@ const Players = () => {
   };
 
   const { data: teams, isLoading: teamsLoading } = useTeams();
+  const { selectedSeason } = useSeason();
 
   const { data: players, isLoading: playersLoading } = useQuery({
-    queryKey: ['all-players-with-team'],
+    queryKey: ['all-players-with-team', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*, team:alih_teams(id, name, english_name, logo)')
+        .eq('season', selectedSeason)
         .order('name'); // Default sort by name
 
       if (error) throw error;
@@ -92,12 +95,12 @@ const Players = () => {
     <div className="min-h-screen bg-background pb-10">
       <SEO 
         title={t('nav.players', 'Players')}
-        description="Search for Asia League Ice Hockey players"
+        description={`Search for Asia League Ice Hockey players (${selectedSeason})`}
         path="/players"
       />
       <PageHeader 
         title={t('nav.players', 'Players')} 
-        subtitle={t('page.players.subtitle', '2025-26 Season Players')} 
+        subtitle={`${selectedSeason} ${t('common.season')}`}
       />
 
       <div className="container mx-auto px-4">
@@ -164,6 +167,9 @@ const Players = () => {
         ) : filteredPlayers.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p>{t('error.noPlayers', 'No players found')}</p>
+            {!selectedTeam && !searchQuery && (
+              <p className="mt-2 text-sm">{t('page.players.noRosterForSeason', { season: selectedSeason })}</p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

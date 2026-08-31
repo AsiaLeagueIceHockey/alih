@@ -15,12 +15,14 @@ import { useTeams } from "@/hooks/useTeams";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { CommentSection } from "@/components/comments";
+import { useSeason } from "@/context/SeasonContext";
 
 const TeamDetail = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const { data: teams = [] } = useTeams();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { selectedSeason } = useSeason();
 
   // 팀 정보 조회
   const { data: team, isLoading: isLoadingTeam } = useQuery({
@@ -42,11 +44,12 @@ const TeamDetail = () => {
 
   // 순위 정보 조회
   const { data: standings } = useQuery({
-    queryKey: ['team-standings'],
+    queryKey: ['team-standings', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, logo)')
+        .eq('season', selectedSeason)
         .order('rank', { ascending: true });
 
       if (error) throw error;
@@ -64,12 +67,13 @@ const TeamDetail = () => {
 
   // 선수 정보 조회
   const { data: players } = useQuery({
-    queryKey: ['team-players', teamId],
+    queryKey: ['team-players', teamId, selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*')
         .eq('team_id', teamId)
+        .eq('season', selectedSeason)
         .order('points', { ascending: false });
 
       if (error) throw error;
@@ -82,12 +86,13 @@ const TeamDetail = () => {
 
   // 최근 경기 조회 (완료된 경기 5개)
   const { data: recentGames } = useQuery({
-    queryKey: ['team-recent-games', teamId],
+    queryKey: ['team-recent-games', teamId, selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
         .or(`home_alih_team_id.eq.${teamId},away_alih_team_id.eq.${teamId}`)
+        .eq('season', selectedSeason)
         .eq('game_status', 'Game Finished')
         .order('match_at', { ascending: false })
         .limit(5);
@@ -102,12 +107,13 @@ const TeamDetail = () => {
 
   // 홈/원정 전체 경기 조회 (통계용)
   const { data: allFinishedGames } = useQuery({
-    queryKey: ['team-all-games', teamId],
+    queryKey: ['team-all-games', teamId, selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
         .or(`home_alih_team_id.eq.${teamId},away_alih_team_id.eq.${teamId}`)
+        .eq('season', selectedSeason)
         .eq('game_status', 'Game Finished')
         .order('match_at', { ascending: false });
 
@@ -121,7 +127,7 @@ const TeamDetail = () => {
 
   // 팀의 경기 상세 데이터 조회 (골 통계용)
   const { data: gameDetails } = useQuery({
-    queryKey: ['team-game-details', teamId],
+    queryKey: ['team-game-details', teamId, selectedSeason],
     queryFn: async () => {
       // 팀의 완료된 경기 game_no 목록
       const gameNos = allFinishedGames?.map(g => g.game_no) || [];

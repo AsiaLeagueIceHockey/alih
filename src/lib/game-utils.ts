@@ -71,3 +71,20 @@ export const formatMatchDateTimeLabel = (date: Date, language: string, locale: L
   const timeLabel = format(date, "HH:mm", { locale });
   return `${formatMatchDateLabel(date, language, locale)}, ${timeLabel}`;
 };
+
+export const getSeasonMonths = (seasonString: string) => {
+  // seasonString is expected to be in "YYYY-YY" format, e.g. "2026-27"
+  const startYear = parseInt(seasonString.split('-')[0], 10);
+  const endYear = startYear + 1;
+
+  return [
+    { value: 9, year: startYear },
+    { value: 10, year: startYear },
+    { value: 11, year: startYear },
+    { value: 12, year: startYear },
+    { value: 1, year: endYear },
+    { value: 2, year: endYear },
+    { value: 3, year: endYear },
+    { value: 4, year: endYear },
+  ];
+};

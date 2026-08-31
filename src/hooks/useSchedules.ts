@@ -14,6 +14,7 @@ export interface ScheduleGame {
   highlight_title: string | null;
   game_status: string | null;
   live_url: string | null;
+  season: string;
   season_phase?: string | null;
   source_popup_id?: number | null;
   source_game_no?: number | null;
@@ -46,18 +47,25 @@ export interface ScheduleGame {
   } | null;
 }
 
+import { CURRENT_SEASON } from "@/constants/season";
+import { useSeason } from "@/context/SeasonContext";
+
 /**
  * 전체 일정 데이터를 가져오는 공통 훅
  * - 모든 페이지에서 동일한 캐시 사용 (queryKey: 'alih-schedules')
  * - 진행 중인 경기가 있을 때만 1분마다 polling
  */
-export const useSchedules = () => {
+export const useSchedules = (season?: string) => {
+  const { selectedSeason } = useSeason();
+  const resolvedSeason = season ?? selectedSeason ?? CURRENT_SEASON;
+
   return useQuery({
-    queryKey: ['alih-schedules'],
+    queryKey: ['alih-schedules', resolvedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', resolvedSeason)
         .order('match_at', { ascending: true });
       
       if (error) throw error;
@@ -84,8 +92,8 @@ export const useSchedules = () => {
  * 특정 game_no의 일정 데이터를 가져오는 훅
  * - 전체 일정 캐시를 사용하여 데이터 일관성 보장
  */
-export const useScheduleByGameNo = (gameNo: string | number | null | undefined) => {
-  const { data: schedules, isLoading, error } = useSchedules();
+export const useScheduleByGameNo = (gameNo: string | number | null | undefined, season?: string) => {
+  const { data: schedules, isLoading, error } = useSchedules(season);
   
   const scheduleData = gameNo 
     ? schedules?.find(game => game.game_no === Number(gameNo))

@@ -14,7 +14,7 @@
     },
     "playerDetail": {
         "notFound": "Player not found.",
-        "seasonStats": "25-26 Season Stats",
+        "seasonStats": "{{season}} Season Stats",
         "leagueRank": "#{{rank}} in Goals",
         "draftInfo": "Draft Info",
         "about": "About",
@@ -42,7 +42,7 @@
     "season": "Season",
     "cardGeneration": {
         "steps": {
-            "checking": "Checking 25-26 Season Stats...",
+            "checking": "Checking {{season}} Season Stats...",
             "verifying": "Verifying Team Info...",
             "printing": "Designing Card..."
         },
@@ -62,15 +62,15 @@
     "page": {
         "home": {
             "title": "Asia League Ice Hockey",
-            "subtitle": "2025-26 Season"
+            "subtitle": "2026-27 Season"
         },
         "schedule": {
             "title": "Game Schedule & Results",
-            "subtitle": "2025-26 Season All Games"
+            "subtitle": "2026-27 Season All Games"
         },
         "standings": {
             "title": "Standings",
-            "subtitle": "2025-26 Season Stats"
+            "subtitle": "2026-27 Season Stats"
         },
         "highlights": {
             "title": "Highlights",
@@ -78,7 +78,7 @@
         },
         "news": {
             "title": "Asia League News",
-            "subtitle": "2025-26 Season"
+            "subtitle": "2026-27 Season"
         },
         "videos": {
             "title": "Videos",
@@ -97,7 +97,8 @@
             "gameResult": "Game Result"
         },
         "players": {
-            "subtitle": "2025-26 Season Players"
+            "subtitle": "2026-27 Season Players",
+            "noRosterForSeason": "No roster has been added for the {{season}} season yet."
         }
     },
     "game": {
@@ -366,6 +367,7 @@
         "loginRequired": "Login required"
     },
     "common": {
+        "season": "Season",
         "back": "Back",
         "browsePlayers": "Browse Players",
         "generating": "Generating..."

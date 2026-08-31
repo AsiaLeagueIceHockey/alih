@@ -57,6 +57,7 @@ export interface CareerHistory {
 
 export interface Player {
   id: number;
+  season: string;
   name: string;
   jersey_number: string;
   position: string;
@@ -104,6 +105,7 @@ export interface PlayerCard {
 
 export interface TeamStanding {
   rank: number;
+  season: string;
   team_id: number;
   games_played: number;
   points: number;

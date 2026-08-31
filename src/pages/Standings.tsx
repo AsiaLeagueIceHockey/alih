@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { useSeason } from "@/context/SeasonContext";
 
 interface TeamStanding {
   rank: number;
@@ -47,12 +48,14 @@ interface AlihTeam {
 const Standings = () => {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { selectedSeason } = useSeason();
   const { data: teamStandings, isLoading: isLoadingTeams } = useQuery({
-    queryKey: ['team-standings'],
+    queryKey: ['team-standings', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
+        .eq('season', selectedSeason)
         .order('rank', { ascending: true });
       
       if (error) throw error;
@@ -69,11 +72,12 @@ const Standings = () => {
 
   // 득점 순위 데이터
   const { data: goalLeaders, isLoading: isLoadingGoals } = useQuery({
-    queryKey: ['goal-leaders'],
+    queryKey: ['goal-leaders', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
+        .eq('season', selectedSeason)
         .order('goals', { ascending: false })
         .order('assists', { ascending: false })
         .order('points', { ascending: false });
@@ -98,11 +102,12 @@ const Standings = () => {
 
   // 도움 순위 데이터
   const { data: assistLeaders, isLoading: isLoadingAssists } = useQuery({
-    queryKey: ['assist-leaders'],
+    queryKey: ['assist-leaders', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
+        .eq('season', selectedSeason)
         .order('assists', { ascending: false })
         .order('goals', { ascending: false })
         .order('points', { ascending: false });
@@ -127,11 +132,12 @@ const Standings = () => {
 
   // 포인트 순위 데이터
   const { data: pointLeaders, isLoading: isLoadingPoints } = useQuery({
-    queryKey: ['point-leaders'],
+    queryKey: ['point-leaders', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
+        .eq('season', selectedSeason)
         .order('points', { ascending: false })
         .order('goals', { ascending: false })
         .order('assists', { ascending: false });
@@ -173,12 +179,12 @@ const Standings = () => {
   const standingsStructuredData = {
     "@context": "https://schema.org",
     "@type": "Table",
-    "name": "아시아리그 아이스하키 2025-26 시즌 순위표",
+    "name": `아시아리그 아이스하키 ${selectedSeason} 시즌 순위표`,
     "description": "아시아리그 아이스하키 팀 순위, 승점, 승패, 골득실 정보",
     "about": {
       "@type": "SportsLeague",
       "name": "Asia League Ice Hockey",
-      "season": "2025-26"
+      "season": selectedSeason
     }
   };
 
@@ -195,13 +201,13 @@ const Standings = () => {
   return (
     <div className="min-h-screen bg-background pb-10">
       <SEO 
-        title="아시아리그 순위 - 팀 순위표, 선수 스탯 | 2025-26 시즌"
-        description="아시아리그 아이스하키 2025-26 시즌 팀 순위표와 개인 기록 확인. 승점, 승패, 골득실, 득점왕, 어시스트왕, 포인트 리더 등 상세 스탯 제공. HL안양, 홋카이도 레드이글스 순위 실시간 업데이트."
-        keywords="아시아리그 순위, 아이스하키 순위표, 팀 순위, 선수 스탯, 득점 순위, 아시아리그 팀 순위, 2025-26 시즌 순위, HL안양 순위, 안양한라 순위, 홋카이도 레드이글스 순위, 도호쿠 프리블레이즈 순위, 닛코 아이스벅스 순위, 요코하마 그리츠 순위, 스타즈 고베 순위, 승점 순위, 득점왕, 어시스트왕, 포인트 순위, 골득실"
+        title={`아시아리그 순위 - 팀 순위표, 선수 스탯 | ${selectedSeason} 시즌`}
+        description={`아시아리그 아이스하키 ${selectedSeason} 시즌 팀 순위표와 개인 기록 확인. 승점, 승패, 골득실, 득점왕, 어시스트왕, 포인트 리더 등 상세 스탯 제공.`}
+        keywords={`아시아리그 순위, 아이스하키 순위표, 팀 순위, 선수 스탯, 득점 순위, 아시아리그 팀 순위, ${selectedSeason} 시즌 순위, 승점 순위, 득점왕, 어시스트왕, 포인트 순위, 골득실`}
         path="/standings"
         structuredData={[standingsStructuredData, breadcrumbData]}
       />
-      <PageHeader title={t('page.standings.title')} subtitle={t('page.standings.subtitle')} />
+      <PageHeader title={t('page.standings.title')} subtitle={`${selectedSeason} ${t('common.season')}`} />
       
       <div className="container mx-auto px-4">
         <Tabs defaultValue="teams" className="w-full">
@@ -236,7 +242,7 @@ const Standings = () => {
                   <tbody>
                     {teamStandings?.map((standing) => (
                       <tr 
-                        key={standing.rank} 
+                        key={standing.team_id}
                         className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
                       >
                         <td className="p-2 md:p-3 font-bold text-primary">{standing.rank}</td>

@@ -13,6 +13,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import InstallPrompt from "./components/install-prompt";
 import './i18n'; // i18n initialization
 import { AuthProvider } from "./context/AuthContext";
+import { SeasonProvider } from "./context/SeasonContext";
 import OnboardingDialog from "./components/auth/OnboardingDialog";
 import { handleInAppBrowser } from "./utils/in-app";
 import InAppGuide from "./components/common/InAppGuide";
@@ -123,6 +124,7 @@ const App = () => {
           },
         }}
       >
+        <SeasonProvider>
         <AuthProvider>
           <TooltipProvider>
           <Toaster />
@@ -271,6 +273,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
         </AuthProvider>
+        </SeasonProvider>
       </PersistQueryClientProvider>
     </HelmetProvider>
   );

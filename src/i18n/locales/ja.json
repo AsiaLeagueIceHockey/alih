@@ -14,7 +14,7 @@
     },
     "playerDetail": {
         "notFound": "選手が見つかりません。",
-        "seasonStats": "25-26 シーズン成績",
+        "seasonStats": "{{season}} シーズン成績",
         "leagueRank": "リーグ得点{{rank}}位",
         "draftInfo": "ドラフト情報",
         "about": "選手紹介",
@@ -36,7 +36,7 @@
     },
     "cardGeneration": {
         "steps": {
-            "checking": "25-26シーズン成績確認中...",
+            "checking": "{{season}}シーズン成績確認中...",
             "verifying": "チーム情報を確認中...",
             "printing": "カードをデザイン中..."
         },
@@ -56,15 +56,15 @@
     "page": {
         "home": {
             "title": "アジアリーグアイスホッケー",
-            "subtitle": "2025-26シーズン"
+            "subtitle": "2026-27シーズン"
         },
         "schedule": {
             "title": "試合日程・結果",
-            "subtitle": "2025-26シーズン全試合"
+            "subtitle": "2026-27シーズン全試合"
         },
         "standings": {
             "title": "順位",
-            "subtitle": "2025-26シーズン記録"
+            "subtitle": "2026-27シーズン記録"
         },
         "highlights": {
             "title": "ハイライト",
@@ -72,7 +72,7 @@
         },
         "news": {
             "title": "アジアリーグニュース",
-            "subtitle": "2025-26シーズン"
+            "subtitle": "2026-27シーズン"
         },
         "videos": {
             "title": "動画",
@@ -91,7 +91,8 @@
             "gameResult": "試合結果"
         },
         "players": {
-            "subtitle": "2025-26シーズン選手"
+            "subtitle": "2026-27シーズン選手",
+            "noRosterForSeason": "{{season}}シーズンのロスターはまだ登録されていません。"
         }
     },
     "game": {
@@ -365,6 +366,7 @@
         "loginRequired": "ログインが必要です"
     },
     "common": {
+        "season": "シーズン",
         "back": "戻る",
         "browsePlayers": "選手一覧を見る",
         "generating": "生成中..."

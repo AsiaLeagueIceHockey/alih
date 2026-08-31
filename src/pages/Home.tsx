@@ -19,6 +19,8 @@ import type { CarouselApi } from "@/components/ui/carousel";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { formatMatchDateTimeLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
+import { useSeason } from "@/context/SeasonContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TeamStanding {
   rank: number;
@@ -58,6 +60,7 @@ const Home = () => {
   const { data: teams } = useTeams();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { selectedSeason, setSelectedSeason, availableSeasons } = useSeason();
   
   // Date locale helper
   const getDateLocale = () => {
@@ -94,7 +97,7 @@ const Home = () => {
     });
   }, [recentGamesApi]);
 
-  const { data: schedules } = useSchedules();
+  const { data: schedules } = useSchedules(selectedSeason);
 
   const { data: alihTeams } = useQuery({
     queryKey: ['alih-teams-standings'],
@@ -113,11 +116,12 @@ const Home = () => {
   });
 
   const { data: teamStandings } = useQuery({
-    queryKey: ['team-standings'],
+    queryKey: ['team-standings', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, logo, english_name)')
+        .eq('season', selectedSeason)
         .order('rank', { ascending: true });
 
       if (error) throw error;
@@ -235,7 +239,7 @@ const Home = () => {
     "name": "아시아리그 아이스하키",
     "alternateName": ["Asia League Ice Hockey", "아시아리그하키"],
     "url": "https://alhockey.fans",
-    "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 실시간 스코어, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한 곳에서",
+    "description": `아시아리그 아이스하키 ${selectedSeason} 시즌 - 경기 일정, 실시간 스코어, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한 곳에서`,
     "inLanguage": "ko-KR",
     "potentialAction": {
       "@type": "SearchAction",
@@ -275,15 +279,28 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background pb-10">
       <SEO
-        title="아시아리그 아이스하키 - 경기 일정, 실시간 스코어, 하이라이트 | 2025-26 시즌"
-        description="아시아리그 아이스하키 2025-26 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요. HL안양, 홋카이도 레드이글스, 도호쿠 프리블레이즈 등 전 팀 정보 제공."
-        keywords="아시아리그 아이스하키, 아시아리그, 아이스하키, 2025-26 시즌, HL안양, 안양한라, 홋카이도 레드이글스, 도호쿠 프리블레이즈, 닛코 아이스벅스, 요코하마 그리츠, 스타즈 고베, HL ANYANG, RED EAGLES HOKKAIDO, TOHOKU FREE BLADES, NIKKO ICEBUCKS, YOKOHAMA GRITS, STARS KOBE, 경기 일정, 경기 결과, 실시간 스코어, 하이라이트 영상, 팀 순위, 승점, 선수 스탯, 득점 순위, 도움 순위, 아이스하키 뉴스, ALIH"
+        title={`아시아리그 아이스하키 - 경기 일정, 실시간 스코어, 하이라이트 | ${selectedSeason} 시즌`}
+        description={`아시아리그 아이스하키 ${selectedSeason} 시즌 경기 일정, 실시간 결과, 하이라이트 영상, 팀 순위, 선수 스탯, 최신 뉴스를 한눈에 확인하세요. HL안양, 홋카이도 레드이글스, 도호쿠 프리블레이즈 등 전 팀 정보 제공.`}
+        keywords={`아시아리그 아이스하키, 아시아리그, 아이스하키, ${selectedSeason} 시즌, HL안양, 안양한라, 홋카이도 레드이글스, 도호쿠 프리블레이즈, 닛코 아이스벅스, 요코하마 그리츠, 스타즈 고베, HL ANYANG, RED EAGLES HOKKAIDO, TOHOKU FREE BLADES, NIKKO ICEBUCKS, YOKOHAMA GRITS, STARS KOBE, 경기 일정, 경기 결과, 실시간 스코어, 하이라이트 영상, 팀 순위, 승점, 선수 스탯, 득점 순위, 도움 순위, 아이스하키 뉴스, ALIH`}
         path="/"
         structuredData={combinedStructuredData}
       />
-      <PageHeader title={t('page.home.title')} subtitle={t('page.home.subtitle')} />
+      <PageHeader title={t('page.home.title')} subtitle={`${selectedSeason} ${t('common.season')}`} />
 
       <div className="container mx-auto px-4 py-6 space-y-6">
+        <section className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+          <span className="text-sm font-medium">{t('common.season')}</span>
+          <Select value={selectedSeason} onValueChange={(value) => setSelectedSeason(value as typeof selectedSeason)}>
+            <SelectTrigger className="w-[130px]" aria-label={t('common.season')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSeasons.map((season) => (
+                <SelectItem key={season} value={season}>{season}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </section>
         {/* In Progress Games */}
         {inProgressGames.length > 0 && (
           <section>
@@ -760,7 +777,7 @@ const Home = () => {
                 <tbody>
                   {topThreeStandings.map((standing) => (
                     <tr
-                      key={standing.rank}
+                      key={standing.team_id}
                       className="border-b border-border/50 hover:bg-secondary/30 cursor-pointer"
                       onClick={() => navigate(`/team/${standing.team_id}`)}
                     >

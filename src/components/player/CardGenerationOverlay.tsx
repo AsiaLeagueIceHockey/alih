@@ -8,6 +8,7 @@ import { Player, Team, PlayerCard as PlayerCardType } from '@/types/team';
 import PlayerCard from './PlayerCard';
 import confetti from 'canvas-confetti';
 import { externalSupabase } from '@/lib/supabase-external';
+import { useSeason } from '@/context/SeasonContext';
 
 interface CardGenerationOverlayProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ type Step = 'idle' | 'checking_stats' | 'verifying_identity' | 'printing' | 'com
 const CardGenerationOverlay = ({ isOpen, onClose, player, team, onSuccess, onViewCard }: CardGenerationOverlayProps) => {
   const { t, i18n } = useTranslation();
   const { profile } = useAuth();
+  const { selectedSeason } = useSeason();
   const [step, setStep] = useState<Step>('idle');
   const [generatedCard, setGeneratedCard] = useState<PlayerCardType | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +85,7 @@ const CardGenerationOverlay = ({ isOpen, onClose, player, team, onSuccess, onVie
   };
 
   const steps = [
-    { id: 'checking_stats', label: t('cardGeneration.steps.checking') },
+    { id: 'checking_stats', label: t('cardGeneration.steps.checking', { season: selectedSeason }) },
     { id: 'verifying_identity', label: t('cardGeneration.steps.verifying') },
     { id: 'printing', label: t('cardGeneration.steps.printing') },
   ];

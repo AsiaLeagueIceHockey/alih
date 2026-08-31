@@ -10,11 +10,13 @@ import TeamHeader from "@/components/team/TeamHeader";
 import { Team, Player, TeamStanding } from "@/types/team";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { useSeason } from "@/context/SeasonContext";
 
 const TeamRoster = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { selectedSeason } = useSeason();
 
   const { data: team, isLoading: isLoadingTeam } = useQuery({
     queryKey: ['team-detail', teamId],
@@ -35,11 +37,12 @@ const TeamRoster = () => {
 
   // 순위 정보 조회
   const { data: standings } = useQuery({
-    queryKey: ['team-standings'],
+    queryKey: ['team-standings', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, logo)')
+        .eq('season', selectedSeason)
         .order('rank', { ascending: true });
 
       if (error) throw error;
@@ -56,12 +59,13 @@ const TeamRoster = () => {
   const currentRank = standings?.find(s => s.team_id === Number(teamId))?.rank;
 
   const { data: players, isLoading: isLoadingPlayers } = useQuery({
-    queryKey: ['team-players', teamId],
+    queryKey: ['team-players', teamId, selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*')
         .eq('team_id', teamId)
+        .eq('season', selectedSeason)
         .order('points', { ascending: false });
 
       if (error) throw error;

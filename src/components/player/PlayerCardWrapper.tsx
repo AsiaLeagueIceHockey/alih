@@ -5,18 +5,20 @@ import { externalSupabase } from "@/lib/supabase-external";
 import PlayerCard from "@/components/player/PlayerCard";
 import { Player, Team, PlayerCard as PlayerCardType } from "@/types/team";
 import { Loader2 } from "lucide-react";
+import { useSeason } from "@/context/SeasonContext";
 
 // Wrapper for standalone card route to fetch data
 export const PlayerCardWrapper = () => {
    const { playerSlug } = useParams<{ playerSlug: string }>();
    const isNumericId = playerSlug && /^\d+$/.test(playerSlug);
+   const { selectedSeason } = useSeason();
 
    const { data: player, isLoading } = useQuery({
-      queryKey: ['player-detail-card', playerSlug],
+      queryKey: ['player-detail-card', playerSlug, selectedSeason],
       queryFn: async () => {
          let query = externalSupabase.from('alih_players').select('*');
          if (isNumericId) query = query.eq('id', playerSlug);
-         else query = query.eq('slug', playerSlug);
+         else query = query.eq('slug', playerSlug).eq('season', selectedSeason);
          const { data, error } = await query.single();
          if (error) throw error;
          return data as Player;

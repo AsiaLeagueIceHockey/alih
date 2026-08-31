@@ -14,7 +14,7 @@
     },
     "playerDetail": {
         "notFound": "선수를 찾을 수 없습니다.",
-        "seasonStats": "25-26 시즌 스탯",
+        "seasonStats": "{{season}} 시즌 스탯",
         "leagueRank": "리그 득점 {{rank}}위",
         "draftInfo": "드래프트 정보",
         "about": "선수 소개",
@@ -36,7 +36,7 @@
     },
     "cardGeneration": {
         "steps": {
-            "checking": "25-26 시즌 스탯 확인 중...",
+            "checking": "{{season}} 시즌 스탯 확인 중...",
             "verifying": "팀 정보 확인 중...",
             "printing": "카드 디자인 진행 중..."
         },
@@ -56,15 +56,15 @@
     "page": {
         "home": {
             "title": "아시아리그 아이스하키",
-            "subtitle": "2025-26 시즌"
+            "subtitle": "2026-27 시즌"
         },
         "schedule": {
             "title": "경기 일정 / 결과",
-            "subtitle": "2025-26 시즌 전체 경기"
+            "subtitle": "2026-27 시즌 전체 경기"
         },
         "standings": {
             "title": "순위",
-            "subtitle": "2025-26 시즌 기록"
+            "subtitle": "2026-27 시즌 기록"
         },
         "highlights": {
             "title": "하이라이트",
@@ -72,7 +72,7 @@
         },
         "news": {
             "title": "아시아리그 뉴스",
-            "subtitle": "2025-26 소식"
+            "subtitle": "2026-27 소식"
         },
         "videos": {
             "title": "영상",
@@ -91,7 +91,8 @@
             "gameResult": "경기 결과"
         },
         "players": {
-            "subtitle": "2025-26 시즌 선수"
+            "subtitle": "2026-27 시즌 선수",
+            "noRosterForSeason": "{{season}} 시즌 로스터가 아직 등록되지 않았습니다."
         }
     },
     "game": {
@@ -365,6 +366,7 @@
         "loginRequired": "로그인이 필요합니다"
     },
     "common": {
+        "season": "시즌",
         "back": "뒤로",
         "browsePlayers": "선수 목록 보기",
         "generating": "생성 중..."

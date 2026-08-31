@@ -9,6 +9,7 @@ import { Loader2, Play } from "lucide-react";
 import SEO from "@/components/SEO";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { useSeason } from "@/context/SeasonContext";
 
 interface ScheduleGame {
   id: number;
@@ -25,6 +26,7 @@ interface ScheduleGame {
 const Highlights = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { selectedSeason } = useSeason();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const playerRef = useRef<HTMLDivElement>(null);
@@ -40,11 +42,12 @@ const Highlights = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const { data: teams, isLoading: teamsLoading } = useTeams();
 
   const { data: games, isLoading, error } = useQuery({
-    queryKey: ['alih-schedule-highlights'],
+    queryKey: ['alih-schedule-highlights', selectedSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', selectedSeason)
         .not('highlight_url', 'is', null)
         .neq('highlight_url', '')
         .order('match_at', { ascending: false });
@@ -83,7 +86,7 @@ const Highlights = ({ hideHeader = false }: { hideHeader?: boolean }) => {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": "아시아리그 아이스하키 하이라이트 영상",
-    "description": "아시아리그 아이스하키 2025-26 시즌 경기 하이라이트 영상 모음",
+    "description": `아시아리그 아이스하키 ${selectedSeason} 시즌 경기 하이라이트 영상 모음`,
     "url": "https://alhockey.fans/highlights",
     "mainEntity": {
       "@type": "ItemList",
@@ -111,8 +114,8 @@ const Highlights = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   return (
     <div className="min-h-screen bg-background pb-10">
       <SEO 
-        title="아시아리그 하이라이트 - 경기 영상, 골 장면 모음 | 2025-26 시즌"
-        description="아시아리그 아이스하키 2025-26 시즌 하이라이트 영상 모음. 최신 경기 하이라이트, 골 장면, 베스트 세이브를 팀별로 확인하세요. HL안양, 홋카이도 레드이글스 등 모든 팀 영상 제공."
+        title={`아시아리그 하이라이트 - 경기 영상, 골 장면 모음 | ${selectedSeason} 시즌`}
+        description={`아시아리그 아이스하키 ${selectedSeason} 시즌 하이라이트 영상 모음. 최신 경기 하이라이트, 골 장면, 베스트 세이브를 팀별로 확인하세요. HL안양, 홋카이도 레드이글스 등 모든 팀 영상 제공.`}
         keywords="아시아리그 아이스하키 하이라이트, 아시아리그 하이라이트, 아이스하키 영상, 경기 하이라이트, 골 영상, 아시아리그 경기 영상, HL안양 하이라이트, 안양한라 영상, 홋카이도 레드이글스 하이라이트, 도호쿠 프리블레이즈 영상, 닛코 아이스벅스 영상, 요코하마 그리츠 영상, 스타즈 고베 영상, 베스트 골, 세이브 영상, 최신 경기 영상"
         path="/highlights"
         structuredData={[highlightStructuredData, breadcrumbData]}

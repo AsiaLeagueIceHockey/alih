@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,24 +12,15 @@ import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
-import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
-
-// Month data (raw values only, labels come from translations)
-const MONTHS_DATA = [
-  { value: 9, year: 2025 },
-  { value: 10, year: 2025 },
-  { value: 11, year: 2025 },
-  { value: 12, year: 2025 },
-  { value: 1, year: 2026 },
-  { value: 2, year: 2026 },
-  { value: 3, year: 2026 },
-  { value: 4, year: 2026 },
-];
+import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame, getSeasonMonths } from "@/lib/game-utils";
+import { useSeason } from "@/context/SeasonContext";
 
 const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { selectedSeason } = useSeason();
+  const seasonMonths = useMemo(() => getSeasonMonths(selectedSeason), [selectedSeason]);
 
   // Date locale helper
   const getDateLocale = () => {
@@ -50,8 +41,8 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   };
 
   // Dynamic month labels
-  const getMonthLabel = (month: number) => {
-    const date = new Date(2025, month - 1, 1);
+  const getMonthLabel = (month: number, year: number) => {
+    const date = new Date(year, month - 1, 1);
     return format(date, 'LLL', { locale: getDateLocale() });
   };
 
@@ -60,7 +51,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const currentYear = now.getFullYear();
   
   // 현재 월에 해당하는 MONTHS_DATA 인덱스 찾기
-  const currentMonthIndex = MONTHS_DATA.findIndex(
+  const currentMonthIndex = seasonMonths.findIndex(
     m => m.value === currentMonth && m.year === currentYear
   );
   const defaultMonth = currentMonthIndex >= 0 ? currentMonthIndex : 0;
@@ -71,7 +62,12 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 
   const { data: teams, isLoading: teamsLoading } = useTeams();
 
-  const { data: schedules, isLoading: schedulesLoading, error } = useSchedules();
+  useEffect(() => {
+    setSelectedMonth(defaultMonth);
+    setExpandedGameId(null);
+  }, [defaultMonth, selectedSeason]);
+
+  const { data: schedules, isLoading: schedulesLoading, error } = useSchedules(selectedSeason);
 
   const getTeamById = (teamId: number) => {
     if (!teams) return null;
@@ -100,7 +96,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
       const gameMonth = gameDate.getMonth() + 1;
       const gameYear = gameDate.getFullYear();
       
-      const monthFilter = MONTHS_DATA[selectedMonth];
+      const monthFilter = seasonMonths[selectedMonth];
       const monthMatch = gameMonth === monthFilter.value && gameYear === monthFilter.year;
       
       if (!monthMatch) return false;
@@ -113,7 +109,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
       
       return true;
     });
-  }, [schedules, selectedMonth, selectedTeam, teams]);
+  }, [schedules, selectedMonth, selectedTeam, seasonMonths, teams]);
 
   const isLoading = teamsLoading || schedulesLoading;
 
@@ -122,7 +118,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": "아시아리그 아이스하키 경기 일정",
-    "description": "아시아리그 아이스하키 2025-26 시즌 전체 경기 일정과 결과",
+    "description": `아시아리그 아이스하키 ${selectedSeason} 시즌 전체 경기 일정과 결과`,
     "url": "https://alhockey.fans/schedule",
     "mainEntity": {
       "@type": "ItemList",
@@ -151,19 +147,19 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   return (
     <div className="min-h-screen bg-background pb-10">
       <SEO 
-        title="아시아리그 경기 일정 - 2025-26 시즌 전체 일정 및 결과"
-        description="아시아리그 아이스하키 2025-26 시즌 전체 경기 일정, 월별 일정, 팀별 일정을 확인하세요. 실시간 경기 결과, 경기장 정보, 하이라이트 영상까지 한 번에. HL안양, 홋카이도 레드이글스 등 전 팀 경기 일정 제공."
-        keywords="아시아리그 아이스하키 일정, 아시아리그 일정, 아이스하키 경기 일정, 아시아리그 경기 일정, 2025-26 시즌 일정, HL안양 경기 일정, 안양한라 일정, 홋카이도 레드이글스 일정, 도호쿠 프리블레이즈 일정, 닛코 아이스벅스 일정, 요코하마 그리츠 일정, 스타즈 고베 일정, 경기 결과, 하이라이트, 경기장 정보, 월별 경기"
+        title={`아시아리그 경기 일정 - ${selectedSeason} 시즌 전체 일정 및 결과`}
+        description={`아시아리그 아이스하키 ${selectedSeason} 시즌 전체 경기 일정, 월별 일정, 팀별 일정을 확인하세요. 실시간 경기 결과, 경기장 정보, 하이라이트 영상까지 한 번에. HL안양, 홋카이도 레드이글스 등 전 팀 경기 일정 제공.`}
+        keywords={`아시아리그 아이스하키 일정, 아시아리그 일정, 아이스하키 경기 일정, 아시아리그 경기 일정, ${selectedSeason} 시즌 일정, HL안양 경기 일정, 안양한라 일정, 홋카이도 레드이글스 일정, 도호쿠 프리블레이즈 일정, 닛코 아이스벅스 일정, 요코하마 그리츠 일정, 스타즈 고베 일정, 경기 결과, 하이라이트, 경기장 정보, 월별 경기`}
         path="/schedule"
         structuredData={[scheduleStructuredData, breadcrumbData]}
       />
-      {!hideHeader && <PageHeader title={t('page.schedule.title')} subtitle={t('page.schedule.subtitle')} />}
+      {!hideHeader && <PageHeader title={t('page.schedule.title')} subtitle={`${selectedSeason} ${t('common.season')}`} />}
       
       <div className="container mx-auto px-4">
         {/* 월별 필터 */}
         <div className="mb-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {MONTHS_DATA.map((month, index) => (
+            {seasonMonths.map((month, index) => (
               <Button
                 key={index}
                 variant={selectedMonth === index ? "default" : "outline"}
@@ -171,7 +167,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                 onClick={() => setSelectedMonth(index)}
                 className="whitespace-nowrap"
               >
-                {getMonthLabel(month.value)}
+                {getMonthLabel(month.value, month.year)}
               </Button>
             ))}
           </div>

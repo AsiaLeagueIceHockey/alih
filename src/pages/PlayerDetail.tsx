@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { externalSupabase } from "@/lib/supabase-external";
+import { useSeason } from "@/context/SeasonContext";
 import { Loader2, ChevronLeft, Instagram, User, MapPin, ArrowUp, Weight, Trophy, CreditCard, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -27,6 +28,7 @@ const PlayerDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { selectedSeason } = useSeason();
 
   // State for card generation
   const [showGenerationOverlay, setShowGenerationOverlay] = useState(false);
@@ -39,7 +41,7 @@ const PlayerDetail = () => {
 
   // 선수 정보 조회
   const { data: player, isLoading: isLoadingPlayer } = useQuery({
-    queryKey: ['player-detail', playerSlug],
+    queryKey: ['player-detail', playerSlug, selectedSeason],
     queryFn: async () => {
       let query = externalSupabase
         .from('alih_players')
@@ -49,7 +51,7 @@ const PlayerDetail = () => {
       if (isNumericId) {
         query = query.eq('id', playerSlug);
       } else {
-        query = query.eq('slug', playerSlug);
+        query = query.eq('slug', playerSlug).eq('season', selectedSeason);
       }
       
       const { data, error } = await query.single();
@@ -79,12 +81,13 @@ const PlayerDetail = () => {
 
   // 득점 순위 조회 (동률 포함)
   const { data: goalRank } = useQuery({
-    queryKey: ['player-goal-rank', player?.id],
+    queryKey: ['player-goal-rank', player?.id, selectedSeason],
     queryFn: async () => {
       // 1. 나보다 골이 많은 선수의 수를 셈
       const { count, error } = await externalSupabase
         .from('alih_players')
         .select('*', { count: 'exact', head: true })
+        .eq('season', selectedSeason)
         .gt('goals', player!.goals);
 
       if (error) throw error;
@@ -315,7 +318,7 @@ const PlayerDetail = () => {
           {/* Stats Dashboard */}
           <Card className="p-4">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-              📊 {t('playerDetail.seasonStats')}
+              📊 {t('playerDetail.seasonStats', { season: selectedSeason })}
             </h2>
             
             <div className="grid grid-cols-6 gap-2 text-center">
@@ -482,7 +485,7 @@ const PlayerDetail = () => {
               {isCareerExpanded && (
                 <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
                   {player.career_history
-                    .filter((career: CareerHistory) => !(career.season === '25-26' && career.league === 'Asia League'))
+                    .filter((career: CareerHistory) => !(career.season === selectedSeason.substring(2) && career.league === 'Asia League'))
                     .map((career: CareerHistory, idx: number) => (
                     <div key={idx} className="flex justify-between items-center py-2 border-b border-border last:border-0">
                       <div>

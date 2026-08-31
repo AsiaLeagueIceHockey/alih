@@ -1,7 +1,7 @@
 {
     "name": "alhockey_fans",
     "short_name": "alhockey_fans",
-    "description": "아시아리그 아이스하키 2025-26 시즌 - 경기 일정, 실시간 스코어, 하이라이트",
+    "description": "아시아리그 아이스하키 2026-27 시즌 - 경기 일정, 실시간 스코어, 하이라이트",
     "id": "alhockey-fans-pwa",
     "start_url": "/",
     "scope": "/",
