@@ -2,11 +2,20 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { DOMParser, Element } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 import webpush from "npm:web-push@3.6.3";
+import { requireCron } from "../_shared/auth.ts";
 
 // 1. Supabase 클라이언트 설정
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const supabase = createClient(supabaseUrl, supabaseKey);
+const currentSeason = Deno.env.get("CURRENT_SEASON") ?? "";
+const observeOnly = Deno.env.get('OBSERVE_ONLY') === 'true';
+const reminderEnabled = Deno.env.get('REMINDER_ENABLED') === 'true';
+const liveWriteEnabled = Deno.env.get('LIVE_WRITE_ENABLED') === 'true';
+const livePushEnabled = Deno.env.get('LIVE_PUSH_ENABLED') === 'true';
+const canaryOnly = Deno.env.get('CANARY_ONLY') === 'true';
+const canaryUserId = Deno.env.get('CANARY_USER_ID') ?? '';
+const retryFailedDeliveries = Deno.env.get('RETRY_FAILED_DELIVERIES') === 'true';
 
 // VAPID 설정 (유효성 검사 로직 복구)
 const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
@@ -134,29 +143,61 @@ interface MatchNotificationData {
   time?: string;
 }
 
+interface NotificationResult {
+  successCount: number;
+  failCount: number;
+}
+
+async function claimNotification(eventKey: string, eventType: string, scheduleId: number): Promise<number | null> {
+  const { data, error } = await supabase.rpc('claim_notification_event', {
+    p_event_key: eventKey,
+    p_event_type: eventType,
+    p_schedule_id: scheduleId,
+    p_allow_retry: retryFailedDeliveries,
+  });
+  if (error) throw error;
+  return data as number | null;
+}
+
+async function completeNotification(eventId: number, result: NotificationResult): Promise<void> {
+  const { error } = await supabase.rpc('complete_notification_event', {
+    p_event_id: eventId,
+    p_success_count: result.successCount,
+    p_failure_count: result.failCount,
+  });
+  if (error) console.error(`[PUSH] Failed to complete event ${eventId}:`, error);
+}
+
 async function sendMatchNotification(
   homeTeamId: number,
   awayTeamId: number,
   type: NotificationType,
   messageData: MatchNotificationData,
-  url: string
-) {
+  url: string,
+  eventId: number
+): Promise<NotificationResult> {
   console.log(`[PUSH] Preparing ${type} notification for teams ${homeTeamId} vs ${awayTeamId}`);
+  const finish = async (result: NotificationResult) => {
+    await completeNotification(eventId, result);
+    return result;
+  };
 
   try {
     // 1. 홈팀 또는 어웨이팀을 구독한 유저 조회
-    const { data: profiles, error: profileError } = await supabase
+    let profileQuery = supabase
       .from('profiles')
       .select('id, preferred_language')
       .or(`favorite_team_ids.cs.{${homeTeamId}},favorite_team_ids.cs.{${awayTeamId}}`);
+    if (canaryOnly) profileQuery = profileQuery.eq('id', canaryUserId);
+    const { data: profiles, error: profileError } = await profileQuery;
 
     if (profileError) {
       console.error(`[PUSH] Error fetching profiles:`, profileError);
-      return;
+      return finish({ successCount: 0, failCount: 1 });
     }
     if (!profiles || profiles.length === 0) {
       console.log(`[PUSH] No subscribers for teams ${homeTeamId} or ${awayTeamId}`);
-      return;
+      return finish({ successCount: 0, failCount: 0 });
     }
 
     // 중복 제거된 유저 목록
@@ -172,22 +213,30 @@ async function sendMatchNotification(
     const userIds = Array.from(uniqueUsers.keys());
     const { data: tokens, error: tokenError } = await supabase
       .from('notification_tokens')
-      .select('user_id, token')
+      .select('id, user_id, token')
       .in('user_id', userIds);
 
     if (tokenError) {
       console.error(`[PUSH] Error fetching tokens:`, tokenError);
-      return;
+      return finish({ successCount: 0, failCount: 1 });
     }
     if (!tokens || tokens.length === 0) {
       console.log(`[PUSH] No active tokens found`);
-      return;
+      return finish({ successCount: 0, failCount: 0 });
     }
 
     console.log(`[PUSH] Sending to ${tokens.length} devices...`);
 
     // 3. 알림 전송
-    const notifications = tokens.map(t => {
+    const notifications = tokens.map(async t => {
+      const { data: claimed, error: claimError } = await supabase.rpc('claim_notification_delivery', {
+        p_event_id: eventId,
+        p_token_id: t.id,
+        p_allow_retry: retryFailedDeliveries,
+      });
+      if (claimError) throw claimError;
+      if (claimed !== true) return false;
+
       const lang = uniqueUsers.get(t.user_id) || 'ko';
       const langKey = lang as 'ko' | 'ja' | 'en';
       
@@ -206,28 +255,71 @@ async function sendMatchNotification(
         try {
           subscription = JSON.parse(subscription);
         } catch {
-          return Promise.reject({ message: "Invalid JSON token" });
+          await supabase.rpc('complete_notification_delivery', {
+            p_event_id: eventId,
+            p_token_id: t.id,
+            p_success: false,
+            p_error: 'Invalid JSON token',
+          });
+          return false;
         }
       }
-      return webpush.sendNotification(subscription, JSON.stringify({ title, body, url }), {
-        urgency: 'high',
-        TTL: 60 * 60, // 1시간 (경기 알림은 시의성 중요)
-      });
+      try {
+        await webpush.sendNotification(subscription, JSON.stringify({ title, body, url }), {
+          urgency: 'high',
+          TTL: 60 * 60,
+        });
+        await supabase.rpc('complete_notification_delivery', {
+          p_event_id: eventId,
+          p_token_id: t.id,
+          p_success: true,
+          p_error: null,
+        });
+        return true;
+      } catch (error: any) {
+        if (error?.statusCode === 404 || error?.statusCode === 410) {
+          await supabase.from('notification_tokens').delete().eq('id', t.id);
+        }
+        await supabase.rpc('complete_notification_delivery', {
+          p_event_id: eventId,
+          p_token_id: t.id,
+          p_success: false,
+          p_error: String(error?.message || error).slice(0, 500),
+        });
+        console.error('[PUSH] Delivery failed:', error?.message || error);
+        return false;
+      }
     });
 
-    const results = await Promise.allSettled(notifications);
-    const successCount = results.filter((r) => r.status === 'fulfilled').length;
-    const failCount = results.filter((r) => r.status === 'rejected').length;
+    const results = await Promise.all(notifications);
+    const successCount = results.filter(Boolean).length;
+    const failCount = results.length - successCount;
 
     console.log(`[PUSH] Result: ✅ Success: ${successCount}, ❌ Failed: ${failCount}`);
+    const result = { successCount, failCount };
+    return finish(result);
 
   } catch (err) {
     console.error(`[PUSH] Critical Error:`, err);
+    const result = { successCount: 0, failCount: 1 };
+    return finish(result);
   }
 }
 
 serve(async (req) => {
   try {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    }
+    await requireCron(req);
+    if (!currentSeason) throw new Error('CURRENT_SEASON is required');
+    if (canaryOnly && !canaryUserId) throw new Error('CANARY_USER_ID is required when CANARY_ONLY=true');
+    if (observeOnly && (liveWriteEnabled || livePushEnabled)) {
+      throw new Error('OBSERVE_ONLY cannot be combined with live write or Push');
+    }
+    if (livePushEnabled && !liveWriteEnabled) {
+      throw new Error('LIVE_PUSH_ENABLED requires LIVE_WRITE_ENABLED');
+    }
     console.log("--- Starting Live Polling ---");
 
     const now = new Date();
@@ -241,6 +333,7 @@ serve(async (req) => {
     const { data: upcomingGames, error: upcomingError } = await supabase
       .from("alih_schedule")
       .select("*")
+      .eq("season", currentSeason)
       .gte("match_at", twentyMinLater.toISOString())
       .lte("match_at", thirtyMinLater.toISOString());
 
@@ -250,6 +343,10 @@ serve(async (req) => {
       console.log(`[REMINDER] Found ${upcomingGames.length} games starting in ~30 min`);
       
       for (const upcomingGame of upcomingGames) {
+        if (!reminderEnabled) {
+          console.log(`[REMINDER] Disabled for game ${upcomingGame.game_no}, skipping`);
+          continue;
+        }
         if (upcomingGame.reminder_sent) {
           console.log(`[REMINDER] Already sent for game ${upcomingGame.game_no}, skipping`);
           continue;
@@ -259,10 +356,16 @@ serve(async (req) => {
         const awayTeamNames = await getTeamNames(upcomingGame.away_alih_team_id);
 
         if (homeTeamNames && awayTeamNames) {
+          const eventKey = `${upcomingGame.season}:${upcomingGame.id}:reminder`;
+          const eventId = await claimNotification(eventKey, 'reminder', upcomingGame.id);
+          if (!eventId) {
+            console.log(`[REMINDER] Already claimed for game ${upcomingGame.game_no}`);
+            continue;
+          }
           const matchTime = new Date(upcomingGame.match_at);
           const timeStr = matchTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' });
 
-          await sendMatchNotification(
+          const delivery = await sendMatchNotification(
             upcomingGame.home_alih_team_id,
             upcomingGame.away_alih_team_id,
             'reminder',
@@ -272,8 +375,14 @@ serve(async (req) => {
               venue: upcomingGame.match_place,
               time: timeStr
             },
-            `/schedule/${upcomingGame.game_no}`
+            `/schedule/${upcomingGame.game_no}?season=${encodeURIComponent(upcomingGame.season)}`,
+            eventId
           );
+
+          if (delivery.failCount > 0) {
+            console.error(`[REMINDER] Delivery failed for game ${upcomingGame.game_no}; schedule flag remains unset.`);
+            continue;
+          }
 
           // reminder_sent 플래그 업데이트
           // [Fix] live_data를 건드리지 않고 별도 컬럼만 업데이트하여 데이터 오염 방지
@@ -302,6 +411,7 @@ serve(async (req) => {
     const { data: potentialGames, error: fetchError } = await supabase
       .from("alih_schedule")
       .select("*")
+      .eq("season", currentSeason)
       .gte("match_at", yesterday.toISOString())
       .lte("match_at", now.toISOString());
 
@@ -335,8 +445,11 @@ serve(async (req) => {
     // [중요 수정] 개별 게임 에러 격리를 위한 루프 구조 변경
     for (const game of ongoingGames) {
       try {
-        const targetUrlId = (game.game_no ?? 0) + 20388;
-        const targetUrl = `https://asiaicehockey.com/score/${targetUrlId}`;
+        const targetUrl = game.score_url;
+        if (!targetUrl || !/^https:\/\/asiaicehockey\.com\/score\/\d+$/.test(targetUrl)) {
+          console.warn(`[GAME ${game.game_no}] Missing or invalid official score_url; skipping.`);
+          continue;
+        }
         
         console.log(`[GAME ${game.game_no}] Fetching URL: ${targetUrl}`);
 
@@ -353,18 +466,19 @@ serve(async (req) => {
 
         // --- A. 경기 시간 및 상태 텍스트 파싱 ---
         const statusNode = doc.querySelector(".uk-text-lighter.uk-text-right");
-        let gameStatus = "Live"; 
-        let rawStatusText = ""; 
-
-        if (statusNode) {
-          rawStatusText = statusNode.textContent.trim(); 
-          gameStatus = rawStatusText.split("(")[0].trim();
+        const rawStatusText = statusNode?.textContent.trim() || "";
+        if (!rawStatusText) throw new Error('Official status selector is missing');
+        if (rawStatusText.includes('試合前')) {
+          console.log(`[GAME ${game.game_no}] Official page is still pre-game.`);
+          continue;
         }
+        let gameStatus = rawStatusText.split("(")[0].trim();
 
         // --- B. 스코어 파싱 ---
         const scoreRows = doc.querySelectorAll("table.alh-table.report tbody tr");
-        let homeScoreTotal = 0;
-        let awayScoreTotal = 0;
+        if (scoreRows.length === 0) throw new Error('Official score table is missing');
+        let homeScoreTotal: number | null = null;
+        let awayScoreTotal: number | null = null;
         
         const periodScores = {
           "1p": { home: null as number | null, away: null as number | null },
@@ -377,8 +491,8 @@ serve(async (req) => {
         if (scoreRows.length > 0) {
           const totalHeaders = (scoreRows[0] as Element).querySelectorAll("th");
           if (totalHeaders.length >= 2) {
-              homeScoreTotal = safeParseInt(totalHeaders[0].textContent) ?? 0;
-              awayScoreTotal = safeParseInt(totalHeaders[1].textContent) ?? 0;
+              homeScoreTotal = safeParseInt(totalHeaders[0].textContent);
+              awayScoreTotal = safeParseInt(totalHeaders[1].textContent);
           }
           
           const row0Cells = (scoreRows[0] as Element).querySelectorAll("td");
@@ -398,6 +512,9 @@ serve(async (req) => {
           periodScores["3p"] = parseSubRow(2);
           periodScores["ovt"] = parseSubRow(3);
           periodScores["pss"] = parseSubRow(4);
+        }
+        if (homeScoreTotal === null || awayScoreTotal === null) {
+          throw new Error('Official total score is not parseable');
         }
 
         // --- 3 Period 20:00 종료 감지 ---
@@ -422,7 +539,7 @@ serve(async (req) => {
           }
         }
         
-        const isGameEndStatus = gameStatus.toLowerCase().includes("game finished") || gameStatus.includes("試合終了");
+        const isGameEndStatus = isStatusFinished || gameStatus.toLowerCase().includes("game finished");
         if (isGameEndStatus) {
           gameStatus = "Game Finished"; 
         }
@@ -431,6 +548,9 @@ serve(async (req) => {
         const oldStatus = game.game_status ?? "";
         const oldHomeScore = game.home_alih_team_score ?? 0;
         const oldAwayScore = game.away_alih_team_score ?? 0;
+        if (homeScoreTotal < oldHomeScore || awayScoreTotal < oldAwayScore) {
+          throw new Error(`Refusing score regression ${oldHomeScore}-${oldAwayScore} -> ${homeScoreTotal}-${awayScoreTotal}`);
+        }
 
         const isLiveActive = !isGameEndStatus && (
             gameStatus === "Live" || 
@@ -443,34 +563,44 @@ serve(async (req) => {
         const wasNotLive = !oldStatus.includes("Live") && !oldStatus.includes("Period") && !oldStatus.includes("OVT");
         const isGameStart = wasNotLive && isLiveActive;
         const isGameEnd = (!oldStatus.includes("Finish") && isGameEndStatus);
+        const pushBeforePersistence = false;
 
         // 1. 경기 시작 알림
-        if (isGameStart) {
+        if (pushBeforePersistence && !observeOnly && livePushEnabled && isGameStart) {
           console.log(`[EVENT] Game Start Detected: Game ${game.game_no}`);
+          const eventKey = `${game.season}:${game.id}:start`;
           const homeTeamNames = await getTeamNames(game.home_alih_team_id);
           const awayTeamNames = await getTeamNames(game.away_alih_team_id);
           
-          if (homeTeamNames && awayTeamNames) {
+          const eventId = homeTeamNames && awayTeamNames
+            ? await claimNotification(eventKey, 'game_start', game.id)
+            : null;
+          if (homeTeamNames && awayTeamNames && eventId) {
             await sendMatchNotification(
               game.home_alih_team_id,
               game.away_alih_team_id,
               'game_start',
               { homeTeam: homeTeamNames, awayTeam: awayTeamNames, venue: game.match_place },
-              `/schedule/${game.game_no}`
+              `/schedule/${game.game_no}?season=${encodeURIComponent(game.season)}`,
+              eventId
             );
           }
         }
 
         // 2. 득점 알림
-        if (isLiveActive || isGameEnd) { 
+        if (pushBeforePersistence && !observeOnly && livePushEnabled && (isLiveActive || isGameEnd)) {
           if (homeScoreTotal > oldHomeScore || awayScoreTotal > oldAwayScore) {
+            const eventKey = `${game.season}:${game.id}:goal:${homeScoreTotal}-${awayScoreTotal}`;
             const homeTeamNames = await getTeamNames(game.home_alih_team_id);
             const awayTeamNames = await getTeamNames(game.away_alih_team_id);
             const scoringTeamNames = homeScoreTotal > oldHomeScore ? homeTeamNames : awayTeamNames;
             
             console.log(`[EVENT] Goal Detected: Game ${game.game_no}`);
             
-            if (homeTeamNames && awayTeamNames && scoringTeamNames) {
+            const eventId = homeTeamNames && awayTeamNames && scoringTeamNames
+              ? await claimNotification(eventKey, 'goal', game.id)
+              : null;
+            if (homeTeamNames && awayTeamNames && scoringTeamNames && eventId) {
               await sendMatchNotification(
                 game.home_alih_team_id,
                 game.away_alih_team_id,
@@ -482,19 +612,24 @@ serve(async (req) => {
                   homeScore: homeScoreTotal,
                   awayScore: awayScoreTotal
                 },
-                `/schedule/${game.game_no}`
+                `/schedule/${game.game_no}?season=${encodeURIComponent(game.season)}`,
+                eventId
               );
             }
           }
         }
 
         // 3. 경기 종료 알림
-        if (isGameEnd) {
+        if (pushBeforePersistence && !observeOnly && livePushEnabled && isGameEnd) {
           console.log(`[EVENT] Game Finished Detected: Game ${game.game_no}`);
+          const eventKey = `${game.season}:${game.id}:end`;
           const homeTeamNames = await getTeamNames(game.home_alih_team_id);
           const awayTeamNames = await getTeamNames(game.away_alih_team_id);
           
-          if (homeTeamNames && awayTeamNames) {
+          const eventId = homeTeamNames && awayTeamNames
+            ? await claimNotification(eventKey, 'game_end', game.id)
+            : null;
+          if (homeTeamNames && awayTeamNames && eventId) {
             await sendMatchNotification(
               game.home_alih_team_id,
               game.away_alih_team_id,
@@ -505,7 +640,8 @@ serve(async (req) => {
                 homeScore: homeScoreTotal,
                 awayScore: awayScoreTotal
               },
-              `/schedule/${game.game_no}`
+              `/schedule/${game.game_no}?season=${encodeURIComponent(game.season)}`,
+              eventId
             );
           }
         }
@@ -580,6 +716,12 @@ serve(async (req) => {
           polled_at: new Date().toISOString()
         };
 
+        if (observeOnly || !liveWriteEnabled) {
+          console.log(`[OBSERVE] Game ${game.id}: ${homeScoreTotal}-${awayScoreTotal} (${gameStatus})`);
+          results.push({ id: game.id, status: 'Observed', score: `${homeScoreTotal}-${awayScoreTotal} (${gameStatus})` });
+          continue;
+        }
+
         const { error: updateError } = await supabase
           .from("alih_schedule")
           .update({
@@ -595,6 +737,26 @@ serve(async (req) => {
         } else {
           console.log(`[DB] Updated Game ${game.id} Successfully.`);
           results.push({ id: game.id, status: "Updated", score: `${homeScoreTotal}-${awayScoreTotal} (${gameStatus})` });
+
+          if (!observeOnly && livePushEnabled) {
+            const homeTeamNames = await getTeamNames(game.home_alih_team_id);
+            const awayTeamNames = await getTeamNames(game.away_alih_team_id);
+            const path = `/schedule/${game.game_no}?season=${encodeURIComponent(game.season)}`;
+            if (isGameStart && homeTeamNames && awayTeamNames) {
+              const eventId = await claimNotification(`${game.season}:${game.id}:start`, 'game_start', game.id);
+              if (eventId) await sendMatchNotification(game.home_alih_team_id, game.away_alih_team_id, 'game_start', { homeTeam: homeTeamNames, awayTeam: awayTeamNames, venue: game.match_place }, path, eventId);
+            }
+            if ((homeScoreTotal > oldHomeScore || awayScoreTotal > oldAwayScore) && homeTeamNames && awayTeamNames) {
+              const scoreChangeIsAmbiguous = homeScoreTotal > oldHomeScore && awayScoreTotal > oldAwayScore;
+              const scoringTeam = homeScoreTotal > oldHomeScore ? homeTeamNames : awayTeamNames;
+              const eventId = await claimNotification(`${game.season}:${game.id}:score:${homeScoreTotal}-${awayScoreTotal}`, scoreChangeIsAmbiguous ? 'score_change' : 'goal', game.id);
+              if (eventId) await sendMatchNotification(game.home_alih_team_id, game.away_alih_team_id, 'goal', { homeTeam: homeTeamNames, awayTeam: awayTeamNames, scoringTeam, homeScore: homeScoreTotal, awayScore: awayScoreTotal }, path, eventId);
+            }
+            if (isGameEnd && homeTeamNames && awayTeamNames) {
+              const eventId = await claimNotification(`${game.season}:${game.id}:end`, 'game_end', game.id);
+              if (eventId) await sendMatchNotification(game.home_alih_team_id, game.away_alih_team_id, 'game_end', { homeTeam: homeTeamNames, awayTeam: awayTeamNames, homeScore: homeScoreTotal, awayScore: awayScoreTotal }, path, eventId);
+            }
+          }
         }
       } catch (gameErr) {
         // [중요] 한 게임에서 에러가 나도 다른 게임은 계속 진행

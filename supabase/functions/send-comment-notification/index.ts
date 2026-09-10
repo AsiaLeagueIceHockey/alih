@@ -1,22 +1,24 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.80.0';
 import webPush from 'npm:web-push@3.6.7';
+import { corsHeaders, requireUser } from '../_shared/auth.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const retryFailedDeliveries = Deno.env.get('RETRY_FAILED_DELIVERIES') === 'true';
 
 serve(async (req: Request) => {
+  const headers = corsHeaders(req);
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers });
   }
 
   try {
-    const { commentId, entityType, entityId, authorId } = await req.json();
-
-    if (!commentId || !entityType || !entityId || !authorId) {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+    }
+    const caller = await requireUser(req);
+    const { commentId } = await req.json();
+    if (!commentId) {
       throw new Error('Missing required fields');
     }
 
@@ -44,6 +46,24 @@ serve(async (req: Request) => {
       console.error('Comment query error:', commentError);
       throw new Error('Comment not found');
     }
+    if (comment.user_id !== caller.id) throw new Error('Forbidden');
+
+    const entityType = comment.entity_type;
+    const entityId = comment.entity_id;
+    const authorId = comment.user_id;
+
+    const { data: eventId, error: claimError } = await supabaseAdmin.rpc('claim_notification_event', {
+      p_event_key: `comment:${comment.id}`,
+      p_event_type: 'comment',
+      p_schedule_id: entityType === 'game' ? entityId : null,
+      p_allow_retry: retryFailedDeliveries,
+    });
+    if (!eventId && !claimError) {
+      return new Response(JSON.stringify({ success: true, message: 'Already notified' }), {
+        headers: { ...headers, 'Content-Type': 'application/json' },
+      });
+    }
+    if (claimError) throw claimError;
 
     // 작성자 프로필 별도 조회
     const { data: authorProfile } = await supabaseAdmin
@@ -56,14 +76,16 @@ serve(async (req: Request) => {
 
     // 엔티티 정보 가져오기 (알림 메시지용)
     let entityName = '';
+    let entityPath = '/';
     if (entityType === 'game') {
       const { data: game } = await supabaseAdmin
         .from('alih_schedule')
-        .select('home_alih_team_id, away_alih_team_id')
+        .select('game_no, season, home_alih_team_id, away_alih_team_id')
         .eq('id', entityId)
         .single();
       
       if (game) {
+        entityPath = `/schedule/${game.game_no}?season=${encodeURIComponent(game.season)}`;
         const { data: teams } = await supabaseAdmin
           .from('alih_teams')
           .select('id, name')
@@ -82,6 +104,7 @@ serve(async (req: Request) => {
         .eq('id', entityId)
         .single();
       entityName = team?.name || '팀';
+      entityPath = `/team/${entityId}`;
     } else if (entityType === 'player') {
       const { data: player } = await supabaseAdmin
         .from('alih_players')
@@ -89,6 +112,7 @@ serve(async (req: Request) => {
         .eq('id', entityId)
         .single();
       entityName = player?.name || '선수';
+      entityPath = `/player/${entityId}`;
     }
 
     // 해당 엔티티에 댓글을 남긴 다른 사용자들 조회 (본인 제외)
@@ -108,16 +132,21 @@ serve(async (req: Request) => {
     const uniqueUserIds = [...new Set(otherCommenters?.map(c => c.user_id) || [])];
 
     if (uniqueUserIds.length === 0) {
+      await supabaseAdmin.rpc('complete_notification_event', {
+        p_event_id: eventId,
+        p_success_count: 0,
+        p_failure_count: 0,
+      });
       return new Response(
         JSON.stringify({ success: true, message: 'No users to notify' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...headers, 'Content-Type': 'application/json' } }
       );
     }
 
     // 알린 사용자들의 푸시 토큰 가져오기
     const { data: tokens, error: tokenError } = await supabaseAdmin
       .from('notification_tokens')
-      .select('token, platform')
+      .select('id, token, platform')
       .in('user_id', uniqueUserIds);
 
     if (tokenError) {
@@ -125,28 +154,25 @@ serve(async (req: Request) => {
     }
 
     if (!tokens || tokens.length === 0) {
+      await supabaseAdmin.rpc('complete_notification_event', {
+        p_event_id: eventId,
+        p_success_count: 0,
+        p_failure_count: 0,
+      });
       return new Response(
         JSON.stringify({ success: true, message: 'No tokens found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...headers, 'Content-Type': 'application/json' } }
       );
     }
 
     // 알림 페이로드
-    const entityPath = entityType === 'game' 
-      ? `/schedule/${entityId}`
-      : entityType === 'team'
-        ? `/team/${entityId}`
-        : `/player/${entityId}`;
-
     const payload = JSON.stringify({
       title: `💬 ${authorNickname}님이 댓글을 남겼습니다`,
       body: entityName 
         ? `${entityName}에 새 댓글: "${comment.content.substring(0, 50)}${comment.content.length > 50 ? '...' : ''}"`
         : comment.content.substring(0, 80),
       icon: '/icon-192x192.png',
-      data: {
-        url: entityPath
-      }
+      url: entityPath
     });
 
     // 푸시 알림 전송
@@ -154,6 +180,13 @@ serve(async (req: Request) => {
     let failCount = 0;
 
     for (const tokenData of tokens) {
+      const { data: claimed, error: deliveryClaimError } = await supabaseAdmin.rpc('claim_notification_delivery', {
+        p_event_id: eventId,
+        p_token_id: tokenData.id,
+        p_allow_retry: retryFailedDeliveries,
+      });
+      if (deliveryClaimError) throw deliveryClaimError;
+      if (claimed !== true) continue;
       try {
         // 토큰이 string이면 파싱, 이미 객체면 그대로 사용
         const subscription = typeof tokenData.token === 'string' 
@@ -163,8 +196,14 @@ serve(async (req: Request) => {
           urgency: 'high',
           TTL: 60 * 60,
         });
+        await supabaseAdmin.rpc('complete_notification_delivery', {
+          p_event_id: eventId,
+          p_token_id: tokenData.id,
+          p_success: true,
+          p_error: null,
+        });
         successCount++;
-      } catch (error) {
+      } catch (error: any) {
         console.error('Push send error:', error);
         failCount++;
         
@@ -173,10 +212,22 @@ serve(async (req: Request) => {
           await supabaseAdmin
             .from('notification_tokens')
             .delete()
-            .eq('token', tokenData.token);
+            .eq('id', tokenData.id);
         }
+        await supabaseAdmin.rpc('complete_notification_delivery', {
+          p_event_id: eventId,
+          p_token_id: tokenData.id,
+          p_success: false,
+          p_error: String(error?.message || error).slice(0, 500),
+        });
       }
     }
+
+    await supabaseAdmin.rpc('complete_notification_event', {
+      p_event_id: eventId,
+      p_success_count: successCount,
+      p_failure_count: failCount,
+    });
 
     return new Response(
       JSON.stringify({ 
@@ -185,7 +236,7 @@ serve(async (req: Request) => {
         failed: failCount,
         totalRecipients: uniqueUserIds.length 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...headers, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
@@ -196,8 +247,8 @@ serve(async (req: Request) => {
         error: error instanceof Error ? error.message : 'Unknown error' 
       }),
       { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        status: error instanceof Error && error.message === 'Unauthorized' ? 401 : error instanceof Error && error.message === 'Forbidden' ? 403 : 400,
+        headers: { ...headers, 'Content-Type': 'application/json' }
       }
     );
   }

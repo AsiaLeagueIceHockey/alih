@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { externalSupabase } from '@/lib/supabase-external';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,9 +28,12 @@ interface AdminComment {
   created_at: string;
   user?: {
     nickname: string;
-    email: string;
   };
   slug?: string;
+  schedule?: {
+    game_no: number;
+    season: string;
+  };
 }
 
 const AdminComments = () => {
@@ -57,15 +59,15 @@ const AdminComments = () => {
 
       // 3. 프로필 조회
       const { data: profiles, error: profilesError } = await externalSupabase
-        .from('profiles')
-        .select('id, nickname, email')
+        .from('public_profiles')
+        .select('id, nickname')
         .in('id', userIds);
 
       if (profilesError) throw profilesError;
 
       // 4. 프로필 맵 생성
       const profileMap = new Map(
-        (profiles || []).map(p => [p.id, { nickname: p.nickname || '익명', email: p.email || '' }])
+        (profiles || []).map(p => [p.id, { nickname: p.nickname || '익명' }])
       );
 
       // 5. 선수 슬러그 조회 (선수 타입인 경우)
@@ -73,7 +75,7 @@ const AdminComments = () => {
         commentsData.filter(c => c.entity_type === 'player').map(c => c.entity_id)
       )];
 
-      let playerSlugMap = new Map<number, string>();
+      const playerSlugMap = new Map<number, string>();
       if (playerIds.length > 0) {
         const { data: players } = await externalSupabase
           .from('alih_players')
@@ -87,11 +89,27 @@ const AdminComments = () => {
         }
       }
 
+      const scheduleIds = [...new Set(
+        commentsData.filter(c => c.entity_type === 'game').map(c => c.entity_id)
+      )];
+      const scheduleMap = new Map<number, { game_no: number; season: string }>();
+      if (scheduleIds.length > 0) {
+        const { data: schedules, error: schedulesError } = await externalSupabase
+          .from('alih_schedule')
+          .select('id, game_no, season')
+          .in('id', scheduleIds);
+        if (schedulesError) throw schedulesError;
+        schedules?.forEach(schedule => {
+          scheduleMap.set(schedule.id, { game_no: schedule.game_no, season: schedule.season });
+        });
+      }
+
       // 6. 댓글에 유저 정보 및 엔티티 정보 추가
       return commentsData.map(comment => ({
         ...comment,
-        user: profileMap.get(comment.user_id) || { nickname: '익명', email: '' },
-        slug: comment.entity_type === 'player' ? playerSlugMap.get(comment.entity_id) : undefined
+        user: profileMap.get(comment.user_id) || { nickname: '익명' },
+        slug: comment.entity_type === 'player' ? playerSlugMap.get(comment.entity_id) : undefined,
+        schedule: comment.entity_type === 'game' ? scheduleMap.get(comment.entity_id) : undefined,
       })) as AdminComment[];
     },
     staleTime: 1000 * 30,
@@ -100,20 +118,10 @@ const AdminComments = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       // Edge Function으로 관리자 삭제 (service_role 사용)
-      const adminPin = import.meta.env.VITE_ADMIN_PIN;
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      const response = await fetch(`${supabaseUrl}/functions/v1/admin-delete-comment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-        },
-        body: JSON.stringify({ commentId: id, adminPin }),
+      const { data: result, error } = await externalSupabase.functions.invoke('admin-delete-comment', {
+        body: { commentId: id },
       });
-
-      const result = await response.json();
+      if (error) throw error;
       
       if (!result.success) {
         throw new Error(result.error || 'Delete failed');
@@ -150,9 +158,9 @@ const AdminComments = () => {
     }
   };
 
-  const getEntityLink = (type: string, id: number, slug?: string) => {
+  const getEntityLink = (type: string, id: number, slug?: string, schedule?: AdminComment['schedule']) => {
     switch (type) {
-      case 'game': return `/schedule/${id}`;
+      case 'game': return schedule ? `/schedule/${schedule.game_no}?season=${encodeURIComponent(schedule.season)}` : '#';
       case 'team': return `/team/${id}`;
       case 'player': return `/player/${slug || id}`;
       default: return '#';
@@ -160,7 +168,7 @@ const AdminComments = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -227,13 +235,13 @@ const AdminComments = () => {
                             {comment.user?.nickname || 'Unknown'}
                           </span>
                           <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                            {comment.user?.email}
+                            ID {comment.user_id.slice(0, 8)}…
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <a 
-                          href={getEntityLink(comment.entity_type, comment.entity_id, comment.slug)}
+                          href={getEntityLink(comment.entity_type, comment.entity_id, comment.slug, comment.schedule)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"
@@ -286,7 +294,7 @@ const AdminComments = () => {
           )}
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
 import { isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { getInstagramTheme } from "@/lib/instagram-theme";
+import { resolveSupportedSeason } from "@/lib/season-url";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -45,7 +46,7 @@ interface GoalData {
 }
 
 interface GameDetailData {
-  game_no: number;
+  schedule_id: number;
   home_roster: RosterPlayer[];
   away_roster: RosterPlayer[];
   goals: GoalData[];
@@ -54,16 +55,18 @@ interface GameDetailData {
 const InstagramGoals = () => {
   const [searchParams] = useSearchParams();
   const gameNo = searchParams.get('game_no');
+  const season = resolveSupportedSeason(searchParams.get('season'));
   const pageParam = searchParams.get('page');
   const currentPage = pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
 
   // 스케줄 데이터
   const { data: scheduleData, isLoading: scheduleLoading } = useQuery({
-    queryKey: ['instagram-goals-schedule', gameNo],
+    queryKey: ['instagram-goals-schedule', season, gameNo],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', season)
         .eq('game_no', gameNo)
         .maybeSingle();
       if (error) throw error;
@@ -88,17 +91,17 @@ const InstagramGoals = () => {
 
   // 경기 상세 (골/로스터)
   const { data: gameDetail, isLoading: detailLoading } = useQuery({
-    queryKey: ['instagram-goals-detail', gameNo],
+    queryKey: ['instagram-goals-detail', season, scheduleData?.id],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_game_details')
-        .select('game_no, home_roster, away_roster, goals')
-        .eq('game_no', gameNo)
+        .select('schedule_id, home_roster, away_roster, goals')
+        .eq('schedule_id', scheduleData?.id)
         .maybeSingle();
       if (error) throw error;
       return data as GameDetailData | null;
     },
-    enabled: !!gameNo,
+    enabled: !!scheduleData?.id,
   });
 
   const homeTeam = teamsData?.find(t => t.id === scheduleData?.home_alih_team_id);

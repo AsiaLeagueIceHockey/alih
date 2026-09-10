@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
 import { isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { getInstagramTheme } from "@/lib/instagram-theme";
+import { resolveSupportedSeason } from "@/lib/season-url";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -45,21 +46,23 @@ interface GameSummary {
 }
 
 interface GameDetailData {
-  game_no: number;
+  schedule_id: number;
   game_summary: GameSummary;
 }
 
 const InstagramScore = () => {
   const [searchParams] = useSearchParams();
   const gameNo = searchParams.get('game_no');
+  const season = resolveSupportedSeason(searchParams.get('season'));
 
   // 스케줄 데이터
   const { data: scheduleData, isLoading: scheduleLoading } = useQuery({
-    queryKey: ['instagram-schedule', gameNo],
+    queryKey: ['instagram-schedule', season, gameNo],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', season)
         .eq('game_no', gameNo)
         .maybeSingle();
       if (error) throw error;
@@ -84,17 +87,17 @@ const InstagramScore = () => {
 
   // 경기 상세 (피리어드별 스코어)
   const { data: gameDetail, isLoading: detailLoading } = useQuery({
-    queryKey: ['instagram-game-detail', gameNo],
+    queryKey: ['instagram-game-detail', season, scheduleData?.id],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_game_details')
-        .select('game_no, game_summary')
-        .eq('game_no', gameNo)
+        .select('schedule_id, game_summary')
+        .eq('schedule_id', scheduleData?.id)
         .maybeSingle();
       if (error) throw error;
       return data as GameDetailData | null;
     },
-    enabled: !!gameNo,
+    enabled: !!scheduleData?.id,
   });
 
   const homeTeam = teamsData?.find(t => t.id === scheduleData?.home_alih_team_id);

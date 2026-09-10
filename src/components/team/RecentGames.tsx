@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
+import { schedulePath } from "@/lib/season-url";
 
 interface TeamBasic {
   id: number;
@@ -26,9 +27,10 @@ interface RecentGamesProps {
   games: ScheduleGameRaw[];
   teams: TeamBasic[];
   teamId: number;
+  season: string;
 }
 
-const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
+const RecentGames = ({ games, teams, teamId, season }: RecentGamesProps) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
@@ -82,7 +84,7 @@ const RecentGames = ({ games, teams, teamId }: RecentGamesProps) => {
             return (
               <div
                 key={game.id}
-                onClick={() => navigate(`/schedule/${game.game_no}`)}
+                onClick={() => navigate(schedulePath(game.game_no, season))}
                 className="py-3 flex items-center gap-2 cursor-pointer hover:bg-secondary/30 rounded-lg transition-colors first:pt-0 last:pb-0"
               >
                 {/* 날짜 */}

@@ -4,6 +4,12 @@
 
 🔗 **사이트**: [https://alhockey.fans](https://alhockey.fans)
 
+## 2026-27 운영 인수인계
+
+2026-27 시즌의 Supabase, Edge Function, Web Push, 배치 작업, migration 및 런칭 상태는 [`docs/2026-27-operations-audit.md`](docs/2026-27-operations-audit.md)를 기준으로 관리합니다. 시즌 운영이나 production 데이터 작업을 시작하기 전에 반드시 이 문서를 먼저 확인하세요.
+
+현재 미완료 작업을 GPT-5.6 Terra로 이어서 실행할 때는 [`.omx/plans/2026-27-terra-execution-plan.md`](.omx/plans/2026-27-terra-execution-plan.md)를 사용합니다.
+
 ## 주요 기능
 
 - 🏒 **경기 일정/결과**: 월별/팀별 필터링, 실시간 스코어 업데이트

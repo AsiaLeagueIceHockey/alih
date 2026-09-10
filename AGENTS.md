@@ -1,3 +1,9 @@
+# Agent handoff entry point
+
+Before changing season data, Supabase schema, Edge Functions, Web Push, cron jobs, or the sibling `alih-batch` pipeline, read `docs/2026-27-operations-audit.md` completely. It is the source of truth for the verified production snapshot, unapplied migrations, launch gates, credential setup, and rollback. Source files in this repository do not prove that a migration or function is deployed.
+
+For the unfinished 2026-27 launch, follow `.omx/plans/2026-27-terra-execution-plan.md` phase by phase. It records the current dirty-worktree hazards, GPT-5.6 Terra handoff prompt, verification gates, production delivery sequence, first-game canary, and stop conditions.
+
 # Agent Work Summary - Player Card Feature
 
 ## Completed Tasks
@@ -75,4 +81,3 @@
 4.  **Documentation & Diagnostic Scripts**:
     -   Created `sql/v10_cron_schedule_management.sql` containing the optimization queries and commented instructions on how to re-schedule `live-game` (`* * * * *` via `net.http_post`) when the next season begins.
     -   Created `scripts/check_health.cjs` (`node scripts/check_health.cjs`) to quickly diagnose Supabase connectivity, latency, and status directly from the terminal.
-

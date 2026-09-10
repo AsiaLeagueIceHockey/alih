@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2, Trophy, Target } from "lucide-react";
+import { resolveSupportedSeason } from "@/lib/season-url";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -27,15 +28,17 @@ interface Team {
 const InstagramWeeklyStats = () => {
   const [searchParams] = useSearchParams();
   const type = searchParams.get('type') || 'goals'; // 'goals' or 'assists'
+  const season = resolveSupportedSeason(searchParams.get('season'));
   const isGoals = type === 'goals';
 
   // 전체 선수 데이터
   const { data: players, isLoading: playersLoading } = useQuery({
-    queryKey: ['instagram-weekly-players'],
+    queryKey: ['instagram-weekly-players', season],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*')
+        .eq('season', season)
         .order('points', { ascending: false });
       if (error) throw error;
       return data as Player[];

@@ -129,14 +129,13 @@ const TeamDetail = () => {
   const { data: gameDetails } = useQuery({
     queryKey: ['team-game-details', teamId, selectedSeason],
     queryFn: async () => {
-      // 팀의 완료된 경기 game_no 목록
-      const gameNos = allFinishedGames?.map(g => g.game_no) || [];
-      if (gameNos.length === 0) return [];
+      const scheduleIds = allFinishedGames?.map(g => g.id) || [];
+      if (scheduleIds.length === 0) return [];
 
       const { data, error } = await externalSupabase
         .from('alih_game_details')
-        .select('game_no, goals')
-        .in('game_no', gameNos);
+        .select('schedule_id, goals')
+        .in('schedule_id', scheduleIds);
 
       if (error) throw error;
       return data || [];
@@ -213,7 +212,7 @@ const TeamDetail = () => {
     const periodGoals = { p1: 0, p2: 0, p3: 0, ot: 0 };
 
     gameDetails.forEach((detail) => {
-      const game = allFinishedGames.find(g => g.game_no === detail.game_no);
+      const game = allFinishedGames.find(g => g.id === detail.schedule_id);
       if (!game || !detail.goals) return;
 
       const goals = detail.goals as Goal[];
@@ -312,7 +311,7 @@ const TeamDetail = () => {
           {team.team_info && <TeamInfoCard teamInfo={team.team_info} />}
 
           {/* 최근 경기 */}
-          <RecentGames games={recentGames || []} teams={teams} teamId={Number(teamId)} />
+          <RecentGames games={recentGames || []} teams={teams} teamId={Number(teamId)} season={selectedSeason} />
 
           {/* 댓글 섹션 */}
           <CommentSection entityType="team" entityId={Number(teamId)} />

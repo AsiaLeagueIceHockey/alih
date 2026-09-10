@@ -18,6 +18,21 @@ const TEAM_MAP = {
   '東北フリーブレイズ': 3
 };
 
+const VENUE_MAP = {
+  'nepiaアイスアリーナ': 'Tomakomai',
+  'HLアニャンアイスリンク': 'Anyang',
+  '日光霧降アイスアリーナ': 'Nikko',
+  'FLAT HACHINOHE': 'Hachinohe',
+  'KOSÉ新横浜スケートセンター': 'Shinyokohama',
+  '月寒体育館': 'Sapporo',
+  '尼崎スポーツの森 アイススケートリンク': 'Amagasaki',
+  '尼崎スポーツの森　アイススケートリンク': 'Amagasaki',
+  '神戸市立ポートアイランドスポーツセンター': 'Kobe',
+  'ダイドードリンコアイスアリーナ': 'Nishitokyo',
+  'ユタカアイスアリーナくしろ': 'Kushiro',
+  '小瀬スポーツ公園アイスアリーナ': 'Kofu',
+};
+
 async function scrapeMonth(year, month) {
   const url = `https://asiaicehockey.com/schedule/${year}/${month.toString().padStart(2, '0')}`;
   console.log(`Fetching ${url}...`);
@@ -69,17 +84,23 @@ async function scrapeMonth(year, month) {
              matchPlace = $table.find('tbody tr:nth-child(3) td:nth-child(2)').text().trim();
           }
 
-          if (homeTeamId && awayTeamId && time) {
+          const scoreHref = $table.closest('a').attr('href') || '';
+          const scoreIdMatch = scoreHref.match(/\/score\/(\d+)/);
+          const sourceScoreId = scoreIdMatch ? Number(scoreIdMatch[1]) : null;
+
+          if (homeTeamId && awayTeamId && time && sourceScoreId) {
             // Construct timestamp (JST = +09:00)
             const matchAt = `${fullDate}T${time}:00+09:00`;
             games.push({
               match_at: matchAt,
-              match_place: matchPlace,
+              match_place: VENUE_MAP[matchPlace] || matchPlace,
               home_alih_team_id: homeTeamId,
               away_alih_team_id: awayTeamId,
               game_status: 'Scheduled',
               season: targetSeason,
-              season_phase: 'regular'
+              season_phase: 'regular',
+              score_url: `https://asiaicehockey.com/score/${sourceScoreId}`,
+              source_score_id: sourceScoreId
             });
           }
         });
@@ -106,7 +127,8 @@ async function main() {
   console.log(`Found ${allGames.length} games.`);
 
   if (allGames.length > 0) {
-    // assign game_no (since source_game_no might be hard to get reliably without clicking detail)
+    // Internal game numbers are season-local. Live polling must use score_url,
+    // because official score IDs are not ordered by kickoff time.
     allGames = allGames.sort((a, b) => new Date(a.match_at) - new Date(b.match_at));
     allGames = allGames.map((g, i) => ({ ...g, game_no: i + 1 }));
 

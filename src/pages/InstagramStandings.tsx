@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { resolveSupportedSeason } from "@/lib/season-url";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -20,13 +22,17 @@ interface Standing {
 }
 
 const InstagramStandings = () => {
+  const [searchParams] = useSearchParams();
+  const season = resolveSupportedSeason(searchParams.get('season'));
+
   // 순위 데이터
   const { data: standings, isLoading } = useQuery({
-    queryKey: ['instagram-standings'],
+    queryKey: ['instagram-standings', season],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('*, team:alih_teams(name, logo)')
+        .eq('season', season)
         .order('rank', { ascending: true });
       if (error) throw error;
       return data as Standing[];

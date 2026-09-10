@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Loader2, Plus, Trash2, Video, Eye, EyeOff, ExternalLink } from 'lucide-react';
@@ -147,7 +146,7 @@ const AdminVideos = () => {
   const thumbnailPreview = formYoutubeUrl ? getYoutubeThumbnail(formYoutubeUrl) : null;
 
   return (
-    <AdminLayout>
+    <>
       <SEO
         title="영상 관리 - Admin"
         description="영상 콘텐츠 관리 페이지"
@@ -389,7 +388,7 @@ const AdminVideos = () => {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

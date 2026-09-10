@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { getLocalizedTeamName } from '@/hooks/useLocalizedTeamName';
 
 interface CheerBattleProps {
-  gameNo: number | string;
+  scheduleId: number;
   homeTeam: {
     id: number;
     name: string;
@@ -32,8 +32,8 @@ interface Particle {
   y: number;
 }
 
-const CheerBattle = ({ gameNo, homeTeam, awayTeam, isLive = false }: CheerBattleProps) => {
-  const { homeCheers, awayCheers, homePercentage, awayPercentage, addCheer } = useCheers(gameNo);
+const CheerBattle = ({ scheduleId, homeTeam, awayTeam, isLive = false }: CheerBattleProps) => {
+  const { homeCheers, awayCheers, homePercentage, awayPercentage, addCheer } = useCheers(scheduleId);
   const [particles, setParticles] = useState<Particle[]>([]);
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;

@@ -21,6 +21,7 @@ import { ko, ja, enUS } from "date-fns/locale";
 import { CommentSection } from "@/components/comments";
 import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { useSeason } from "@/context/SeasonContext";
+import { schedulePath } from "@/lib/season-url";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -217,18 +218,18 @@ const GameDetail = () => {
 
   // 경기 상세 데이터 (완료된 경기만)
   const { data: gameDetail, isLoading: detailLoading } = useQuery({
-    queryKey: ['game-detail', gameNo],
+    queryKey: ['game-detail', scheduleData?.id],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_game_details')
         .select('*')
-        .eq('game_no', gameNo)
+        .eq('schedule_id', scheduleData?.id)
         .maybeSingle();
 
       if (error) throw error;
       return data as GameDetailData | null;
     },
-    enabled: !!gameNo && isCompleted,
+    enabled: !!scheduleData?.id && isCompleted,
   });
 
   // 맞대결 전적 가져오기 (미완료 경기 또는 종료됐지만 gameDetail이 없는 경우)
@@ -466,7 +467,7 @@ const GameDetail = () => {
           title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${isFinishedWithLiveData ? t('page.gameDetail.gameResult') : isInProgress ? t('page.gameDetail.liveGame') : t('page.gameDetail.gameInfo')} | ${t('seo.leagueName')}`}
           description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
           keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData?.match_place || ''}`}
-          path={`/schedule/${gameNo}`}
+          path={schedulePath(gameNo || '', selectedSeason)}
           structuredData={structuredData}
         />
 
@@ -631,7 +632,7 @@ const GameDetail = () => {
 
           {/* 응원 배틀 */}
           <CheerBattle
-            gameNo={gameNo || ''}
+            scheduleId={scheduleData.id}
             homeTeam={{ id: homeTeam.id, name: homeTeam.name, logo: homeTeam.logo }}
             awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
             isLive={isInProgress}
@@ -814,7 +815,7 @@ const GameDetail = () => {
                     <div
                       key={game.id}
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => navigate(`/schedule/${game.game_no}`)}
+                      onClick={() => navigate(schedulePath(game.game_no, selectedSeason))}
                     >
                       <div className="text-sm text-muted-foreground">
                         {format(gameDate, 'M/d', { locale: getDateLocale() })}
@@ -963,7 +964,7 @@ const GameDetail = () => {
         title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${t('page.gameDetail.gameResult')} | ${t('seo.leagueName')}`}
         description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
         keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData?.match_place || ''}`}
-        path={`/schedule/${gameNo}`}
+        path={schedulePath(gameNo || '', selectedSeason)}
         structuredData={structuredData}
       />
       {/* 헤더 */}
@@ -1084,7 +1085,7 @@ const GameDetail = () => {
 
         {/* 응원 배틀 */}
         <CheerBattle
-          gameNo={gameNo || ''}
+          scheduleId={scheduleData.id}
           homeTeam={{ id: homeTeam.id, name: homeTeam.name, logo: homeTeam.logo }}
           awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
           isLive={false}

@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { CURRENT_SEASON, AVAILABLE_SEASONS } from '@/constants/season';
+import { resolveSupportedSeason } from '@/lib/season-url';
 
 export type Season = (typeof AVAILABLE_SEASONS)[number];
 
@@ -17,7 +18,12 @@ const SeasonContext = createContext<SeasonContextType>({
 
 export const SeasonProvider = ({ children }: { children: ReactNode }) => {
   const [selectedSeason, setSelectedSeasonState] = useState<Season>(() => {
-    // Restore from localStorage, but always default to CURRENT_SEASON
+    const linkedSeason = new URLSearchParams(window.location.search).get('season');
+    if (linkedSeason) {
+      return resolveSupportedSeason(linkedSeason);
+    }
+
+    // Restore from localStorage, but always default to CURRENT_SEASON.
     const stored = localStorage.getItem('selectedSeason');
     return stored && AVAILABLE_SEASONS.includes(stored as Season) ? stored as Season : CURRENT_SEASON;
   });
