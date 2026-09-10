@@ -56,3 +56,4 @@ Phase 2 and the static portion of Phase 3 were completed locally without product
 - Batch Python/Node syntax checks succeeded with explicit `TARGET_SEASON`.
 - Deno is not installed locally, so Edge Function runtime typecheck remains an explicit Phase 4 blocker; no function was deployed.
 - The user supplied one administrator bootstrap account on 2026-09-10. The email is intentionally not recorded here; resolve it only in the approved one-time production bootstrap step after the private admin migration exists.
+- Immutable prelaunch branches were pushed after static validation: `alih` `6b625bd` and `alih-batch` `cd240f1`. Review PRs exist, but neither branch has been merged to `main`.

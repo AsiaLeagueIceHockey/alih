@@ -35,6 +35,8 @@ Supabase project ref: `nvlpbdyqfzmlrjauvhxx` (`ASIALEAGUE`)
 
 Phase 1 baseline hash와 local worktree backup은 [`2026-27-phase1-baseline.md`](2026-27-phase1-baseline.md)에 기록했다. Phase 2/3의 새 migration·frontend·batch 변경은 로컬 정적 검증을 통과했지만 production 배포 전이며, Edge Function Deno runtime 검증은 로컬 Deno 부재로 아직 남아 있다.
 
+Prelaunch review branches were pushed without a `main` merge: [`alih PR #2`](https://github.com/AsiaLeagueIceHockey/alih/pull/2) and [`alih-batch PR #1`](https://github.com/AsiaLeagueIceHockey/alih-batch/pull/1). These PRs do not authorize migration execution, production deployment, cron activation, or fan Push.
+
 현재 사이트가 2026-27 일정을 보여주는 것과 2025-26 수준의 실시간 운영이 준비된 것은 서로 다른 상태다. 일정 표시는 가능하지만 실시간 점수, 웹 푸시, 경기 상세, 새 시즌 선수/순위 자동 갱신은 아직 production에서 활성화되지 않았다.
 
 ## 2. 저장소와 책임 범위
