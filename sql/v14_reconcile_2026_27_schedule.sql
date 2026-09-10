@@ -1,4 +1,3 @@
--- ARCHIVED DRAFT: do not apply. Use supabase/migrations/202609100001_schedule_source_expand.sql.
 -- Schedule seed for 2026-27
 -- Auto-generated from asiaicehockey.com
 
@@ -150,11 +149,16 @@ VALUES
    AND schedule.match_at = source.match_at::timestamptz
    AND schedule.home_alih_team_id = source.home_alih_team_id
    AND schedule.away_alih_team_id = source.away_alih_team_id
+), guard AS (
+  SELECT count(*) AS match_count, count(DISTINCT id) AS distinct_match_count
+  FROM matched
 )
 UPDATE public.alih_schedule AS schedule
 SET score_url = matched.score_url
-FROM matched
-WHERE schedule.id = matched.id;
+FROM matched CROSS JOIN guard
+WHERE schedule.id = matched.id
+  AND guard.match_count = 120
+  AND guard.distinct_match_count = 120;
 
 
 DO $$

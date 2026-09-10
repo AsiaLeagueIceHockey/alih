@@ -146,13 +146,15 @@ async function main() {
     sql += `   AND schedule.home_alih_team_id = source.home_alih_team_id\n`;
     sql += `   AND schedule.away_alih_team_id = source.away_alih_team_id\n`;
     sql += `), guard AS (\n`;
-    sql += `  SELECT CASE WHEN count(*) = 120 AND count(DISTINCT id) = 120 THEN 1 ELSE 1 / 0 END AS ok\n`;
+    sql += `  SELECT count(*) AS match_count, count(DISTINCT id) AS distinct_match_count\n`;
     sql += `  FROM matched\n`;
     sql += `)\n`;
     sql += `UPDATE public.alih_schedule AS schedule\n`;
     sql += `SET score_url = matched.score_url\n`;
     sql += `FROM matched CROSS JOIN guard\n`;
-    sql += `WHERE schedule.id = matched.id;\n\n`;
+    sql += `WHERE schedule.id = matched.id\n`;
+    sql += `  AND guard.match_count = 120\n`;
+    sql += `  AND guard.distinct_match_count = 120;\n\n`;
     sql += `\nDO $$\nBEGIN\n`;
     sql += `  IF (SELECT count(*) FROM public.alih_schedule WHERE season = '${targetSeason}' AND score_url IS NOT NULL) <> 120\n`;
     sql += `     OR (SELECT count(DISTINCT score_url) FROM public.alih_schedule WHERE season = '${targetSeason}') <> 120 THEN\n`;

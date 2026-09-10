@@ -1,4 +1,4 @@
--- Expand-only: bind the verified 2026-27 official score URLs to existing schedule rows.
+-- Schedule seed for 2026-27
 -- Auto-generated from asiaicehockey.com
 
 -- Additive source reconciliation for an already-created season.
@@ -150,13 +150,15 @@ VALUES
    AND schedule.home_alih_team_id = source.home_alih_team_id
    AND schedule.away_alih_team_id = source.away_alih_team_id
 ), guard AS (
-  SELECT CASE WHEN count(*) = 120 AND count(DISTINCT id) = 120 THEN 1 ELSE 1 / 0 END AS ok
+  SELECT count(*) AS match_count, count(DISTINCT id) AS distinct_match_count
   FROM matched
 )
 UPDATE public.alih_schedule AS schedule
 SET score_url = matched.score_url
 FROM matched CROSS JOIN guard
-WHERE schedule.id = matched.id;
+WHERE schedule.id = matched.id
+  AND guard.match_count = 120
+  AND guard.distinct_match_count = 120;
 
 
 DO $$
