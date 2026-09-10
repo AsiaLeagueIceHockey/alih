@@ -2,3 +2,21 @@ project_id = "nvlpbdyqfzmlrjauvhxx"
 
 [functions.generate-sitemap]
 verify_jwt = false
+
+[functions.admin-list-notification-users]
+verify_jwt = true
+
+[functions.admin-delete-comment]
+verify_jwt = true
+
+[functions.send-test-push]
+verify_jwt = true
+
+[functions.send-comment-notification]
+verify_jwt = true
+
+[functions.team-youtube]
+verify_jwt = false
+
+[functions.live-game]
+verify_jwt = false

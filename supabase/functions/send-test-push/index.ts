@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.3";
+import { corsHeaders, requireAdmin } from "../_shared/auth.ts";
 
 // Supabase 클라이언트 설정
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -25,13 +26,6 @@ if (vapidPublicKey && vapidPrivateKey) {
   }
 }
 
-// CORS headers
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
 interface TestPushRequest {
   user_id: string;
   title: string;
@@ -45,9 +39,10 @@ interface PushResult {
 }
 
 serve(async (req) => {
+  const headers = corsHeaders(req);
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
   try {
@@ -55,9 +50,10 @@ serve(async (req) => {
     if (req.method !== "POST") {
       return new Response(
         JSON.stringify({ error: "Method not allowed" }),
-        { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 405, headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
+    await requireAdmin(req);
 
     // Parse request body
     const { user_id, title, body }: TestPushRequest = await req.json();
@@ -66,14 +62,14 @@ serve(async (req) => {
     if (!user_id) {
       return new Response(
         JSON.stringify({ error: "user_id is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
 
     if (!title || !body) {
       return new Response(
         JSON.stringify({ error: "title and body are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
 
@@ -82,14 +78,14 @@ serve(async (req) => {
     // Get user's notification tokens
     const { data: tokens, error: tokenError } = await supabase
       .from("notification_tokens")
-      .select("token")
+      .select("id, token")
       .eq("user_id", user_id);
 
     if (tokenError) {
       console.error("[TEST-PUSH] Error fetching tokens:", tokenError);
       return new Response(
         JSON.stringify({ error: "Failed to fetch tokens", details: tokenError.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 500, headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
 
@@ -101,7 +97,7 @@ serve(async (req) => {
           sent_count: 0,
           failed_count: 0 
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
 
@@ -116,29 +112,35 @@ serve(async (req) => {
     });
 
     // Send notifications
-    const notifications = tokens.map((t) => {
+    const notifications = tokens.map(async (t) => {
       let subscription = t.token;
       if (typeof subscription === "string") {
         try {
           subscription = JSON.parse(subscription);
         } catch {
-          return Promise.reject({ message: "Invalid JSON token" });
+          return { endpoint: "invalid", status: "rejected" as const, reason: "Invalid JSON token" };
         }
       }
       
-      return webpush.sendNotification(subscription, notificationPayload, {
+      try {
+        await webpush.sendNotification(subscription, notificationPayload, {
           urgency: 'high',
           TTL: 60 * 60,
-        })
-        .then(() => ({ 
+        });
+        return {
           endpoint: subscription.endpoint || "unknown",
           status: "fulfilled" as const
-        }))
-        .catch((err: any) => ({ 
+        };
+      } catch (err: any) {
+        if (err?.statusCode === 404 || err?.statusCode === 410) {
+          await supabase.from('notification_tokens').delete().eq('id', t.id);
+        }
+        return {
           endpoint: subscription.endpoint || "unknown",
           status: "rejected" as const,
           reason: err.message || String(err)
-        }));
+        };
+      }
     });
 
     const results = await Promise.all(notifications);
@@ -156,14 +158,14 @@ serve(async (req) => {
         details: results,
         message: `${successCount}개 기기로 발송 완료 (실패: ${failCount})`
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...headers, "Content-Type": "application/json" } }
     );
 
   } catch (err: any) {
     console.error("[TEST-PUSH] Error:", err);
     return new Response(
       JSON.stringify({ error: err.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: err?.message === 'Unauthorized' ? 401 : err?.message === 'Forbidden' ? 403 : 500, headers: { ...headers, "Content-Type": "application/json" } }
     );
   }
 });

@@ -50,7 +50,7 @@ export const useComments = ({ entityType, entityId }: UseCommentsOptions) => {
 
       // 3. 프로필 조회
       const { data: profiles, error: profilesError } = await externalSupabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, nickname')
         .in('id', userIds);
 

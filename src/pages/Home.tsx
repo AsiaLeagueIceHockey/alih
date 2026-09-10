@@ -21,6 +21,7 @@ import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { formatMatchDateTimeLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { useSeason } from "@/context/SeasonContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { schedulePath } from "@/lib/season-url";
 
 interface TeamStanding {
   rank: number;
@@ -322,7 +323,7 @@ const Home = () => {
                 <Card
                   key={game.id}
                   className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${getStageCardClass(game)}`}
-                  onClick={() => navigate(`/schedule/${game.game_no}`, {
+                  onClick={() => navigate(schedulePath(game.game_no, selectedSeason), {
                     state: {
                       homeTeam: getTeamById(game.home_alih_team_id),
                       awayTeam: getTeamById(game.away_alih_team_id),
@@ -415,7 +416,7 @@ const Home = () => {
           ) : nextGames.length === 1 ? (
             <Card
               className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${getStageCardClass(nextGames[0])}`}
-              onClick={() => navigate(`/schedule/${nextGames[0].game_no}`, {
+              onClick={() => navigate(schedulePath(nextGames[0].game_no, selectedSeason), {
                 state: {
                   homeTeam: getTeamById(nextGames[0].home_alih_team_id),
                   awayTeam: getTeamById(nextGames[0].away_alih_team_id),
@@ -492,7 +493,7 @@ const Home = () => {
                   <CarouselItem key={game.id}>
                     <Card
                       className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${getStageCardClass(game)}`}
-                      onClick={() => navigate(`/schedule/${game.game_no}`, {
+                      onClick={() => navigate(schedulePath(game.game_no, selectedSeason), {
                         state: {
                           homeTeam: getTeamById(game.home_alih_team_id),
                           awayTeam: getTeamById(game.away_alih_team_id),
@@ -596,7 +597,7 @@ const Home = () => {
           ) : recentGames.length === 1 ? (
             <Card
               className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate(`/schedule/${recentGames[0].game_no}`, {
+              onClick={() => navigate(schedulePath(recentGames[0].game_no, selectedSeason), {
                 state: {
                   homeTeam: getTeamById(recentGames[0].home_alih_team_id),
                   awayTeam: getTeamById(recentGames[0].away_alih_team_id),
@@ -649,7 +650,7 @@ const Home = () => {
                   <CarouselItem key={game.id}>
                     <Card
                       className="p-4 border-border cursor-pointer hover:border-primary/50 transition-colors"
-                      onClick={() => navigate(`/schedule/${game.game_no}`, {
+                      onClick={() => navigate(schedulePath(game.game_no, selectedSeason), {
                         state: {
                           homeTeam: getTeamById(game.home_alih_team_id),
                           awayTeam: getTeamById(game.away_alih_team_id),

@@ -5,6 +5,7 @@ import { Loader2, Calendar, MapPin, Clock } from "lucide-react";
 import { AlihTeam } from "@/hooks/useTeams";
 import { isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { getInstagramTheme } from "@/lib/instagram-theme";
+import { resolveSupportedSeason } from "@/lib/season-url";
 
 const externalSupabase = createClient(
   'https://nvlpbdyqfzmlrjauvhxx.supabase.co',
@@ -33,14 +34,16 @@ interface StandingData {
 const InstagramPreview = () => {
   const [searchParams] = useSearchParams();
   const gameNo = searchParams.get('game_no');
+  const season = resolveSupportedSeason(searchParams.get('season'));
 
   // 기준 경기 데이터
   const { data: baseGame, isLoading: baseLoading } = useQuery({
-    queryKey: ['instagram-preview-base', gameNo],
+    queryKey: ['instagram-preview-base', season, gameNo],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', season)
         .eq('game_no', gameNo)
         .maybeSingle();
       if (error) throw error;
@@ -65,11 +68,12 @@ const InstagramPreview = () => {
 
   // 순위 정보
   const { data: standingsData, isLoading: standingsLoading } = useQuery({
-    queryKey: ['instagram-preview-standings'],
+    queryKey: ['instagram-preview-standings', season],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_standings')
         .select('rank, team_id')
+        .eq('season', season)
         .order('rank', { ascending: true });
       if (error) throw error;
       return data as StandingData[];
@@ -79,7 +83,7 @@ const InstagramPreview = () => {
 
   // 시리즈 경기들 (match_at 기준 ±3일, 같은 두 팀)
   const { data: seriesGames, isLoading: seriesLoading } = useQuery({
-    queryKey: ['instagram-preview-series', baseGame?.id, baseGame?.match_at],
+    queryKey: ['instagram-preview-series', season, baseGame?.id, baseGame?.match_at],
     queryFn: async () => {
       if (!baseGame) return [];
       
@@ -92,6 +96,7 @@ const InstagramPreview = () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', season)
         .or(`and(home_alih_team_id.eq.${baseGame.home_alih_team_id},away_alih_team_id.eq.${baseGame.away_alih_team_id}),and(home_alih_team_id.eq.${baseGame.away_alih_team_id},away_alih_team_id.eq.${baseGame.home_alih_team_id})`)
         .gte('match_at', startDate.toISOString())
         .lte('match_at', endDate.toISOString())
@@ -105,13 +110,14 @@ const InstagramPreview = () => {
 
   // 이번 시즌 과거 맞대결 (스코어가 있는 경기만)
   const { data: pastMatchups, isLoading: pastLoading } = useQuery({
-    queryKey: ['instagram-preview-past', baseGame?.home_alih_team_id, baseGame?.away_alih_team_id],
+    queryKey: ['instagram-preview-past', season, baseGame?.id, baseGame?.home_alih_team_id, baseGame?.away_alih_team_id],
     queryFn: async () => {
       if (!baseGame) return [];
       
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
+        .eq('season', season)
         .or(`and(home_alih_team_id.eq.${baseGame.home_alih_team_id},away_alih_team_id.eq.${baseGame.away_alih_team_id}),and(home_alih_team_id.eq.${baseGame.away_alih_team_id},away_alih_team_id.eq.${baseGame.home_alih_team_id})`)
         .not('home_alih_team_score', 'is', null)
         .order('match_at', { ascending: false });

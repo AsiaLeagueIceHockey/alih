@@ -2,19 +2,20 @@
 // 관리자용 알림 설정 사용자 목록 조회 (service_role key로 RLS 우회)
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, requireAdmin } from "../_shared/auth.ts";
 
 serve(async (req: Request) => {
+  const headers = corsHeaders(req);
   // CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers });
   }
 
   try {
+    if (!['GET', 'POST'].includes(req.method)) {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+    }
+    await requireAdmin(req);
     // Supabase 클라이언트 생성 (service_role 키로 RLS 우회)
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -43,7 +44,7 @@ serve(async (req: Request) => {
           users: [],
           message: "알림을 구독한 사용자가 없습니다"
         }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...headers, "Content-Type": "application/json" } }
       );
     }
 
@@ -95,7 +96,7 @@ serve(async (req: Request) => {
         total: users.length
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...headers, "Content-Type": "application/json" },
         status: 200
       }
     );
@@ -109,8 +110,8 @@ serve(async (req: Request) => {
         users: [] 
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500
+        headers: { ...headers, "Content-Type": "application/json" },
+        status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden' ? 403 : 500
       }
     );
   }

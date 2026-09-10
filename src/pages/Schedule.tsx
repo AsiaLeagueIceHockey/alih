@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
 import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame, getSeasonMonths } from "@/lib/game-utils";
 import { useSeason } from "@/context/SeasonContext";
+import { schedulePath } from "@/lib/season-url";
 
 const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
   const navigate = useNavigate();
@@ -252,7 +253,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                       : "border-border"
                   }`}
                   onClick={() => {
-                    navigate(`/schedule/${game.game_no}`, { 
+                    navigate(schedulePath(game.game_no, selectedSeason), {
                       state: { 
                         homeTeam, 
                         awayTeam,

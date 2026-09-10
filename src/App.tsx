@@ -243,17 +243,17 @@ const App = () => {
               {/* 어드민 페이지 */}
               <Route path="/admin/test-push" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <AdminPushTest />
+                  <AdminLayout><AdminPushTest /></AdminLayout>
                 </Suspense>
               } />
               <Route path="/admin/comments" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <AdminComments />
+                  <AdminLayout><AdminComments /></AdminLayout>
                 </Suspense>
               } />
               <Route path="/admin/videos" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <AdminVideos />
+                  <AdminLayout><AdminVideos /></AdminLayout>
                 </Suspense>
               } />
               <Route path="*" element={

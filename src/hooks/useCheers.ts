@@ -9,7 +9,7 @@ const supabase = createClient(
 
 interface CheerData {
   id: number;
-  game_no: number;
+  schedule_id: number;
   home_cheers: number;
   away_cheers: number;
 }
@@ -23,9 +23,8 @@ interface UseCheersReturn {
   addCheer: (team: 'home' | 'away') => void;
 }
 
-export function useCheers(gameNo: number | string): UseCheersReturn {
+export function useCheers(scheduleId: number): UseCheersReturn {
   const queryClient = useQueryClient();
-  const gameNoNum = typeof gameNo === 'string' ? parseInt(gameNo, 10) : gameNo;
   
   // 로컬 상태 (Optimistic UI용) - 기본값 100
   const [localHomeCheers, setLocalHomeCheers] = useState<number>(100);
@@ -39,12 +38,12 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
 
   // 초기 데이터 로드
   const { data, isLoading } = useQuery({
-    queryKey: ['cheers', gameNoNum],
+    queryKey: ['cheers', scheduleId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('alih_cheers')
         .select('*')
-        .eq('game_no', gameNoNum)
+        .eq('schedule_id', scheduleId)
         .maybeSingle();
 
       if (error) throw error;
@@ -75,8 +74,8 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
     try {
       // 홈팀 클릭이 있으면 전송
       if (homeCount > 0) {
-        await supabase.rpc('increment_cheers', {
-          p_game_no: gameNoNum,
+        await supabase.rpc('increment_schedule_cheers', {
+          p_schedule_id: scheduleId,
           p_team: 'home',
           p_count: homeCount,
         });
@@ -84,8 +83,8 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
       
       // 어웨이팀 클릭이 있으면 전송
       if (awayCount > 0) {
-        await supabase.rpc('increment_cheers', {
-          p_game_no: gameNoNum,
+        await supabase.rpc('increment_schedule_cheers', {
+          p_schedule_id: scheduleId,
           p_team: 'away',
           p_count: awayCount,
         });
@@ -96,7 +95,7 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
       setLocalHomeCheers(prev => prev - homeCount);
       setLocalAwayCheers(prev => prev - awayCount);
     }
-  }, [gameNoNum]);
+  }, [scheduleId]);
 
   // 응원 추가 (Optimistic + Debounced)
   const addCheer = useCallback((team: 'home' | 'away') => {
@@ -126,14 +125,14 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
   // Realtime 구독
   useEffect(() => {
     const channel = supabase
-      .channel(`cheers:${gameNoNum}`)
+      .channel(`cheers:${scheduleId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'alih_cheers',
-          filter: `game_no=eq.${gameNoNum}`,
+          filter: `schedule_id=eq.${scheduleId}`,
         },
         (payload) => {
           const newData = payload.new as CheerData;
@@ -142,7 +141,7 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
             setLocalHomeCheers(newData.home_cheers);
             setLocalAwayCheers(newData.away_cheers);
             // 캐시도 업데이트
-            queryClient.setQueryData(['cheers', gameNoNum], newData);
+            queryClient.setQueryData(['cheers', scheduleId], newData);
           }
         }
       )
@@ -158,7 +157,7 @@ export function useCheers(gameNo: number | string): UseCheersReturn {
       }
       channel.unsubscribe();
     };
-  }, [gameNoNum, queryClient, flushToServer]);
+  }, [scheduleId, queryClient, flushToServer]);
 
   // 퍼센티지 계산
   const total = localHomeCheers + localAwayCheers;

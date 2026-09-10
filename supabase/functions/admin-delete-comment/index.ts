@@ -1,31 +1,20 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.80.0';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, requireAdmin } from '../_shared/auth.ts';
 
 serve(async (req: Request) => {
+  const headers = corsHeaders(req);
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers });
   }
 
   try {
-    const { commentId, adminPin } = await req.json();
-
-    // 관리자 PIN 검증
-    const expectedPin = Deno.env.get('ADMIN_PIN');
-    if (!expectedPin || adminPin !== expectedPin) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
     }
+    await requireAdmin(req);
+    const { commentId } = await req.json();
 
     if (!commentId) {
       throw new Error('Missing commentId');
@@ -56,7 +45,7 @@ serve(async (req: Request) => {
         message: 'Comment deleted',
         deletedId: commentId 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...headers, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
@@ -67,8 +56,8 @@ serve(async (req: Request) => {
         error: error instanceof Error ? error.message : 'Unknown error' 
       }),
       { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        status: error instanceof Error && error.message === 'Unauthorized' ? 401 : error instanceof Error && error.message === 'Forbidden' ? 403 : 400,
+        headers: { ...headers, 'Content-Type': 'application/json' }
       }
     );
   }

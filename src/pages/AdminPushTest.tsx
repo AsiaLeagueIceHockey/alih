@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Send, Bell, User, CheckCircle2, XCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { externalSupabase } from '@/lib/supabase-external';
 
 interface NotificationUser {
   id: string;
@@ -28,7 +29,16 @@ interface SendResult {
   sent_count: number;
   failed_count: number;
   message: string;
-  details?: any[];
+  details?: unknown[];
+}
+
+interface PushFunctionResult {
+  success?: boolean;
+  sent_count?: number;
+  failed_count?: number;
+  message?: string;
+  error?: string;
+  details?: unknown[];
 }
 
 const AdminPushTest = () => {
@@ -48,18 +58,12 @@ const AdminPushTest = () => {
       setLoading(true);
       try {
         // Edge Function 호출 (service_role key로 RLS 우회)
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-list-notification-users`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            }
-          }
+        const { data, error } = await externalSupabase.functions.invoke(
+          'admin-list-notification-users',
+          { body: {} }
         );
-
-        const result = await response.json();
+        if (error) throw error;
+        const result = data as { success?: boolean; users?: NotificationUser[]; error?: string };
         
         if (!result.success) {
           console.error('Error fetching users:', result.error);
@@ -102,23 +106,18 @@ const AdminPushTest = () => {
     const selectedUser = users.find(u => u.id === selectedUserId);
     
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-test-push`,
+      const { data, error } = await externalSupabase.functions.invoke(
+        'send-test-push',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
+          body: {
             user_id: selectedUserId,
             title: title.trim(),
             body: body.trim()
-          })
+          }
         }
       );
-
-      const result = await response.json();
+      if (error) throw error;
+      const result = data as PushFunctionResult;
       
       setResults(prev => [{
         timestamp: new Date().toLocaleTimeString('ko-KR'),
@@ -132,7 +131,8 @@ const AdminPushTest = () => {
         details: result.details
       }, ...prev]);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Network error';
       setResults(prev => [{
         timestamp: new Date().toLocaleTimeString('ko-KR'),
         user: selectedUser?.nickname || selectedUser?.email || selectedUserId,
@@ -141,7 +141,7 @@ const AdminPushTest = () => {
         success: false,
         sent_count: 0,
         failed_count: 0,
-        message: err.message || 'Network error'
+        message
       }, ...prev]);
     } finally {
       setSending(false);

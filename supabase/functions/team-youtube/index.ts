@@ -2,6 +2,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { requireCronOrAdmin } from '../_shared/auth.ts'
 
 console.log("[INIT] Batch Video Updater Initialized")
 
@@ -11,6 +12,10 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 serve(async (req) => {
   try {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 })
+    }
+    await requireCronOrAdmin(req)
     // 1. Supabase Admin Client 생성
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
@@ -31,6 +36,7 @@ serve(async (req) => {
         const ytUrl = `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${team.youtube_channel_id}&part=snippet,id&order=date&maxResults=5&type=video`
         
         const ytRes = await fetch(ytUrl)
+        if (!ytRes.ok) throw new Error(`YouTube API returned ${ytRes.status}`)
         const ytData = await ytRes.json()
 
         if (!ytData.items) {
