@@ -28,6 +28,8 @@
 
 적용된 production migration은 `popup49_schedule_source_reconciliation`과 `game_identity_contract`다. 후자는 legacy `game_no` unique를 제거하고 `schedule_id` unique/not-null 계약을 활성화했다. 일반 사용자 Push, reminder/start/score/end Push, live-game cron, GitHub Actions schedule은 **활성화하지 않았다**.
 
+canary 이후 frontend main `0bac708ba0b96a68f99057adbf4aefe65f125fd1`과 batch main `d6657cb58e489cc266ca135e443d50664ea26376`에 popup 49 변경을 병합했다. production `/schedule/1?season=2026-27`에서 score/period/goals/penalties/attendance를 확인했고, 아직 season player record가 없는 선수명은 텍스트 fallback으로 표시되어 `/player/undefined` 링크가 0개임을 확인했다.
+
 현재 운영 상태는 **Prelaunch Ready의 게임시트 DB canary 통과**다. Push canary 수신자와 observe-only/live Push lifecycle 검증이 남아 있으므로 **First-game Validated** 또는 **Season Automation Enabled**로 보고하면 안 된다.
 
 ## 1. 결론
