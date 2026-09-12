@@ -9,6 +9,27 @@
 대상 시즌: `2026-27`
 공식 popup ID: `49`
 
+## 0. 2026-09-12 첫 경기 canary 실행 기록
+
+첫 경기 popup 49 Game No 1은 실제 완료 게임시트로 공개됐다. GitHub Actions manual canary는 immutable batch SHA `0dc01158c0c93a821c882c8a530e00462a05d617`에서 내부 경기 1만 대상으로 실행됐고, 다른 경기·Push·cron은 실행하지 않았다.
+
+| 항목 | 검증 결과 |
+|---|---|
+| 공식 경기 | RED EAGLES HOKKAIDO 4 : 3 NIKKO ICEBUCKS |
+| 관중 | 1,651 |
+| roster | 홈 21명, 원정 20명 |
+| events | 득점 7개, 페널티 6개 |
+| 골리 | ONODA Takuto 29 saves / FUKUFUJI Yutaka 31 saves |
+| production detail | `schedule_id=686` 한 건만 생성 |
+| production score/status | 4:3, `Game Finished` |
+| source mapping | 120/120, 재실행 dry-run 변경 0 |
+| 2025-26 보존 | schedule 129, detail 129, player 143, standings 6, cheers 62 및 season-scoped SHA-256 모두 동일 |
+| Game No 2 | 아직 404, `not_published`로 DB write 없이 종료 |
+
+적용된 production migration은 `popup49_schedule_source_reconciliation`과 `game_identity_contract`다. 후자는 legacy `game_no` unique를 제거하고 `schedule_id` unique/not-null 계약을 활성화했다. 일반 사용자 Push, reminder/start/score/end Push, live-game cron, GitHub Actions schedule은 **활성화하지 않았다**.
+
+현재 운영 상태는 **Prelaunch Ready의 게임시트 DB canary 통과**다. Push canary 수신자와 observe-only/live Push lifecycle 검증이 남아 있으므로 **First-game Validated** 또는 **Season Automation Enabled**로 보고하면 안 된다.
+
 ## 1. 결론
 
 [`https://www.alhockey.com/popup/49/scores.html`](https://www.alhockey.com/popup/49/scores.html)은 이제 `Asia League Ice Hockey 2026-2027 / Regular` 제목으로 정규시즌 120경기와 공식 Game No `1..120`을 제공한다. 2026-27 정규시즌 게임시트와 누적 통계의 authoritative source는 popup 49로 확정한다.

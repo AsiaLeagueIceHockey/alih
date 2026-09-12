@@ -27,17 +27,18 @@ popup 49 정규시즌 일정 120경기와 공식 Game No `1..120`이 공개됐�
 | 2025-26 일정 | 129경기, 모두 `Game Finished` | 반영됨 |
 | 2026-27 일정 | 120경기, 모두 `Scheduled` | 반영됨 |
 | 2026-27 공식 score URL | `26924`~`27043`, 총 120개 | DB 120개 매핑 완료 |
+| 2026-27 popup 49 source mapping | 공식 Game No `1..120` | DB 120개 매핑 완료 |
 | 2025-26 순위 | 6팀 최종 기록 | 반영됨 |
 | 2026-27 순위 | 6팀, 경기/승점 0 초기값 | 반영됨 |
 | 2025-26 선수 | 143명 | 반영됨 |
 | 2026-27 선수 | 0명 | 미수집 |
-| 경기 상세 | 129행, `schedule_id` 129개 backfill | 2025-26 데이터만 존재 |
+| 경기 상세 | 130행, `schedule_id` unique/not-null | 2025-26 129행 보존 + 2026-27 canary 1행 |
 | 웹 푸시 구독 | 조사 당시 token 24개, profile 91개 | 존재 |
 | `live-game` Edge Function | 로컬 소스는 있으나 배포 목록에는 없음 | 미배포 |
 | `live-game` pg_cron | 비시즌 IO 장애 후 해제됨 | 비활성 |
 | GitHub Actions | 뉴스 이외 정기 cron은 소스에서 주석 처리 | 대부분 수동 실행만 가능 |
 | 뉴스 workflow | 2026-06-03까지 성공 후 inactivity로 비활성 | 비활성 |
-| canonical migration | `202609100001`~`005` | 적용 완료, `006`~`009` 미적용 |
+| canonical migration | `202609100001`~`005`, `008` | 적용 완료, `006`·`007`·`009` 미적용 |
 | Supabase MCP | project-scoped read-only 연결 및 운영 audit 완료 | 연결됨 |
 | popup 49 조사 브랜치 | `codex/popup49-gamesheet-integration` | 문서/검증 작업 중 |
 
@@ -307,7 +308,8 @@ GitHub Actions secret 이름 `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API
 - `202609100003_player_season_expand.sql`: 선수/개인기록 season key와 2025-26 backfill. **적용 완료**.
 - `202609100004_predictions_schedule_fk_expand.sql`: predictions bigint schedule FK. **적용 완료**.
 - `202609100005_admin_notification_expand.sql`: private 관리자와 notification event/delivery 기반. **적용 완료**.
-- `202609100006_profile_video_contract.sql`~`202609100009_player_season_contract.sql`: 보안/identity contract. **미적용**.
+- `202609100008_game_identity_contract.sql`: 경기 상세/응원 `schedule_id` not-null, legacy game_no unique 제거, secured cheer realtime. **적용 완료**.
+- `202609100006_profile_video_contract.sql`, `202609100007_storage_contract.sql`, `202609100009_player_season_contract.sql`: **미적용**.
 - `sql/v14`~`v18`: 과거 초안. canonical migration을 대신해 적용하면 안 된다.
 
 Edge Function source가 존재하거나 main에 병합된 사실을 production 배포로 판단하면 안 된다. contract migration, Edge Function 배포, 제한 cron, Push canary의 완성 순서와 수정 요구사항은 Terra 실행 계획을 따른다.
