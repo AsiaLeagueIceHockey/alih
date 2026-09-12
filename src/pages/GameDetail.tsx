@@ -286,6 +286,17 @@ const GameDetail = () => {
     return player?.slug || player?.id; // Fallback to ID if slug missing
   };
 
+  const renderPlayerReference = (playerNo: number, teamId: number, className: string) => {
+    const playerName = getPlayerName(playerNo, teamId);
+    const playerSlug = getPlayerSlug(playerNo, teamId);
+    if (!playerSlug) return <span className={className}>{playerName}</span>;
+    return (
+      <Link to={`/player/${playerSlug}`} className={className}>
+        {playerName}
+      </Link>
+    );
+  };
+
   const getSituationLabel = (situation: string) => {
     if (situation === "+1") return t('stats.situation.ppg');
     if (situation === "-1") return t('stats.situation.shg');
@@ -1208,16 +1219,16 @@ const GameDetail = () => {
                           <Badge className="text-xs whitespace-nowrap">{getSituationLabel(goal.situation)}</Badge>
                         </div>
                         <p className="font-medium text-sm">
-                          {t('gameDetail.scorer')}: <Link to={`/player/${getPlayerSlug(goal.goal_no, goal.team_id)}`} className="hover:underline hover:text-primary text-primary transition-colors">{getPlayerName(goal.goal_no, goal.team_id)}</Link> (#{goal.goal_no})
+                          {t('gameDetail.scorer')}: {renderPlayerReference(goal.goal_no, goal.team_id, 'hover:underline hover:text-primary text-primary transition-colors')} (#{goal.goal_no})
                         </p>
                         {(goal.assist1_no || goal.assist2_no) && (
                           <p className="text-xs text-muted-foreground">
                             {t('gameDetail.assist')}:
                             {goal.assist1_no && (
-                              <> <Link to={`/player/${getPlayerSlug(goal.assist1_no, goal.team_id)}`} className="hover:underline hover:text-primary text-muted-foreground transition-colors">{getPlayerName(goal.assist1_no, goal.team_id)}</Link> (#{goal.assist1_no})</>
+                              <> {renderPlayerReference(goal.assist1_no, goal.team_id, 'hover:underline hover:text-primary text-muted-foreground transition-colors')} (#{goal.assist1_no})</>
                             )}
                             {goal.assist2_no && (
-                              <>, <Link to={`/player/${getPlayerSlug(goal.assist2_no, goal.team_id)}`} className="hover:underline hover:text-primary text-muted-foreground transition-colors">{getPlayerName(goal.assist2_no, goal.team_id)}</Link> (#{goal.assist2_no})</>
+                              <>, {renderPlayerReference(goal.assist2_no, goal.team_id, 'hover:underline hover:text-primary text-muted-foreground transition-colors')} (#{goal.assist2_no})</>
                             )}
                           </p>
                         )}
@@ -1257,9 +1268,7 @@ const GameDetail = () => {
                           <Badge variant="destructive" className="text-xs whitespace-nowrap">{penalty.minutes} min</Badge>
                         </div>
                         <p className="font-medium text-sm">
-                          <Link to={`/player/${getPlayerSlug(penalty.player_no, penalty.team_id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">
-                            {getPlayerName(penalty.player_no, penalty.team_id)}
-                          </Link> (#{penalty.player_no})
+                          {renderPlayerReference(penalty.player_no, penalty.team_id, 'hover:underline hover:text-primary text-foreground transition-colors')} (#{penalty.player_no})
                         </p>
                         <p className="text-xs text-muted-foreground">{t('gameDetail.offence')}: {penalty.offence}</p>
                       </div>
@@ -1307,9 +1316,7 @@ const GameDetail = () => {
                         <TableRow key={player.no}>
                           <TableCell className="font-medium whitespace-nowrap">#{player.no}</TableCell>
                           <TableCell className="whitespace-nowrap">
-                            <Link to={`/player/${getPlayerSlug(player.no, homeTeam.id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">
-                              {player.name}
-                            </Link>
+                            {renderPlayerReference(player.no, homeTeam.id, 'hover:underline hover:text-primary text-foreground transition-colors')}
                             {player.captain_asst && (
                               <Badge variant="secondary" className="ml-2 text-xs">
                                 {player.captain_asst}
@@ -1356,9 +1363,7 @@ const GameDetail = () => {
                         <TableRow key={player.no}>
                           <TableCell className="font-medium whitespace-nowrap">#{player.no}</TableCell>
                           <TableCell className="whitespace-nowrap">
-                            <Link to={`/player/${getPlayerSlug(player.no, awayTeam.id)}`} className="hover:underline hover:text-primary text-foreground transition-colors">
-                              {player.name}
-                            </Link>
+                            {renderPlayerReference(player.no, awayTeam.id, 'hover:underline hover:text-primary text-foreground transition-colors')}
                             {player.captain_asst && (
                               <Badge variant="secondary" className="ml-2 text-xs">
                                 {player.captain_asst}
