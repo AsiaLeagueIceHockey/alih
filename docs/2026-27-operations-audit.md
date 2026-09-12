@@ -31,7 +31,7 @@ popup 49 정규시즌 일정 120경기와 공식 Game No `1..120`이 공개됐�
 | 2025-26 순위 | 6팀 최종 기록 | 반영됨 |
 | 2026-27 순위 | 6팀, 경기/승점 0 초기값 | 반영됨 |
 | 2025-26 선수 | 143명 | 반영됨 |
-| 2026-27 선수 | 0명 | 미수집 |
+| 2026-27 선수 | 138명, 여섯 팀 공식 roster | 반영됨 |
 | 경기 상세 | 130행, `schedule_id` unique/not-null | 2025-26 129행 보존 + 2026-27 canary 1행 |
 | 웹 푸시 구독 | 조사 당시 token 24개, profile 91개 | 존재 |
 | `live-game` Edge Function | 로컬 소스는 있으나 배포 목록에는 없음 | 미배포 |
@@ -199,7 +199,7 @@ profiles.favorite_team_ids + preferred_language
 
 2025-26 운영 결과는 일정/결과 129경기, source 매핑 129/129, reminder 표시 43경기, YouTube live URL 59경기, 하이라이트 95경기, 경기 상세 129경기였다.
 
-2026-27은 정규시즌 120경기(2026-09-12~2027-03-14)와 공식 score URL 120개가 DB에 매핑됐다. popup 49의 공식 Game No source mapping, YouTube live/highlight/reminder/경기 상세는 조사 당시 0이다. 플레이오프는 공식 발표 후 append-only migration으로 추가한다.
+2026-27은 정규시즌 120경기(2026-09-12~2027-03-14)와 공식 score URL 120개가 DB에 매핑됐다. popup 49 공식 Game No source mapping 120개, 첫 경기 경기 상세 1개, 공식 여섯 팀 roster 138명과 `player-images/2026-27/` 사진 138개가 반영됐다. YouTube live/highlight/reminder는 아직 0이다. 플레이오프는 공식 발표 후 append-only migration으로 추가한다.
 
 ### 배포된 Edge Function
 
@@ -223,9 +223,10 @@ profiles.favorite_team_ids + preferred_language
 | 기능 | 파일/workflow | source | 2026-27 상태 |
 |---|---|---|---|
 | 일정 동기화 | `sync-current-schedule.js`, `sync-schedule.yaml` | `asiaicehockey.com/schedule` | dry-run 120경기 성공, 쓰기 비활성 |
-| 게임시트 | `scrapeSingleGame.js`, `parse-gamesheet.yaml` | legacy game sheet | 새 source mapping 미발표, 실행 금지 |
+| 게임시트 | `scrapeSingleGame.js`, `parse-gamesheet.yaml` | popup 49 game sheet | 첫 경기 canary 성공, scheduled cron 비활성 |
 | 순위 | `scrape-standings.py` | legacy standings | popup 47은 404, 49 후보는 빈 페이지 |
-| 선수/골리 | `scrape-players.py` | legacy individual/gksp | 새 데이터 대기 |
+| 팀 roster/사진 | `import-team-rosters.py`, `import-team-rosters.yaml` | 공식 여섯 팀 player 페이지 | 138명/138사진 import 완료, manual dry-run 기본 |
+| 선수/골리 누적 기록 | `scrape-players.py` | legacy individual/gksp | roster와 별개, 공식 누적 기록 source 대기 |
 | 개인 랭킹 | `scrape-stat.py` | legacy point_rank | 새 데이터 대기 |
 | YouTube live | `update-live-url.py` | 팀 YouTube | 시즌 필터 준비, cron 비활성 |
 | 하이라이트 | `scrape-highlights.py` | 공식 YouTube | 시즌 필터 준비, cron 비활성 |
@@ -233,6 +234,8 @@ profiles.favorite_team_ids + preferred_language
 | Instagram | `capture.py` | 내부 capture routes | 시즌 파라미터 준비, cron 비활성 |
 | Weekly | `capture_weekly.py` | 내부 weekly routes | 시즌 파라미터 준비, cron 비활성 |
 | X 콘텐츠 | `x_content.py` | Supabase + Groq | 시즌 파라미터 준비, cron 비활성 |
+
+공식 team roster import는 `import-team-rosters.py`와 `import-team-rosters.yaml`로 수동 실행한다. `TARGET_SEASON`은 필수이며 `DRY_RUN=true`가 기본이다. 2026-09-12에 main SHA `bcc622f`에서 dry-run 후 write canary를 실행했고, EAGLES 22 / FREEBLADES 22 / ICEBUCKS 23 / GRITS 25 / STARS 21 / HL ANYANG 25명, 총 138명의 season-scoped `alih_players`와 `player-images/2026-27/...` 138개를 등록했다. 기존 player card RPC는 새 player ID를 그대로 사용하므로 로그인 사용자는 선수 상세에서 카드를 발급할 수 있다.
 
 GitHub Actions secret 이름 `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `SLACK_WEBHOOK_URL`은 모두 존재한다.
 
