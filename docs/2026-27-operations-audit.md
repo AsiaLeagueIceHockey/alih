@@ -3,14 +3,22 @@
 > 이 문서는 `alih`와 형제 저장소 `alih-batch`, 운영 Supabase를 함께 다루는 기준 문서다.
 > 2026-27 시즌 관련 작업을 시작하는 agent는 코드를 수정하기 전에 이 문서를 먼저 읽어야 한다.
 > 현재 미완료 구현의 상세 실행 순서는 `.omx/plans/2026-27-terra-execution-plan.md`를 따른다.
+> 2026-09-12에 공개된 popup 49 공식 Game No·게임시트 source와 일정 정합성 보정은 [`2026-27-popup49-gamesheet-integration.md`](2026-27-popup49-gamesheet-integration.md)를 먼저 따른다.
 
-최종 조사일: 2026-09-09~10 KST
+최종 조사일: 2026-09-09~12 KST
 시즌 개막일: 2026-09-12
 운영 사이트: <https://alhockey.fans>
-공식 일정: <https://asiaicehockey.com/schedule>
+공식 일정/점수: <https://asiaicehockey.com/schedule>
+공식 Game No/게임시트/통계: <https://www.alhockey.com/popup/49/scores.html>
 Supabase project ref: `nvlpbdyqfzmlrjauvhxx` (`ASIALEAGUE`)
 
 ## 1. 가장 중요한 현재 상태
+
+### 2026-09-12 popup 49 source 갱신
+
+popup 49 정규시즌 일정 120경기와 공식 Game No `1..120`이 공개됐다. production의 경기 집합은 120대120으로 모두 대응하지만, 기존 시간순 내부 `game_no`와 공식 Game No가 54경기에서 다르므로 일괄 번호 치환하지 않는다. `alih_schedule.id`와 내부 `game_no`를 보존하고 `(source_popup_id, source_game_no)=(49, 공식 번호)`로 연결한다. 공식 source 기준 시작 시각 보정 5경기와 `Higashifushimi → Nishitokyo` 장소 보정 2경기도 확인됐다.
+
+첫 경기 전 조사 시점에는 Game Sheet 링크가 0개이고 `ogs1/ogs2`가 404였으며 standings/point rank/GK/PP-SH는 0경기 빈 표, individual은 template marker 상태였다. 실제 게임시트 parser와 누적 통계 writer는 source가 채워진 뒤 canary 검증 전까지 계속 차단한다. 상세 증거와 Terra 구현 순서는 popup 49 인계서를 따른다.
 
 이 문서에 적힌 코드나 migration이 존재한다는 사실은 production 적용을 뜻하지 않는다.
 
@@ -18,24 +26,24 @@ Supabase project ref: `nvlpbdyqfzmlrjauvhxx` (`ASIALEAGUE`)
 |---|---|---|
 | 2025-26 일정 | 129경기, 모두 `Game Finished` | 반영됨 |
 | 2026-27 일정 | 120경기, 모두 `Scheduled` | 반영됨 |
-| 2026-27 공식 score URL | `26924`~`27043`, 총 120개 | DB에는 아직 0개 매핑 |
+| 2026-27 공식 score URL | `26924`~`27043`, 총 120개 | DB 120개 매핑 완료 |
 | 2025-26 순위 | 6팀 최종 기록 | 반영됨 |
 | 2026-27 순위 | 6팀, 경기/승점 0 초기값 | 반영됨 |
 | 2025-26 선수 | 143명 | 반영됨 |
 | 2026-27 선수 | 0명 | 미수집 |
-| 경기 상세 | 129행, 현재 `game_no`만으로 연결 | 2025-26 데이터만 존재 |
+| 경기 상세 | 129행, `schedule_id` 129개 backfill | 2025-26 데이터만 존재 |
 | 웹 푸시 구독 | 조사 당시 token 24개, profile 91개 | 존재 |
 | `live-game` Edge Function | 로컬 소스는 있으나 배포 목록에는 없음 | 미배포 |
 | `live-game` pg_cron | 비시즌 IO 장애 후 해제됨 | 비활성 |
 | GitHub Actions | 뉴스 이외 정기 cron은 소스에서 주석 처리 | 대부분 수동 실행만 가능 |
 | 뉴스 workflow | 2026-06-03까지 성공 후 inactivity로 비활성 | 비활성 |
-| v14~v18 migration/보안 초안 | 아래 설명 참고 | **미적용·검토/재구성 필요** |
+| canonical migration | `202609100001`~`005` | 적용 완료, `006`~`009` 미적용 |
 | Supabase MCP | project-scoped read-only 연결 및 운영 audit 완료 | 연결됨 |
-| 현재 작업 브랜치 | `codex/2026-27-operations` | 미커밋/미푸시 상태에서 작성 |
+| popup 49 조사 브랜치 | `codex/popup49-gamesheet-integration` | 문서/검증 작업 중 |
 
-Phase 1 baseline hash와 local worktree backup은 [`2026-27-phase1-baseline.md`](2026-27-phase1-baseline.md)에 기록했다. Phase 2/3의 새 migration·frontend·batch 변경은 로컬 정적 검증을 통과했지만 production 배포 전이며, Edge Function Deno runtime 검증은 로컬 Deno 부재로 아직 남아 있다.
+Phase 1 baseline hash와 local worktree backup은 [`2026-27-phase1-baseline.md`](2026-27-phase1-baseline.md)에 기록했다. Canonical additive migration `202609100001`~`005`는 production 적용과 postflight hash 검증을 마쳤다. Contract migration `006`~`009`, Edge Function 배포와 live cron/Push 활성화는 아직 남아 있다.
 
-Prelaunch review branches were pushed without a `main` merge: [`alih PR #2`](https://github.com/AsiaLeagueIceHockey/alih/pull/2) and [`alih-batch PR #1`](https://github.com/AsiaLeagueIceHockey/alih-batch/pull/1). These PRs do not authorize migration execution, production deployment, cron activation, or fan Push.
+Prelaunch review branches [`alih PR #2`](https://github.com/AsiaLeagueIceHockey/alih/pull/2)와 [`alih-batch PR #1`](https://github.com/AsiaLeagueIceHockey/alih-batch/pull/1)은 main에 병합됐다. 병합 자체는 contract migration, Edge Function, cron 또는 fan Push 활성화를 의미하지 않는다.
 
 현재 사이트가 2026-27 일정을 보여주는 것과 2025-26 수준의 실시간 운영이 준비된 것은 서로 다른 상태다. 일정 표시는 가능하지만 실시간 점수, 웹 푸시, 경기 상세, 새 시즌 선수/순위 자동 갱신은 아직 production에서 활성화되지 않았다.
 
@@ -190,7 +198,7 @@ profiles.favorite_team_ids + preferred_language
 
 2025-26 운영 결과는 일정/결과 129경기, source 매핑 129/129, reminder 표시 43경기, YouTube live URL 59경기, 하이라이트 95경기, 경기 상세 129경기였다.
 
-2026-27은 정규시즌 120경기(2026-09-12~2027-03-14), 공식 score URL 120개가 확인됐지만 조사 당시 DB 매핑/YouTube live/highlight/reminder/경기 상세가 모두 0이다. 플레이오프는 공식 발표 후 append-only migration으로 추가한다.
+2026-27은 정규시즌 120경기(2026-09-12~2027-03-14)와 공식 score URL 120개가 DB에 매핑됐다. popup 49의 공식 Game No source mapping, YouTube live/highlight/reminder/경기 상세는 조사 당시 0이다. 플레이오프는 공식 발표 후 append-only migration으로 추가한다.
 
 ### 배포된 Edge Function
 
@@ -270,9 +278,9 @@ GitHub Actions secret 이름 `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API
 
 과거 `live-game`을 비시즌에도 매분 호출해 하루 1,440회 실행됐고 pg_net/cron 로그와 autovacuum 부하로 Disk IO/CPU가 고갈됐다. 경기 없는 시간에는 호출하지 않고, 경기 30분 전부터 종료 확인 시점까지만 polling해야 한다.
 
-## 8. 현재 브랜치에 준비된 변경
+## 8. 구현 및 적용 상태
 
-아래는 아직 production 미적용이다.
+아래 frontend/batch 코드는 main에 병합됐다. Production DB에는 canonical additive migration `001`~`005`만 적용됐고 Edge Function/cron/Push는 미배포·비활성이다.
 
 ### `alih`
 
@@ -294,13 +302,15 @@ GitHub Actions secret 이름 `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API
 
 ### migration
 
-- `v14_reconcile_2026_27_schedule.sql`: `score_url`과 공식 120경기 보정. 삭제 없이 점수/상태/reminder/highlight/YouTube URL 보존. **미적용**.
-- `v15_schedule_scoped_game_data.sql`: 경기 상세와 응원에 `schedule_id` 추가, 2025-26 backfill, 새 cheer RPC. MCP로 실제 schema/RLS 대조 후 적용. **미적용**.
-- `v16_season_scoped_player_imports.sql`: 개인 랭킹 season/backfill과 선수/랭킹 복합 key. MCP 대조 후 적용. **미적용**.
-- `v17_security_and_admin_hardening.sql`: 관리자/프로필/영상/Storage 보안 초안. 현재 `profiles.is_admin` 방식은 privilege escalation 위험이 있어 **적용 금지**, 별도 private admin table 방식으로 재작성한다.
-- `v18_notification_idempotency.sql`: 알림 event 초안. recipient delivery ledger와 crash 상태 처리가 없어 **적용 전 재작성**한다.
+- `202609100001_schedule_source_expand.sql`: `score_url` 120개와 `(season, game_no)` unique. **적용 완료**.
+- `202609100002_game_identity_expand.sql`: 경기 상세/응원 `schedule_id` backfill, FK/unique, 새 cheer RPC. **적용 완료**.
+- `202609100003_player_season_expand.sql`: 선수/개인기록 season key와 2025-26 backfill. **적용 완료**.
+- `202609100004_predictions_schedule_fk_expand.sql`: predictions bigint schedule FK. **적용 완료**.
+- `202609100005_admin_notification_expand.sql`: private 관리자와 notification event/delivery 기반. **적용 완료**.
+- `202609100006_profile_video_contract.sql`~`202609100009_player_season_contract.sql`: 보안/identity contract. **미적용**.
+- `sql/v14`~`v18`: 과거 초안. canonical migration을 대신해 적용하면 안 된다.
 
-현재 브랜치의 Edge Function/관리자 보안 코드는 수정 도중 중단된 상태이며 Deno typecheck, browser QA, production 검증 전이다. source가 존재한다고 완료 또는 배포된 것으로 판단하면 안 된다. 완성 순서와 수정 요구사항은 Terra 실행 계획을 따른다.
+Edge Function source가 존재하거나 main에 병합된 사실을 production 배포로 판단하면 안 된다. contract migration, Edge Function 배포, 제한 cron, Push canary의 완성 순서와 수정 요구사항은 Terra 실행 계획을 따른다.
 
 ## 9. Supabase MCP와 `SUPABASE_ACCESS_TOKEN`
 
@@ -353,10 +363,10 @@ Codex CLI 0.149.0에서 Supabase MCP 자동 OAuth 등록 시 Supabase가 요청 
 ### MCP audit 완료 결과
 
 - v13 `(season,slug)` unique index는 운영 DB에 존재한다.
-- v14~v18의 신규 column/table은 운영 DB에 없다.
-- 경기 상세 129/129, 응원 62/62가 2025-26 schedule로 누락 없이 backfill 가능하다.
-- 시즌별 schedule game_no 중복은 0이지만 `UNIQUE(season,game_no)` constraint는 없다.
-- `alih_predictions.schedule_id` 83개는 모두 schedule과 매칭하지만 bigint/FK가 없다.
+- canonical additive migration `001`~`005`의 column/table/constraint가 운영 DB에 존재한다.
+- 경기 상세 129/129와 응원 62/62가 2025-26 schedule에 `schedule_id`로 backfill됐다.
+- `UNIQUE(season,game_no)` constraint가 존재한다.
+- `alih_predictions.schedule_id` 83개는 bigint/FK로 schedule과 연결됐다.
 - `live-game` cron은 없고 team-youtube/cleanup cron 3개만 active다.
 - Realtime publication table은 0개다.
 - Edge Function deployed source와 local security 초안에 drift가 있다.
@@ -378,15 +388,15 @@ Auth provider/redirect와 세부 Function log는 실제 배포 직전 다시 확
 
 - [ ] 백업/rollback 지점 확인
 - [ ] v13 필요 여부 확정
-- [ ] v15 적용 후 2025-26 상세 129개와 cheers backfill 확인
-- [ ] v16 적용 후 2025-26 player stats backfill 확인
+- [x] migration 002 적용 후 2025-26 상세 129개와 cheers backfill 확인
+- [x] migration 003 적용 후 2025-26 player stats backfill 확인
 - [ ] frontend/batch를 새 schema와 함께 배포할 수 있는지 확인
 
 ### C. official schedule
 
-- [ ] v14 적용, 2026-27 120행/unique score URL 120개 확인
-- [ ] `26924`~`27043`, 첫 경기 `26924`/`26925` 확인
-- [ ] `live_url` 미변경 확인
+- [x] migration 001 적용, 2026-27 120행/unique score URL 120개 확인
+- [x] `26924`~`27043`, 첫 경기 `26924`/`26925` 확인
+- [x] `live_url` 미변경 확인
 - [ ] 1월 30·31일 `Nishitokyo` 확인
 
 ### D. application/batch

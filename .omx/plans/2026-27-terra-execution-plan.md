@@ -1,5 +1,7 @@
 # 2026-27 시즌 완전 런칭 — GPT-5.6 Terra 실행 계획
 
+> 2026-09-12 popup 49 공식 Game No·게임시트 source가 공개됐다. 기존 계획의 legacy source 대기 항목을 실행하기 전에 [`docs/2026-27-popup49-gamesheet-integration.md`](../../docs/2026-27-popup49-gamesheet-integration.md)를 처음부터 끝까지 읽고, 그 문서의 120↔120 mapping·5개 시각·2개 장소 보정과 first-game parser gate를 적용한다.
+
 작성 모델: GPT-5.6 Sol
 실행 권장 모델: `gpt-5.6-terra`, reasoning `high` 이상
 작성일: 2026-09-10 KST
@@ -177,9 +179,9 @@
 4. `live-game` parser는 HTML fixture 테스트가 없다. 배포 금지.
 5. 관리자/댓글 Edge Function 수정은 Deno typecheck되지 않았다.
 6. `send-comment-notification`은 v18 table을 전제로 한다. migration보다 먼저 배포하면 실패한다.
-7. `parse-gamesheet.yaml`은 여전히 unsafe legacy `sync-schedule.js`를 먼저 실행한다.
-8. `scrapeSingleGame.js`는 2026-27 공식 game-sheet source가 없어 현재 상세 데이터를 만들 수 없다.
-9. `sync-current-schedule.js`는 DB와 공식 일정을 array index로 연결한다. 일정 순서 변경 시 연쇄 오매핑 위험이 있다.
+7. `parse-gamesheet.yaml`은 unsafe writer를 제거한 대신 현재 의도적으로 항상 실패한다. popup 49 canary 검증 후에만 안전한 workflow로 교체한다.
+8. popup 49 일정과 공식 Game No는 공개됐지만 첫 경기 전에는 실제 2026-27 game sheet HTML이 404다. `scrapeSingleGame.js` writer는 실제 HTML fixture 검증 전까지 차단한다.
+9. `sync-current-schedule.js`의 modern score URL 120개 mapping은 exact event identity로 보정됐다. popup 49 source mapping은 별도 인계서의 120↔120 절차로 추가한다.
 10. batch writer들이 `TARGET_SEASON`을 기본 `2026-27`로 둔다. 필수 env로 바꿔야 한다.
 11. `capture.py` 일부 상세 query가 아직 `game_no` 기반이다.
 12. standings/player/stat scraper는 timeout, `raise_for_status`, source season 검증, 최소 row 검증, dry-run, nonzero exit가 부족하다.
@@ -606,20 +608,20 @@ fail-closed 규칙:
 
 `.github/workflows/parse-gamesheet.yaml`:
 
-- unsafe `node ./sync-schedule.js` step 제거.
+- 현재의 의도적 hard-fail step을 popup 49 canary workflow로 교체한다.
 - 현대 schedule sync가 필요하면 dry-run 전용으로 교체.
 - `scrapeSingleGame.js`에 TARGET_SEASON 전달.
-- 새로운 game-sheet source가 검증될 때까지 schedule cron과 parser cron을 주석 상태로 유지.
-- workflow_dispatch 시에도 source mapping 없으면 명확히 failure.
+- popup 49 실제 game sheet HTML이 검증될 때까지 schedule cron과 parser cron을 주석 상태로 유지.
+- workflow_dispatch 시에도 source mapping이나 완성 HTML이 없으면 `source_not_ready`로 종료하고 DB write는 하지 않는다.
 
 ### 5.4 2026-27 경기 상세 source discovery
 
-현재 공식 score page와 legacy popup 49/50을 확인한다.
+popup 49는 2026-27 정규시즌 120경기와 공식 Game No를 제공하는 것으로 확정됐다. 상세 mapping과 보정 목록은 popup 49 인계서를 따른다.
 
 - modern score page가 roster/goals/penalties/goalie/spectator를 제공하는지 finished 과거 page로 구조 분석.
-- 2026-27 첫 경기 후 legacy `popup/49` 또는 별도 sheet link 공개 여부 확인.
+- 2026-27 첫 경기 후 `popup/49/scores.html`의 Game Sheet href와 `/sheet/49/game/ogs1.html` 공개 여부 확인.
 - source가 없으면 데이터를 추측하지 않고 기능을 partial 상태로 표시.
-- source가 있으면 schedule.score_url 또는 별도 `game_sheet_url`을 저장.
+- source가 있으면 `source_popup_id=49`, `source_game_no=공식 Game No`로 연결한다. `score_url`에 game sheet URL을 넣지 않는다.
 - pure parser fixture를 작성한 뒤에만 writer 활성화.
 
 ### 5.5 standings/player/stat guards
