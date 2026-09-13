@@ -30,12 +30,21 @@ interface PlayerStats {
   id: number;
   slug?: string;
   name: string;
-  jersey_number: string;
+  jersey_number: number;
   team_id: number;
   goals: number;
   assists: number;
   points: number;
   team?: AlihTeam;
+}
+
+interface PlayerRankingSource {
+  team_id: number;
+  player_name: string;
+  jersey_number: number | null;
+  goals: number;
+  assists: number;
+  points: number;
 }
 
 interface AlihTeam {
@@ -64,101 +73,76 @@ const Standings = () => {
       return (data || []).map(standing => ({
         ...standing,
         team: standing.team as unknown as AlihTeam
-      })) as TeamStanding[];
+      })).sort((left, right) => {
+        const leftRank = left.rank > 0 ? left.rank : Number.MAX_SAFE_INTEGER;
+        const rightRank = right.rank > 0 ? right.rank : Number.MAX_SAFE_INTEGER;
+        return leftRank - rightRank || right.points - left.points || left.team_id - right.team_id;
+      }) as TeamStanding[];
     },
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
 
-  // 득점 순위 데이터
-  const { data: goalLeaders, isLoading: isLoadingGoals } = useQuery({
-    queryKey: ['goal-leaders', selectedSeason],
+  // Official point_rank records are independent from the season roster source.
+  // Join by team + jersey number so rank links target the correct season player.
+  const { data: playerRankings, isLoading: isLoadingPlayerRankings } = useQuery({
+    queryKey: ['official-player-rankings', selectedSeason],
     queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_players')
-        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
-        .eq('season', selectedSeason)
-        .order('goals', { ascending: false })
-        .order('assists', { ascending: false })
-        .order('points', { ascending: false });
-      
-      if (error) throw error;
-      
-      const players = (data || []).map(player => ({
-        ...player,
-        team: player.team as unknown as AlihTeam
-      })) as PlayerStats[];
-      
-      // 30등의 골 수를 찾고, 그 값 이상인 선수들만 반환
-      if (players.length > 30) {
-        const rank30Goals = players[29].goals;
-        return players.filter(p => p.goals >= rank30Goals);
-      }
-      return players;
+      const [{ data: rankings, error: rankingsError }, { data: players, error: playersError }] = await Promise.all([
+        externalSupabase
+          .from('alih_player_stats')
+          .select('team_id, player_name, jersey_number, goals, assists, points')
+          .eq('season', selectedSeason),
+        externalSupabase
+          .from('alih_players')
+          .select('id, slug, name, jersey_number, team_id, team:alih_teams(name, english_name, japanese_name, logo)')
+          .eq('season', selectedSeason),
+      ]);
+      if (rankingsError) throw rankingsError;
+      if (playersError) throw playersError;
+
+      const playersByTeamAndNumber = new Map((players || []).map((player) => [
+        `${player.team_id}:${player.jersey_number}`,
+        { ...player, team: player.team as unknown as AlihTeam },
+      ]));
+      return (rankings as PlayerRankingSource[] || []).flatMap((ranking) => {
+        const player = playersByTeamAndNumber.get(`${ranking.team_id}:${ranking.jersey_number}`);
+        if (!player) return [];
+        return [{
+          id: player.id,
+          slug: player.slug,
+          name: player.name || ranking.player_name,
+          jersey_number: player.jersey_number,
+          team_id: ranking.team_id,
+          goals: ranking.goals,
+          assists: ranking.assists,
+          points: ranking.points,
+          team: player.team,
+        } as PlayerStats];
+      });
     },
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 30,
     gcTime: 1000 * 60 * 60 * 24,
   });
 
-  // 도움 순위 데이터
-  const { data: assistLeaders, isLoading: isLoadingAssists } = useQuery({
-    queryKey: ['assist-leaders', selectedSeason],
-    queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_players')
-        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
-        .eq('season', selectedSeason)
-        .order('assists', { ascending: false })
-        .order('goals', { ascending: false })
-        .order('points', { ascending: false });
-      
-      if (error) throw error;
-      
-      const players = (data || []).map(player => ({
-        ...player,
-        team: player.team as unknown as AlihTeam
-      })) as PlayerStats[];
-      
-      // 30등의 도움 수를 찾고, 그 값 이상인 선수들만 반환
-      if (players.length > 30) {
-        const rank30Assists = players[29].assists;
-        return players.filter(p => p.assists >= rank30Assists);
-      }
-      return players;
-    },
-    staleTime: 1000 * 60 * 60,
-    gcTime: 1000 * 60 * 60 * 24,
-  });
+  const getLeaders = (statKey: 'goals' | 'assists' | 'points') => {
+    const players = [...(playerRankings || [])].sort((left, right) => (
+      right[statKey] - left[statKey]
+      || right.points - left.points
+      || right.goals - left.goals
+      || left.name.localeCompare(right.name)
+    ));
+    if (players.length <= 30) return players;
+    const cutoff = players[29][statKey];
+    return players.filter((player) => player[statKey] >= cutoff);
+  };
 
-  // 포인트 순위 데이터
-  const { data: pointLeaders, isLoading: isLoadingPoints } = useQuery({
-    queryKey: ['point-leaders', selectedSeason],
-    queryFn: async () => {
-      const { data, error } = await externalSupabase
-        .from('alih_players')
-        .select('*, team:alih_teams(name, english_name, japanese_name, logo)')
-        .eq('season', selectedSeason)
-        .order('points', { ascending: false })
-        .order('goals', { ascending: false })
-        .order('assists', { ascending: false });
-      
-      if (error) throw error;
-      
-      const players = (data || []).map(player => ({
-        ...player,
-        team: player.team as unknown as AlihTeam
-      })) as PlayerStats[];
-      
-      // 30등의 포인트를 찾고, 그 값 이상인 선수들만 반환
-      if (players.length > 30) {
-        const rank30Points = players[29].points;
-        return players.filter(p => p.points >= rank30Points);
-      }
-      return players;
-    },
-    staleTime: 1000 * 60 * 60,
-    gcTime: 1000 * 60 * 60 * 24,
-  });
+  const goalLeaders = getLeaders('goals');
+  const assistLeaders = getLeaders('assists');
+  const pointLeaders = getLeaders('points');
+  const isLoadingGoals = isLoadingPlayerRankings;
+  const isLoadingAssists = isLoadingPlayerRankings;
+  const isLoadingPoints = isLoadingPlayerRankings;
 
   // 순위 계산 함수 (동점자 처리)
   const calculateRank = (players: PlayerStats[], statKey: 'goals' | 'assists' | 'points') => {

@@ -130,7 +130,11 @@ const Home = () => {
       return (data || []).map(standing => ({
         ...standing,
         team: standing.team as unknown as AlihTeam
-      })) as TeamStanding[];
+      })).sort((left, right) => {
+        const leftRank = left.rank > 0 ? left.rank : Number.MAX_SAFE_INTEGER;
+        const rightRank = right.rank > 0 ? right.rank : Number.MAX_SAFE_INTEGER;
+        return leftRank - rightRank || right.points - left.points || left.team_id - right.team_id;
+      }) as TeamStanding[];
     },
     staleTime: 1000 * 60 * 30, // 30분 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
