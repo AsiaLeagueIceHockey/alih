@@ -29,7 +29,7 @@ popup 49 정규시즌 일정 120경기와 공식 Game No `1..120`이 공개됐�
 | 2026-27 공식 score URL | `26924`~`27043`, 총 120개 | DB 120개 매핑 완료 |
 | 2026-27 popup 49 source mapping | 공식 Game No `1..120` | DB 120개 매핑 완료 |
 | 2025-26 순위 | 6팀 최종 기록 | 반영됨 |
-| 2026-27 순위 | 6팀, 경기/승점 0 초기값 | 반영됨 |
+| 2026-27 순위 | 공식 2경기 기준 4 active-team 순위 + 2팀 0경기 | 반영됨 |
 | 2025-26 선수 | 143명 | 반영됨 |
 | 2026-27 선수 | 138명, 여섯 팀 공식 roster | 반영됨 |
 | 경기 상세 | 130행, `schedule_id` unique/not-null | 2025-26 129행 보존 + 2026-27 canary 1행 |
@@ -38,7 +38,7 @@ popup 49 정규시즌 일정 120경기와 공식 Game No `1..120`이 공개됐�
 | `live-game` pg_cron | 비시즌 IO 장애 후 해제됨 | 비활성 |
 | GitHub Actions | 뉴스 이외 정기 cron은 소스에서 주석 처리 | 대부분 수동 실행만 가능 |
 | 뉴스 workflow | 2026-06-03까지 성공 후 inactivity로 비활성 | 비활성 |
-| canonical migration | `202609100001`~`005`, `008` | 적용 완료, `006`·`007`·`009` 미적용 |
+| canonical migration | `202609100001`~`005`, `008`, `009` | 적용 완료, `006`·`007` 미적용 |
 | Supabase MCP | project-scoped read-only 연결 및 운영 audit 완료 | 연결됨 |
 | popup 49 조사 브랜치 | `codex/popup49-gamesheet-integration` | 문서/검증 작업 중 |
 
@@ -224,10 +224,10 @@ profiles.favorite_team_ids + preferred_language
 |---|---|---|---|
 | 일정 동기화 | `sync-current-schedule.js`, `sync-schedule.yaml` | `asiaicehockey.com/schedule` | dry-run 120경기 성공, 쓰기 비활성 |
 | 게임시트 | `scrapeSingleGame.js`, `parse-gamesheet.yaml` | popup 49 game sheet | 첫 경기 canary 성공, scheduled cron 비활성 |
-| 순위 | `scrape-standings.py` | legacy standings | popup 47은 404, 49 후보는 빈 페이지 |
+| 순위 | `scrape-standings.py`, `update-standings.yaml` | popup 49 standings | 4 active-team 행 manual canary 반영, unplayed 2팀 zero rows 보존 |
 | 팀 roster/사진 | `import-team-rosters.py`, `import-team-rosters.yaml` | 공식 여섯 팀 player 페이지 | 138명/138사진 import 완료, manual dry-run 기본 |
 | 선수/골리 누적 기록 | `scrape-players.py` | legacy individual/gksp | roster와 별개, 공식 누적 기록 source 대기 |
-| 개인 랭킹 | `scrape-stat.py` | legacy point_rank | 새 데이터 대기 |
+| 개인 랭킹 | `scrape-stat.py`, `update-stat.yaml` | popup 49 point_rank | 78행 manual canary 반영, roster `(team, jersey)` 검증 |
 | YouTube live | `update-live-url.py` | 팀 YouTube | 시즌 필터 준비, cron 비활성 |
 | 하이라이트 | `scrape-highlights.py` | 공식 YouTube | 시즌 필터 준비, cron 비활성 |
 | 뉴스 | `scrape-news.py`, `live-news.yaml` | Google News RSS | inactivity 비활성 |
