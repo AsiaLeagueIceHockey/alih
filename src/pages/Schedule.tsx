@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
-import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame, getSeasonMonths } from "@/lib/game-utils";
+import { formatMatchDateLabel, getGameDisplayStatus, isFinalSeriesGame, isPlayoffGame, getSeasonMonths } from "@/lib/game-utils";
 import { useSeason } from "@/context/SeasonContext";
 import { schedulePath } from "@/lib/season-url";
 
@@ -229,18 +229,12 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
               const homeTeam = getTeamById(game.home_alih_team_id);
               const awayTeam = getTeamById(game.away_alih_team_id);
               const matchDate = new Date(game.match_at);
-              const now = new Date();
               const hasScore = game.home_alih_team_score !== null && game.away_alih_team_score !== null;
               const hasHighlight = game.highlight_url && game.highlight_url.trim() !== '';
               const isExpanded = expandedGameId === game.id;
               
-              // 게임 상태 계산
-              const getGameStatus = () => {
-                if (game.game_status === 'Game Finished') return t('game.status.finished');
-                if (matchDate <= now) return t('game.status.inProgress');
-                return t('game.status.scheduled');
-              };
-              const gameStatus = getGameStatus();
+              const displayStatus = getGameDisplayStatus(game.match_at, game.game_status);
+              const gameStatus = t(`game.status.${displayStatus}`);
               
               return (
                 <Card 
@@ -279,8 +273,8 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                       </Button>
                     )}
                     <Badge 
-                      variant={gameStatus === t('game.status.scheduled') ? "default" : "outline"}
-                      className={gameStatus === t('game.status.scheduled') ? "bg-accent" : gameStatus === t('game.status.inProgress') ? "bg-destructive text-destructive-foreground animate-pulse" : ""}
+                      variant={displayStatus === "scheduled" ? "default" : "outline"}
+                      className={displayStatus === "scheduled" ? "bg-accent" : displayStatus === "inProgress" ? "bg-destructive text-destructive-foreground animate-pulse" : ""}
                     >
                       {gameStatus}
                     </Badge>
@@ -313,7 +307,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                       )}
                       <p className="text-sm font-medium mb-1">{getLocalizedTeamName(homeTeam, currentLang) || t('game.pending')}</p>
                       {hasScore && (
-                        <p className={`text-2xl font-bold ${gameStatus === t('game.status.inProgress') ? "text-destructive" : ""}`}>{game.home_alih_team_score}</p>
+                        <p className={`text-2xl font-bold ${displayStatus === "inProgress" ? "text-destructive" : ""}`}>{game.home_alih_team_score}</p>
                       )}
                     </div>
 
@@ -331,7 +325,7 @@ const Schedule = ({ hideHeader = false }: { hideHeader?: boolean }) => {
                       )}
                       <p className="text-sm font-medium mb-1">{getLocalizedTeamName(awayTeam, currentLang) || t('game.pending')}</p>
                       {hasScore && (
-                        <p className={`text-2xl font-bold ${gameStatus === t('game.status.inProgress') ? "text-destructive" : ""}`}>{game.away_alih_team_score}</p>
+                        <p className={`text-2xl font-bold ${displayStatus === "inProgress" ? "text-destructive" : ""}`}>{game.away_alih_team_score}</p>
                       )}
                     </div>
                   </div>

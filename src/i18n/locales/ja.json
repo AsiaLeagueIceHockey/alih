@@ -99,7 +99,8 @@
         "status": {
             "finished": "終了",
             "scheduled": "予定",
-            "inProgress": "進行中"
+            "inProgress": "進行中",
+            "resultPending": "結果確認中"
         },
         "vs": "VS",
         "games": "試合",
@@ -252,6 +253,7 @@
         "sog": "シュート数 (SOG)",
         "noLiveStream": "この試合はライブストリーミングが提供されていません",
         "liveStreamPending": "ライブストリーミングリンクは更新予定です",
+        "resultPending": "公式の試合結果を確認中です",
         "linkCopied": "リンクがクリップボードにコピーされました！",
         "noH2HRecord": "対戦記録がありません",
         "spectators": "観客数",

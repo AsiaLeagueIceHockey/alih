@@ -18,7 +18,7 @@ import SEO from "@/components/SEO";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { useTranslation } from "react-i18next";
 import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
-import { formatMatchDateTimeLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
+import { formatMatchDateTimeLabel, getGameDisplayStatus, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { useSeason } from "@/context/SeasonContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { schedulePath } from "@/lib/season-url";
@@ -171,11 +171,8 @@ const Home = () => {
   };
 
   const getGameStatus = (game: ScheduleGame) => {
-    if (game.game_status === 'Game Finished') return t('game.status.finished');
-    const matchDateObj = new Date(game.match_at);
-    const now = new Date();
-    if (matchDateObj <= now) return t('game.status.inProgress');
-    return t('game.status.scheduled');
+    const status = getGameDisplayStatus(game.match_at, game.game_status);
+    return t(`game.status.${status}`);
   };
 
   const isFinalGame = (game: ScheduleGame) =>
@@ -204,11 +201,9 @@ const Home = () => {
 
   const now = new Date();
 
-  // 진행 중인 경기: match_at <= now && game_status !== 'Game Finished'
-  const inProgressGames = schedules?.filter(game => {
-    const matchDate = new Date(game.match_at);
-    return matchDate <= now && game.game_status !== 'Game Finished';
-  }) || [];
+  const inProgressGames = schedules?.filter(
+    (game) => getGameDisplayStatus(game.match_at, game.game_status, now) === "inProgress"
+  ) || [];
 
   // 다음 경기: 미래의 가장 가까운 날짜의 모든 경기
   const nextGame = schedules?.find(game => new Date(game.match_at) > now);

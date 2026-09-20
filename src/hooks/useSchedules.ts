@@ -49,6 +49,7 @@ export interface ScheduleGame {
 
 import { CURRENT_SEASON } from "@/constants/season";
 import { useSeason } from "@/context/SeasonContext";
+import { getGameDisplayStatus } from "@/lib/game-utils";
 
 /**
  * 전체 일정 데이터를 가져오는 공통 훅
@@ -78,13 +79,20 @@ export const useSchedules = (season?: string) => {
       const data = query.state.data as ScheduleGame[] | undefined;
       if (!data) return false;
       const now = new Date();
-      const hasInProgress = data.some(game => {
-        const matchDate = new Date(game.match_at);
-        return matchDate <= now && game.game_status !== 'Game Finished';
-      });
-      return hasInProgress ? 30000 : false;
+      const statuses = data.map((game) => getGameDisplayStatus(game.match_at, game.game_status, now));
+
+      if (statuses.includes("inProgress")) return 30_000;
+      const hasRecentPendingResult = data.some((game, index) => (
+        statuses[index] === "resultPending"
+        && now.getTime() - new Date(game.match_at).getTime() <= 24 * 60 * 60 * 1000
+      ));
+      if (hasRecentPendingResult) return 2 * 60_000;
+      return false;
     },
     refetchIntervalInBackground: false,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 

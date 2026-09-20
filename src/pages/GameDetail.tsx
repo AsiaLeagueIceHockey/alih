@@ -19,7 +19,7 @@ import { getLocalizedTeamName } from "@/hooks/useLocalizedTeamName";
 import { format } from "date-fns";
 import { ko, ja, enUS } from "date-fns/locale";
 import { CommentSection } from "@/components/comments";
-import { formatMatchDateLabel, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
+import { formatMatchDateLabel, getGameDisplayStatus, isFinalSeriesGame, isPlayoffGame } from "@/lib/game-utils";
 import { useSeason } from "@/context/SeasonContext";
 import { schedulePath } from "@/lib/season-url";
 
@@ -335,15 +335,6 @@ const GameDetail = () => {
     return match?.[1] || null;
   };
 
-  // 게임 상태 계산
-  const getGameStatus = () => {
-    if (scheduleData?.game_status === 'Game Finished') return t('game.status.finished');
-    const matchDateObj = new Date(matchDate);
-    const now = new Date();
-    if (matchDateObj <= now) return t('game.status.inProgress');
-    return t('game.status.scheduled');
-  };
-
   const isPlayoff = isPlayoffGame(matchDate, scheduleData?.season_phase);
   const isFinal = !!scheduleData && isFinalSeriesGame(
     scheduleData.match_at,
@@ -376,7 +367,8 @@ const GameDetail = () => {
   }
 
   const matchDateObj = new Date(matchDate);
-  const gameStatus = getGameStatus();
+  const displayStatus = getGameDisplayStatus(matchDate, scheduleData.game_status);
+  const gameStatus = t(`game.status.${displayStatus}`);
 
   // SportsEvent structured data for SEO
   const getEventStatus = () => {
@@ -456,7 +448,8 @@ const GameDetail = () => {
     const awayTopPlayers = [...awayPlayers].filter(p => p.position !== 'G').sort((a, b) => b.points - a.points).slice(0, 5);
 
     const liveData = scheduleData.live_data;
-    const isInProgress = gameStatus === t('game.status.inProgress');
+    const isInProgress = displayStatus === "inProgress";
+    const isResultPending = displayStatus === "resultPending";
     const isFinishedWithLiveData = isCompleted && !gameDetail && liveData;
 
     // live_data events에서 선수 이름 가져오기 (alih_players에서 team_id와 jersey_number로 매칭)
@@ -605,7 +598,7 @@ const GameDetail = () => {
           <FlightAffiliateBanner homeTeam={homeTeam} />
 
           {/* 승부 예측 - 게임 전에만 여기에 표시 (경기 정보와 라이브 스트리밍 사이) */}
-          {!isInProgress && !isFinishedWithLiveData && (
+          {!isInProgress && !isFinishedWithLiveData && !isResultPending && (
             <MatchPrediction
               scheduleId={scheduleData.id}
               homeTeam={{ id: homeTeam.id, name: homeTeam.name, english_name: homeTeam.english_name, japanese_name: homeTeam.japanese_name, logo: homeTeam.logo }}
@@ -634,7 +627,9 @@ const GameDetail = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
-                {isInProgress
+                {isResultPending
+                  ? t('gameDetail.resultPending')
+                  : isInProgress
                   ? t('gameDetail.noLiveStream')
                   : t('gameDetail.liveStreamPending')}
               </div>
