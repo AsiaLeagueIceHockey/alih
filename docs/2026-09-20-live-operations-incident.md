@@ -20,6 +20,8 @@
 |---:|---|---:|---|
 | 690 | 2026-09-18 | ICEBUCKS 4-3 HL ANYANG | `Game Finished` |
 | 691 | 2026-09-19 | GRITS 0-4 FREEBLADES | `Game Finished` |
+| 692 | 2026-09-20 | ICEBUCKS 6-2 HL ANYANG | `Game Finished` |
+| 693 | 2026-09-20 | GRITS 3-4 FREEBLADES | `Game Finished` |
 
 ## 재발 방지
 
@@ -29,6 +31,16 @@
 - popup 49 결과 workflow는 KST 17:00, 18:00, 20:00, 22:00, 23:00에 공식 종료 경기만 반영한다.
 - 기존 점수와 공식 점수가 충돌하면 writer는 중단한다.
 
+## Push canary 복구 상태
+
+- `live-game` v1을 Production에 배포했다.
+- `CURRENT_SEASON=2026-27`, `REMINDER_ENABLED=true`, `CANARY_ONLY=true`로 제한했다.
+- `LIVE_WRITE_ENABLED=false`, `LIVE_PUSH_ENABLED=false`로 실시간 점수 쓰기와 경기 이벤트 Push는 계속 차단했다.
+- `alih-live-game-windowed` cron은 5분마다 실행하되 경기 30분 전부터 시작 후 4시간까지만 Edge Function을 호출한다.
+- cron 인증값은 `vault`의 `alih_live_game_cron_secret`을 사용한다.
+- 등록된 관리자 계정의 최신 웹 Push 구독 1개로 실제 전송을 검증해 성공 1건, 실패 0건을 확인했다.
+- 검증용 일회성 Edge Function은 전송 직후 삭제했다.
+
 ## 남은 운영 게이트
 
-30분 전 Push를 일반 사용자에게 다시 열기 전 승인된 canary 사용자 1명으로 테스트 Push, reminder 중복 방지, deep link, 만료 token 정리를 검증해야 한다. canary 승인 전에는 일반 fan-out을 활성화하지 않는다.
+일반 사용자 fan-out은 아직 활성화하지 않는다. 실제 예정 경기에서 canary reminder의 event/delivery ledger, deep link, `reminder_sent`, 만료 token 정리를 확인한 뒤 `CANARY_ONLY=false` 전환을 별도 승인한다.
