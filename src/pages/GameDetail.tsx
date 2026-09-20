@@ -164,6 +164,7 @@ const GameDetail = () => {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
   const { selectedSeason } = useSeason();
+  const hasLinkedSeason = new URLSearchParams(location.search).has('season');
   
   // Date locale helper
   const getDateLocale = () => {
@@ -186,10 +187,14 @@ const GameDetail = () => {
   } | null;
 
   // 스케줄 데이터 가져오기 (공통 훅 사용 - 캐시 일관성 보장)
-  const { data: scheduleData, isLoading: scheduleLoading } = useScheduleByGameNo(gameNo) as {
+  const { data: scheduleData, isLoading: scheduleLoading } = useScheduleByGameNo(
+    gameNo,
+    hasLinkedSeason ? selectedSeason : undefined,
+  ) as {
     data: ScheduleGame | undefined;
     isLoading: boolean;
   };
+  const gameSeason = scheduleData?.season ?? selectedSeason;
 
   // 팀 정보 가져오기
   const { data: teamsData, isLoading: teamsLoading } = useQuery({
@@ -234,13 +239,13 @@ const GameDetail = () => {
 
   // 맞대결 전적 가져오기 (미완료 경기 또는 종료됐지만 gameDetail이 없는 경우)
   const { data: headToHead, isLoading: h2hLoading } = useQuery({
-    queryKey: ['head-to-head', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id, gameNo, selectedSeason],
+    queryKey: ['head-to-head', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id, gameNo, gameSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_schedule')
         .select('*')
         .or(`and(home_alih_team_id.eq.${scheduleData?.home_alih_team_id},away_alih_team_id.eq.${scheduleData?.away_alih_team_id}),and(home_alih_team_id.eq.${scheduleData?.away_alih_team_id},away_alih_team_id.eq.${scheduleData?.home_alih_team_id})`)
-        .eq('season', selectedSeason)
+        .eq('season', gameSeason)
         .eq('game_status', 'Game Finished') // 완료된 경기만
         .neq('game_no', Number(gameNo)) // 현재 경기 제외
         .order('match_at', { ascending: false })
@@ -255,13 +260,13 @@ const GameDetail = () => {
   // 양 팀 선수 데이터 가져오기 (미완료 경기용 또는 live_data가 있는 경우)
   const hasLiveData = !!scheduleData?.live_data;
   const { data: players, isLoading: playersLoading } = useQuery({
-    queryKey: ['team-players', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id, selectedSeason],
+    queryKey: ['team-players', scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id, gameSeason],
     queryFn: async () => {
       const { data, error } = await externalSupabase
         .from('alih_players')
         .select('*')
         .in('team_id', [scheduleData?.home_alih_team_id, scheduleData?.away_alih_team_id])
-        .eq('season', selectedSeason);
+        .eq('season', gameSeason);
 
       if (error) throw error;
       return data as PlayerData[];
@@ -471,7 +476,7 @@ const GameDetail = () => {
           title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${isFinishedWithLiveData ? t('page.gameDetail.gameResult') : isInProgress ? t('page.gameDetail.liveGame') : t('page.gameDetail.gameInfo')} | ${t('seo.leagueName')}`}
           description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
           keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData?.match_place || ''}`}
-          path={schedulePath(gameNo || '', selectedSeason)}
+          path={schedulePath(gameNo || '', gameSeason)}
           structuredData={structuredData}
         />
 
@@ -821,7 +826,7 @@ const GameDetail = () => {
                     <div
                       key={game.id}
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => navigate(schedulePath(game.game_no, selectedSeason))}
+                      onClick={() => navigate(schedulePath(game.game_no, gameSeason))}
                     >
                       <div className="text-sm text-muted-foreground">
                         {format(gameDate, 'M/d', { locale: getDateLocale() })}
@@ -934,10 +939,7 @@ const GameDetail = () => {
 
   const [homeScore, awayScore] = gameDetail.game_summary.total.score.split(' : ');
   const completedGameVenue = gameDetail.game_info.venue || scheduleData.match_place;
-  const completedGameVenueParts = completedGameVenue
-    .split('/')
-    .map((part) => part.trim())
-    .filter(Boolean);
+  const completedGameCity = completedGameVenue.split('/')[0].trim();
   const completedGameMeta = [
     {
       label: t('gameDetail.dateLabel'),
@@ -952,12 +954,8 @@ const GameDetail = () => {
     {
       label: t('gameDetail.venueLabel'),
       value: (
-        <span className="mt-1 block text-[13px] font-semibold leading-tight text-foreground/90 sm:text-sm">
-          {completedGameVenueParts.map((part, index) => (
-            <span key={`${part}-${index}`} className="block">
-              {part}
-            </span>
-          ))}
+        <span className="mt-1 block truncate text-[13px] font-semibold leading-tight text-foreground/90 sm:text-sm">
+          {completedGameCity}
         </span>
       ),
       valueClassName: "",
@@ -970,7 +968,7 @@ const GameDetail = () => {
         title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${t('page.gameDetail.gameResult')} | ${t('seo.leagueName')}`}
         description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData?.match_place || ''}`}
         keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData?.match_place || ''}`}
-        path={schedulePath(gameNo || '', selectedSeason)}
+        path={schedulePath(gameNo || '', gameSeason)}
         structuredData={structuredData}
       />
       {/* 헤더 */}

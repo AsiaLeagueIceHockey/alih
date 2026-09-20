@@ -102,14 +102,38 @@ export const useSchedules = (season?: string) => {
  */
 export const useScheduleByGameNo = (gameNo: string | number | null | undefined, season?: string) => {
   const { data: schedules, isLoading, error } = useSchedules(season);
-  
+  const parsedGameNo = Number(gameNo);
   const scheduleData = gameNo 
-    ? schedules?.find(game => game.game_no === Number(gameNo))
+    ? schedules?.find(game => game.game_no === parsedGameNo)
     : undefined;
+
+  const shouldFindLegacyLink = Boolean(
+    gameNo
+    && season === undefined
+    && !isLoading
+    && schedules
+    && !scheduleData
+  );
+  const legacySchedule = useQuery({
+    queryKey: ['alih-schedule-legacy-link', parsedGameNo],
+    queryFn: async () => {
+      const { data, error: fallbackError } = await externalSupabase
+        .from('alih_schedule')
+        .select('*')
+        .eq('game_no', parsedGameNo)
+        .order('match_at', { ascending: false })
+        .limit(2);
+
+      if (fallbackError) throw fallbackError;
+      return data?.length === 1 ? data[0] as ScheduleGame : undefined;
+    },
+    enabled: shouldFindLegacyLink,
+    staleTime: 1000 * 60 * 5,
+  });
   
   return {
-    data: scheduleData,
-    isLoading,
-    error,
+    data: scheduleData ?? legacySchedule.data,
+    isLoading: isLoading || (shouldFindLegacyLink && legacySchedule.isLoading),
+    error: error ?? legacySchedule.error,
   };
 };
