@@ -1,5 +1,33 @@
 import { format, type Locale } from "date-fns";
 
+export type GameDisplayStatus = "scheduled" | "inProgress" | "resultPending" | "finished";
+
+const LIVE_GAME_WINDOW_MS = 3 * 60 * 60 * 1000;
+const FINISHED_STATUS_MARKERS = ["finish", "final", "試合終了"];
+
+export const getGameDisplayStatus = (
+  matchAt: string,
+  gameStatus?: string | null,
+  now = new Date()
+): GameDisplayStatus => {
+  const normalizedStatus = gameStatus?.trim().toLowerCase() ?? "";
+
+  if (FINISHED_STATUS_MARKERS.some((marker) => normalizedStatus.includes(marker))) {
+    return "finished";
+  }
+
+  const matchTime = new Date(matchAt).getTime();
+  if (!Number.isFinite(matchTime) || matchTime > now.getTime()) {
+    return "scheduled";
+  }
+
+  if (now.getTime() - matchTime <= LIVE_GAME_WINDOW_MS) {
+    return "inProgress";
+  }
+
+  return "resultPending";
+};
+
 const PLAYOFF_START_DATE = new Date("2026-03-19T00:00:00+09:00");
 const PLAYOFF_END_DATE = new Date("2026-04-05T23:59:59+09:00");
 const FINAL_START_DATE = new Date("2026-03-28T00:00:00+09:00");
