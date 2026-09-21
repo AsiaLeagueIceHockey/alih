@@ -1,5 +1,7 @@
 # 2026-27 시즌 완전 런칭 — GPT-5.6 Terra 실행 계획
 
+> 2026-09-22 운영 장애 이후의 현재 상태와 실행 우선순위는 [`docs/2026-27-season-recovery-handoff.md`](../../docs/2026-27-season-recovery-handoff.md)를 먼저 따른다. 이 문서의 기존 phase는 세부 계약과 검증 기준으로 사용한다.
+
 > 2026-09-12 popup 49 공식 Game No·게임시트 source가 공개됐다. 기존 계획의 legacy source 대기 항목을 실행하기 전에 [`docs/2026-27-popup49-gamesheet-integration.md`](../../docs/2026-27-popup49-gamesheet-integration.md)를 처음부터 끝까지 읽고, 그 문서의 120↔120 mapping·5개 시각·2개 장소 보정과 first-game parser gate를 적용한다.
 
 작성 모델: GPT-5.6 Sol

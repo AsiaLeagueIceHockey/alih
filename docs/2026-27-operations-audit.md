@@ -1,5 +1,7 @@
 # 2026-27 시즌 운영 인수인계 및 런칭 런북
 
+> 2026-09-22 이후의 실제 운영 장애, 최신 DB 수치, 복구 우선순위는 [`2026-27-season-recovery-handoff.md`](2026-27-season-recovery-handoff.md)를 우선한다. 이 문서는 launch 당시의 설계·migration·baseline 근거로 유지한다.
+
 > 이 문서는 `alih`와 형제 저장소 `alih-batch`, 운영 Supabase를 함께 다루는 기준 문서다.
 > 2026-27 시즌 관련 작업을 시작하는 agent는 코드를 수정하기 전에 이 문서를 먼저 읽어야 한다.
 > 현재 미완료 구현의 상세 실행 순서는 `.omx/plans/2026-27-terra-execution-plan.md`를 따른다.
