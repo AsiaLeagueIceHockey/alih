@@ -924,15 +924,151 @@ const GameDetail = () => {
     );
   }
 
-  // 완료된 경기 UI (기존 코드)
+  // A finished score can be official before the league publishes its Game Sheet.
+  // Keep schedule-backed result pages usable while detail ingestion catches up.
   if (!gameDetail) {
+    const homeScore = scheduleData.home_alih_team_score?.toString() ?? '-';
+    const awayScore = scheduleData.away_alih_team_score?.toString() ?? '-';
+    const completedGameCity = scheduleData.match_place.split('/')[0].trim();
+    const completedGameMeta = [
+      {
+        label: t('gameDetail.dateLabel'),
+        value: formatGameDay(matchDateObj),
+      },
+      {
+        label: t('gameDetail.timeLabel'),
+        value: format(matchDateObj, 'HH:mm', { locale: getDateLocale() }),
+      },
+      {
+        label: t('gameDetail.venueLabel'),
+        value: completedGameCity,
+      },
+    ];
+
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <p className="text-destructive mb-4">경기 상세 기록을 불러올 수 없습니다</p>
-        <Button onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          돌아가기
-        </Button>
+      <div className="min-h-screen bg-background pb-10">
+        <SEO
+          title={`${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} - ${t('page.gameDetail.gameResult')} | ${t('seo.leagueName')}`}
+          description={`${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)} @ ${scheduleData.match_place}`}
+          keywords={`${getLocalizedTeamName(homeTeam, currentLang)}, ${getLocalizedTeamName(awayTeam, currentLang)}, ${t('seo.leagueName')}, ${scheduleData.match_place}`}
+          path={schedulePath(gameNo || '', gameSeason)}
+          structuredData={structuredData}
+        />
+        <div className={`pt-[calc(1rem+env(safe-area-inset-top))] pb-4 ${
+          isFinal
+            ? "bg-[linear-gradient(180deg,rgba(120,53,15,0.2)_0%,rgba(69,10,10,0.08)_35%,transparent_100%)] border-b border-amber-300/25"
+            : isPlayoff
+            ? "bg-gradient-to-b from-slate-400/10 to-background border-b border-slate-400/20"
+            : "bg-gradient-to-b from-primary/10 to-background"
+        }`}>
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-10" />
+              <h1 className="text-2xl font-bold text-center">{t('page.gameDetail.gameResult')}</h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-10 h-10"
+                onClick={async () => {
+                  const shareData = {
+                    title: `${getLocalizedTeamName(homeTeam, currentLang)} vs ${getLocalizedTeamName(awayTeam, currentLang)}`,
+                    text: `${format(matchDateObj, 'PPP', { locale: getDateLocale() })} ${scheduleData.match_place}`,
+                    url: window.location.href,
+                  };
+
+                  if (navigator.share) {
+                    try {
+                      await navigator.share(shareData);
+                    } catch {
+                      // Ignore the user cancelling the native share dialog.
+                    }
+                  } else {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert(t('gameDetail.linkCopied'));
+                  }
+                }}
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="container mx-auto px-4 -mt-4">
+          <Card className={`p-6 mb-6 overflow-hidden relative ${
+            isFinal
+              ? "border-amber-300/40 shadow-[0_22px_65px_-34px_rgba(251,191,36,0.75)] bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.16),transparent_40%),linear-gradient(135deg,rgba(69,10,10,0.14),rgba(24,24,27,0.98))]"
+              : isPlayoff
+              ? "border-slate-300/50 shadow-lg shadow-slate-500/5 bg-gradient-to-br from-background via-background to-slate-400/5"
+              : ""
+          }`}>
+            <div className="flex items-start justify-between mb-6">
+              <Link
+                to={`/team/${homeTeam.id}`}
+                className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity"
+              >
+                <img src={homeTeam.logo} alt={getLocalizedTeamName(homeTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(homeTeam, currentLang)}</p>
+              </Link>
+
+              <div className="w-[120px] flex-shrink-0 flex flex-col items-center">
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl font-bold">{homeScore}</span>
+                  <span className="text-2xl text-muted-foreground">:</span>
+                  <span className="text-4xl font-bold">{awayScore}</span>
+                </div>
+                <Badge variant="outline" className="mt-2">{t('gameDetail.final')}</Badge>
+                {(isPlayoff || isFinal) && (
+                  <Badge className={`mt-1 text-[10px] font-bold h-4 ${isFinal ? "bg-amber-200 text-amber-950 border border-amber-100/70" : "bg-slate-200 text-slate-900"}`}>
+                    {stageBadge}
+                  </Badge>
+                )}
+              </div>
+
+              <Link
+                to={`/team/${awayTeam.id}`}
+                className="w-[calc(50%-60px)] flex flex-col items-center hover:opacity-80 transition-opacity"
+              >
+                <img src={awayTeam.logo} alt={getLocalizedTeamName(awayTeam, currentLang)} className="w-16 h-16 object-contain mb-2" />
+                <p className="text-xs font-medium text-center hover:text-primary transition-colors">{getLocalizedTeamName(awayTeam, currentLang)}</p>
+              </Link>
+            </div>
+
+            <div className="mt-6 border-t border-border/60 pt-5">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {completedGameMeta.map((item) => (
+                  <div key={item.label} className="rounded-xl bg-background/40 px-3 py-3 sm:px-4">
+                    <p className="text-[11px] font-medium text-muted-foreground">{item.label}</p>
+                    <p className="mt-1 text-sm font-semibold leading-snug text-foreground/90">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-5 mb-6 text-center bg-muted/25">
+            <h2 className="font-semibold">{t('gameDetail.detailPendingTitle')}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{t('gameDetail.detailPending')}</p>
+          </Card>
+
+          <FlightAffiliateBanner homeTeam={homeTeam} />
+
+          <CheerBattle
+            scheduleId={scheduleData.id}
+            homeTeam={{ id: homeTeam.id, name: homeTeam.name, logo: homeTeam.logo }}
+            awayTeam={{ id: awayTeam.id, name: awayTeam.name, logo: awayTeam.logo }}
+            isLive={false}
+          />
+
+          <MatchPrediction
+            scheduleId={scheduleData.id}
+            homeTeam={{ id: homeTeam.id, name: homeTeam.name, english_name: homeTeam.english_name, japanese_name: homeTeam.japanese_name, logo: homeTeam.logo }}
+            awayTeam={{ id: awayTeam.id, name: awayTeam.name, english_name: awayTeam.english_name, japanese_name: awayTeam.japanese_name, logo: awayTeam.logo }}
+            disabled={true}
+          />
+
+          <CommentSection entityType="game" entityId={scheduleData.id} />
+        </div>
       </div>
     );
   }

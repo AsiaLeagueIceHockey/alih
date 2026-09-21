@@ -249,6 +249,8 @@
         "noLiveStream": "이 경기는 라이브 스트리밍이 제공되지 않습니다",
         "liveStreamPending": "라이브 스트리밍 링크 업데이트 예정입니다",
         "resultPending": "공식 경기 결과를 확인하고 있습니다",
+        "detailPendingTitle": "상세 기록 준비 중",
+        "detailPending": "공식 게임시트가 공개되는 대로 피리어드 기록과 선수 정보를 업데이트합니다.",
         "linkCopied": "링크가 클립보드에 복사되었습니다!",
         "noH2HRecord": "맞대결 기록이 없습니다",
         "spectators": "관중",

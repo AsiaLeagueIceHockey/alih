@@ -254,6 +254,8 @@
         "noLiveStream": "この試合はライブストリーミングが提供されていません",
         "liveStreamPending": "ライブストリーミングリンクは更新予定です",
         "resultPending": "公式の試合結果を確認中です",
+        "detailPendingTitle": "詳細記録を準備中です",
+        "detailPending": "公式ゲームシートの公開後、ピリオドごとの記録と選手情報を更新します。",
         "linkCopied": "リンクがクリップボードにコピーされました！",
         "noH2HRecord": "対戦記録がありません",
         "spectators": "観客数",
