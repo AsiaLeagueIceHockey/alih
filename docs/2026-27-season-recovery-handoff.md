@@ -5,6 +5,23 @@
 > 권장 실행 모델: GPT-5.6 Terra, reasoning `high` 이상
 > 이 문서는 2026-09-22의 운영 상태를 기준으로 한 최신 복구 실행서다. 과거 설계와 migration 배경은 `2026-27-operations-audit.md`, 상세 phase 설계는 `.omx/plans/2026-27-terra-execution-plan.md`를 함께 참조한다.
 
+## 0. 2026-09-22 실행 업데이트
+
+아래 변경과 production postflight는 이 문서 최초 작성 뒤 실제로 완료됐다. 이 섹션이 이후 작업의 현재 기준이며, 아래 진단 섹션의 과거 수치는 장애 발생 당시 snapshot으로 남긴다.
+
+- 프론트엔드 PR [#13](https://github.com/AsiaLeagueIceHockey/alih/pull/13)을 병합했다. `GameDetail`은 공식 Game Sheet가 아직 없는 종료 경기에서도 schedule의 팀, 최종 점수, 날짜/시간, 도시를 표시하고 다국어 `상세 기록 준비 중` 상태를 렌더링한다. 운영 번들에 세 언어 fallback 문구가 포함된 것을 확인했다.
+- batch PR [#10](https://github.com/AsiaLeagueIceHockey/alih-batch/pull/10)을 병합했다. scheduled standings/player-rank writer는 `2026-27`, `DRY_RUN=false`, `ALLOW_WRITE=true`를 명시한다. 수동 dispatch는 여전히 dry-run 기본값이다.
+- 내부 경기 2~5를 공식 popup 49 Game Sheet로 dry-run한 뒤 제한 write canary를 실행했다. `alih_game_details`의 2026-27 행은 1에서 5가 되었고, 네 경기의 schedule/detail 최종 점수, 관중, 골 이벤트 수가 일치한다. 2025-26 일정 129행과 상세 129행은 변하지 않았다.
+- batch PR [#11](https://github.com/AsiaLeagueIceHockey/alih-batch/pull/11)을 병합했다. standings writer가 `updated_at`을 기록하도록 고쳤고, 2026-27 standings 여섯 행의 최신 시각은 2026-09-22 01:04 KST다. 2026-27 player stats는 104행으로 갱신됐다.
+- batch PR [#12](https://github.com/AsiaLeagueIceHockey/alih-batch/pull/12)을 병합했다. Game Sheet writer는 KST 12:00~23:40에만 20분 간격으로 실행되며, 수동 canary와 season/identity write gate를 보존한다. 공식 sheet 미공개는 정상 종료하고 parser 오류는 workflow 실패로 드러난다.
+
+남은 운영 게이트:
+
+1. 6~9번 경기의 공식 Game Sheet는 아직 source에 없으므로 fallback 화면을 유지한다. source가 공개되면 자동 writer가 상세를 생성한다.
+2. `scrape-players.py`의 개인 출전 기록과 `career_history`는 공식 six-team source가 완결될 때까지 활성화하지 않는다. 선수 상세의 G/A/PTS는 `alih_player_stats`를 조합해 표시하도록 이미 수정했다.
+3. 실시간 score write와 start/goal/end Push는 `LIVE_WRITE_ENABLED=false`, `LIVE_PUSH_ENABLED=false`, `CANARY_ONLY=true` 상태를 유지한다. 2026-09-26 전 fixture + observe-only + live-write-only canary를 통과해야 한다.
+4. 실제 Push canary를 받을 사용자 계정/기기는 데이터만으로 정할 수 없다. 지정 전에는 `CANARY_ONLY=false` 또는 일반 fan-out을 절대 활성화하지 않는다.
+
 ## 1. 결론
 
 2026-27 시즌을 2025-26과 같은 수준으로 복구할 수 있다. 다만 현재는 정상 운영 상태가 아니며, 한 가지 장애가 아니라 네 개의 자동화 경로가 각각 차단되어 있다.
