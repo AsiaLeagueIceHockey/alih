@@ -20,6 +20,12 @@ import PlayerCard from "@/components/player/PlayerCard";
 import LoginDialog from "@/components/auth/LoginDialog";
 import CardDetailModal from "@/components/player/CardDetailModal";
 
+interface OfficialPlayerRanking {
+  goals: number;
+  assists: number;
+  points: number;
+}
+
 const PlayerDetail = () => {
   const { playerSlug } = useParams<{ playerSlug: string }>();
   const { t, i18n } = useTranslation();
@@ -79,23 +85,50 @@ const PlayerDetail = () => {
     staleTime: 1000 * 60 * 60,
   });
 
+  // The official point ranking is published before the complete individual record.
+  // Keep profile fields on alih_players and overlay only its published G/A/PTS.
+  const { data: officialRanking, isLoading: isLoadingOfficialRanking } = useQuery({
+    queryKey: ['player-official-ranking', player?.team_id, player?.jersey_number, selectedSeason],
+    queryFn: async () => {
+      const jerseyNumber = Number(player!.jersey_number);
+      const { data, error } = await externalSupabase
+        .from('alih_player_stats')
+        .select('goals, assists, points, jersey_number')
+        .eq('season', selectedSeason)
+        .eq('team_id', player!.team_id)
+        .eq('jersey_number', jerseyNumber)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as OfficialPlayerRanking | null;
+    },
+    enabled: !!player?.team_id && Number.isInteger(Number(player?.jersey_number)),
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const displayedStats = {
+    goals: officialRanking?.goals ?? player?.goals ?? 0,
+    assists: officialRanking?.assists ?? player?.assists ?? 0,
+    points: officialRanking?.points ?? player?.points ?? 0,
+  };
+
   // 득점 순위 조회 (동률 포함)
   const { data: goalRank } = useQuery({
-    queryKey: ['player-goal-rank', player?.id, selectedSeason],
+    queryKey: ['player-goal-rank', player?.id, selectedSeason, displayedStats.goals],
     queryFn: async () => {
       // 1. 나보다 골이 많은 선수의 수를 셈
       const { count, error } = await externalSupabase
-        .from('alih_players')
+        .from('alih_player_stats')
         .select('*', { count: 'exact', head: true })
         .eq('season', selectedSeason)
-        .gt('goals', player!.goals);
+        .gt('goals', displayedStats.goals);
 
       if (error) throw error;
       
       // 2. (더 많은 선수 수) + 1 = 나의 등수
       return (count ?? 0) + 1;
     },
-    enabled: !!player,
+    enabled: !!player && !!officialRanking && !isLoadingOfficialRanking,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -147,7 +180,7 @@ const PlayerDetail = () => {
 
   // 포지션 라벨
   const getPositionLabel = (pos: string) => {
-    // @ts-ignore
+    // @ts-expect-error Translation keys are generated dynamically from the position code.
     return t(`playerDetail.position.${pos}`, pos); 
   };
 
@@ -215,7 +248,7 @@ const PlayerDetail = () => {
     <>
       <SEO
         title={`${getLocalizedPlayerName()} | ${team ? getLocalizedTeamName(team, currentLang) : ''}`}
-        description={`${getLocalizedPlayerName()} - ${player.points}pts (${player.goals}G, ${player.assists}A)`}
+        description={`${getLocalizedPlayerName()} - ${displayedStats.points}pts (${displayedStats.goals}G, ${displayedStats.assists}A)`}
         ogImage={player.photo_url}
       />
 
@@ -367,16 +400,16 @@ const PlayerDetail = () => {
                   {/* Field Player Stats */}
                   <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">G</div>
-                    <div className="text-xl font-bold text-success">{player.goals}</div>
+                    <div className="text-xl font-bold text-success">{displayedStats.goals}</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">A</div>
-                    <div className="text-xl font-bold text-primary">{player.assists}</div>
+                    <div className="text-xl font-bold text-primary">{displayedStats.assists}</div>
                   </div>
                   
                   <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">PTS</div>
-                    <div className="text-xl font-bold">{player.points}</div>
+                    <div className="text-xl font-bold">{displayedStats.points}</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-3 col-span-2">
                     <div className="text-xs text-muted-foreground mb-1">
