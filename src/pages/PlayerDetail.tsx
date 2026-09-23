@@ -65,7 +65,8 @@ const PlayerDetail = () => {
       return data as Player;
     },
     enabled: !!playerSlug,
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: 'always',
   });
 
   // 팀 정보 조회
@@ -103,7 +104,8 @@ const PlayerDetail = () => {
       return data as OfficialPlayerRanking | null;
     },
     enabled: !!player?.team_id && Number.isInteger(Number(player?.jersey_number)),
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: 'always',
   });
 
   const displayedStats = {
