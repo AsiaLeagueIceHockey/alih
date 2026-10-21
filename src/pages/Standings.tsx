@@ -79,6 +79,7 @@ const Standings = () => {
         return leftRank - rightRank || right.points - left.points || left.team_id - right.team_id;
       }) as TeamStanding[];
     },
+    refetchOnMount: 'always',
     staleTime: 1000 * 60 * 60, // 1시간 동안 캐시
     gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 메모리에 유지
   });
